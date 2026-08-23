@@ -5,3 +5,6 @@ __pycache__/
 *.pyc
 .wrangler/
 dist/
+*.log
+logs/*.log
+.pytest_cache/

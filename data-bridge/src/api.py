@@ -28,7 +28,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Load environment configuration
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
 load_dotenv()
 
 # Rate limiting config
@@ -42,7 +42,7 @@ ALLOWED_ORIGINS = [
 ]
 
 # Load nodes from config file
-_nodes_config_path = os.path.join(os.path.dirname(__file__), "nodes.json")
+_nodes_config_path = os.path.join(os.path.dirname(__file__), "..", "config", "nodes.json")
 
 
 def load_target_nodes() -> list:
