@@ -4,6 +4,7 @@ Scrapes node_exporter metrics (port 9100) from all configured global VMs
 and ingests parsed metrics into MySQL HeatWave.
 """
 import os
+import json
 import logging
 import time
 import argparse
@@ -31,6 +32,28 @@ SCRAPE_INTERVAL = int(os.getenv("SCRAPE_INTERVAL_SECONDS", "60"))
 
 # Database connection pool (lazy initialization)
 _db_pool = None
+
+# Load nodes from config file
+_nodes_config_path = os.path.join(os.path.dirname(__file__), "nodes.json")
+
+
+def load_target_nodes() -> list:
+    """Load target nodes from nodes.json config file."""
+    try:
+        with open(_nodes_config_path, "r") as f:
+            nodes = json.load(f)
+            logger.info(f"Loaded {len(nodes)} nodes from config")
+            return nodes
+    except FileNotFoundError:
+        logger.error(f"nodes.json not found at {_nodes_config_path}")
+        raise
+    except json.JSONDecodeError as e:
+        logger.error(f"Invalid JSON in nodes.json: {e}")
+        raise
+
+
+# Target nodes (loaded from config)
+TARGET_NODES = load_target_nodes()
 
 
 def get_db_pool() -> PooledDB:
@@ -62,21 +85,6 @@ def get_db_pool() -> PooledDB:
         logger.info(f"Database connection pool initialized (host={host}, database={database})")
     
     return _db_pool
-
-
-# Target 10 active global production nodes
-TARGET_NODES = [
-    {"name": "jpa", "host": "<REDACTED_IP>", "region": "ap-tokyo", "provider": "Oracle Cloud", "lat": 35.6762, "lng": 139.6503},
-    {"name": "jpb", "host": "<REDACTED_IP>",  "region": "ap-tokyo", "provider": "Oracle Cloud", "lat": 35.6762, "lng": 139.6503},
-    {"name": "jpc", "host": "<REDACTED_IP>",  "region": "ap-tokyo", "provider": "Oracle Cloud", "lat": 35.6762, "lng": 139.6503},
-    {"name": "jpd", "host": "<REDACTED_IP>", "region": "ap-tokyo", "provider": "Oracle Cloud", "lat": 35.6762, "lng": 139.6503},
-    {"name": "jpe", "host": "<REDACTED_IP>",   "region": "ap-tokyo", "provider": "Oracle Cloud", "lat": 35.6762, "lng": 139.6503},
-    {"name": "usa", "host": "<REDACTED_IP>", "region": "us-ashburn", "provider": "Oracle Cloud", "lat": 39.0438, "lng": -77.4874},
-    {"name": "usb", "host": "<REDACTED_IP>", "region": "us-ashburn", "provider": "Oracle Cloud", "lat": 39.0438, "lng": -77.4874},
-    {"name": "usc", "host": "<REDACTED_IP>",  "region": "us-ashburn", "provider": "Oracle Cloud", "lat": 39.0438, "lng": -77.4874},
-    {"name": "sga", "host": "3.0.1.4",        "region": "ap-singapore", "provider": "AWS", "lat": 1.3521, "lng": 103.8198},
-    {"name": "cna", "host": "<REDACTED_IP>",   "region": "cn-beijing", "provider": "Alibaba Cloud", "lat": 39.9042, "lng": 116.4074},
-]
 
 
 def parse_prometheus_metrics(raw_text: str) -> dict:

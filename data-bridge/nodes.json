@@ -1,0 +1,12 @@
+[
+  {"name": "jpa", "host": "<REDACTED_IP>", "region": "ap-tokyo", "provider": "Oracle Cloud", "lat": 35.6762, "lng": 139.6503},
+  {"name": "jpb", "host": "<REDACTED_IP>", "region": "ap-tokyo", "provider": "Oracle Cloud", "lat": 35.6762, "lng": 139.6503},
+  {"name": "jpc", "host": "<REDACTED_IP>", "region": "ap-tokyo", "provider": "Oracle Cloud", "lat": 35.6762, "lng": 139.6503},
+  {"name": "jpd", "host": "<REDACTED_IP>", "region": "ap-tokyo", "provider": "Oracle Cloud", "lat": 35.6762, "lng": 139.6503},
+  {"name": "jpe", "host": "<REDACTED_IP>", "region": "ap-tokyo", "provider": "Oracle Cloud", "lat": 35.6762, "lng": 139.6503},
+  {"name": "usa", "host": "<REDACTED_IP>", "region": "us-ashburn", "provider": "Oracle Cloud", "lat": 39.0438, "lng": -77.4874},
+  {"name": "usb", "host": "<REDACTED_IP>", "region": "us-ashburn", "provider": "Oracle Cloud", "lat": 39.0438, "lng": -77.4874},
+  {"name": "usc", "host": "<REDACTED_IP>", "region": "us-ashburn", "provider": "Oracle Cloud", "lat": 39.0438, "lng": -77.4874},
+  {"name": "sga", "host": "3.0.1.4", "region": "ap-singapore", "provider": "AWS", "lat": 1.3521, "lng": 103.8198},
+  {"name": "cna", "host": "<REDACTED_IP>", "region": "cn-beijing", "provider": "Alibaba Cloud", "lat": 39.9042, "lng": 116.4074}
+]

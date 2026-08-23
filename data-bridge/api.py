@@ -4,7 +4,10 @@ Provides REST endpoints for Cloudflare Workers & Frontend UI
 to query telemetry data, node health, and AutoML insights.
 """
 import os
+import json
 import logging
+import time
+from collections import defaultdict
 from contextlib import contextmanager
 from datetime import datetime
 from typing import Optional
@@ -12,8 +15,9 @@ from typing import Optional
 import pymysql
 from dbutils.pooled_db import PooledDB
 from dotenv import load_dotenv
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 # Configure logging
 logging.basicConfig(
@@ -27,17 +31,80 @@ logger = logging.getLogger(__name__)
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
 load_dotenv()
 
+# Rate limiting config
+RATE_LIMIT_REQUESTS = int(os.getenv("RATE_LIMIT_REQUESTS", "60"))  # requests per window
+RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", "60"))  # window in seconds
+
 # Allowed CORS origins
 ALLOWED_ORIGINS = [
     "https://nexus.53.workers.dev",
     "http://localhost:8787",  # wrangler dev
 ]
 
+# Load nodes from config file
+_nodes_config_path = os.path.join(os.path.dirname(__file__), "nodes.json")
+
+
+def load_target_nodes() -> list:
+    """Load target nodes from nodes.json config file."""
+    try:
+        with open(_nodes_config_path, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        logger.warning(f"nodes.json not found, using empty list")
+        return []
+    except json.JSONDecodeError as e:
+        logger.error(f"Invalid JSON in nodes.json: {e}")
+        return []
+
+
+TARGET_NODES = load_target_nodes()
+
 app = FastAPI(
     title="Nexus Data Bridge API",
     description="Internal API for Cloudflare Tunnel & Worker integration",
     version="1.0.0"
 )
+
+# Rate limiter storage: {ip: [(timestamp, count)]}
+_rate_limit_store: dict = defaultdict(list)
+
+
+def check_rate_limit(client_ip: str) -> bool:
+    """Check if client is within rate limit. Returns True if allowed."""
+    now = time.time()
+    window_start = now - RATE_LIMIT_WINDOW
+    
+    # Clean old entries
+    _rate_limit_store[client_ip] = [
+        t for t in _rate_limit_store[client_ip] if t > window_start
+    ]
+    
+    # Check limit
+    if len(_rate_limit_store[client_ip]) >= RATE_LIMIT_REQUESTS:
+        return False
+    
+    # Record request
+    _rate_limit_store[client_ip].append(now)
+    return True
+
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    """Rate limiting middleware."""
+    # Get client IP (trust X-Forwarded-For from Cloudflare)
+    client_ip = request.headers.get("CF-Connecting-IP") or \
+                request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or \
+                request.client.host or "unknown"
+    
+    if not check_rate_limit(client_ip):
+        logger.warning(f"Rate limit exceeded for {client_ip}")
+        return JSONResponse(
+            status_code=429,
+            content={"error": "Too many requests", "retry_after": RATE_LIMIT_WINDOW}
+        )
+    
+    return await call_next(request)
 
 # Enable CORS for Cloudflare Worker & local dev
 app.add_middleware(
@@ -122,7 +189,6 @@ def health_check():
 @app.get("/api/nodes/summary")
 def get_nodes_summary():
     """Returns the registered global nodes and geographic metadata."""
-    from ingest import TARGET_NODES
     return {
         "total_nodes": len(TARGET_NODES),
         "nodes": TARGET_NODES,
@@ -136,7 +202,6 @@ def get_latest_metrics():
     Returns the latest telemetry snapshot for every registered active node.
     Used for dashboard top cards, world map status, and fleet overview.
     """
-    from ingest import TARGET_NODES
     active_names = [n["name"] for n in TARGET_NODES]
     node_map = {n["name"]: n for n in TARGET_NODES}
 
@@ -234,7 +299,6 @@ def get_ai_diagnostics():
     """
     Automated health heuristics & anomaly detection summary.
     """
-    from ingest import TARGET_NODES
     active_names = [n["name"] for n in TARGET_NODES]
     format_strings = ','.join(['%s'] * len(active_names))
 
