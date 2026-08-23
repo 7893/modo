@@ -5,12 +5,12 @@ After=network.target
 [Service]
 Type=simple
 User=ubuntu
-WorkingDirectory=/home/ubuntu/nexus/data-bridge
+WorkingDirectory=/home/ubuntu/nexus/data-bridge/src
 ExecStart=/home/ubuntu/nexus/data-bridge/venv/bin/python ingest.py
 Restart=always
 RestartSec=5
-StandardOutput=append:/home/ubuntu/nexus/data-bridge/ingest.log
-StandardError=append:/home/ubuntu/nexus/data-bridge/ingest.log
+StandardOutput=append:/home/ubuntu/nexus/logs/ingest.log
+StandardError=append:/home/ubuntu/nexus/logs/ingest.log
 
 [Install]
 WantedBy=multi-user.target

@@ -25,7 +25,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Load environment configuration
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
 load_dotenv()
 
 SCRAPE_INTERVAL = int(os.getenv("SCRAPE_INTERVAL_SECONDS", "60"))
@@ -34,7 +34,7 @@ SCRAPE_INTERVAL = int(os.getenv("SCRAPE_INTERVAL_SECONDS", "60"))
 _db_pool = None
 
 # Load nodes from config file
-_nodes_config_path = os.path.join(os.path.dirname(__file__), "nodes.json")
+_nodes_config_path = os.path.join(os.path.dirname(__file__), "..", "config", "nodes.json")
 
 
 def load_target_nodes() -> list:

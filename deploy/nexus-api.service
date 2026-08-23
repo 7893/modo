@@ -5,12 +5,12 @@ After=network.target
 [Service]
 Type=simple
 User=ubuntu
-WorkingDirectory=/home/ubuntu/nexus/data-bridge
+WorkingDirectory=/home/ubuntu/nexus/data-bridge/src
 ExecStart=/home/ubuntu/nexus/data-bridge/venv/bin/uvicorn api:app --host 127.0.0.1 --port 8000
 Restart=always
 RestartSec=3
-StandardOutput=append:/home/ubuntu/nexus/data-bridge/api.log
-StandardError=append:/home/ubuntu/nexus/data-bridge/api.log
+StandardOutput=append:/home/ubuntu/nexus/logs/api.log
+StandardError=append:/home/ubuntu/nexus/logs/api.log
 
 [Install]
 WantedBy=multi-user.target
