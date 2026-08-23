@@ -39,4 +39,4 @@ def test_cors_headers():
     """Verify CORS headers are present for cross-origin Worker requests."""
     response = client.get("/health", headers={"Origin": "https://service.example.com"})
     assert response.status_code == 200
-    assert response.headers.get("access-control-allow-origin") in ["*", "https://service.example.com"]
+    assert response.headers.get("access-control-allow-origin") == "https://service.example.com"
