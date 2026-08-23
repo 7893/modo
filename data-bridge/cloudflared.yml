@@ -1,0 +1,9 @@
+tunnel: ca75737d-f726-4441-84b1-3e8e3c11094b
+credentials-file: /home/ubuntu/.cloudflared/ca75737d-f726-4441-84b1-3e8e3c11094b.json
+
+ingress:
+  - hostname: api-nexus.8n8m.cfd
+    service: http://127.0.0.1:8000
+    originRequest:
+      connectTimeout: 10s
+  - service: http_status:404
