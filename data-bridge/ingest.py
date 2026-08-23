@@ -4,7 +4,7 @@ Scrapes node_exporter metrics (port 9100) from all configured global VMs
 and ingests parsed metrics into MySQL HeatWave.
 """
 import os
-import re
+import logging
 import time
 import argparse
 from datetime import datetime
@@ -12,7 +12,16 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
 import pymysql
+from dbutils.pooled_db import PooledDB
 from dotenv import load_dotenv
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+logger = logging.getLogger(__name__)
 
 # Load environment configuration
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
@@ -20,19 +29,40 @@ load_dotenv()
 
 SCRAPE_INTERVAL = int(os.getenv("SCRAPE_INTERVAL_SECONDS", "60"))
 
+# Database connection pool (lazy initialization)
+_db_pool = None
 
-def get_db_config():
-    """Get database configuration from environment variables."""
-    host = os.getenv("MYSQL_HOST")
-    port = int(os.getenv("MYSQL_PORT", "3306"))
-    user = os.getenv("MYSQL_USER")
-    password = os.getenv("MYSQL_PASSWORD")
-    database = os.getenv("MYSQL_DATABASE", "nexus_db")
+
+def get_db_pool() -> PooledDB:
+    """Get or create the database connection pool."""
+    global _db_pool
+    if _db_pool is None:
+        host = os.getenv("MYSQL_HOST")
+        port = int(os.getenv("MYSQL_PORT", "3306"))
+        user = os.getenv("MYSQL_USER")
+        password = os.getenv("MYSQL_PASSWORD")
+        database = os.getenv("MYSQL_DATABASE", "nexus_db")
+        
+        if not all([host, user, password]):
+            raise RuntimeError("Missing required environment variables: MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD")
+        
+        _db_pool = PooledDB(
+            creator=pymysql,
+            maxconnections=5,
+            mincached=1,
+            maxcached=3,
+            blocking=True,
+            host=host,
+            port=port,
+            user=user,
+            password=password,
+            database=database,
+            connect_timeout=5,
+        )
+        logger.info(f"Database connection pool initialized (host={host}, database={database})")
     
-    if not all([host, user, password]):
-        raise RuntimeError("Missing required environment variables: MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD")
-    
-    return host, port, user, password, database
+    return _db_pool
+
 
 # Target 10 active global production nodes
 TARGET_NODES = [
@@ -47,6 +77,7 @@ TARGET_NODES = [
     {"name": "sga", "host": "3.0.1.4",        "region": "ap-singapore", "provider": "AWS", "lat": 1.3521, "lng": 103.8198},
     {"name": "cna", "host": "<REDACTED_IP>",   "region": "cn-beijing", "provider": "Alibaba Cloud", "lat": 39.9042, "lng": 116.4074},
 ]
+
 
 def parse_prometheus_metrics(raw_text: str) -> dict:
     """Extract key metrics from raw Prometheus text format."""
@@ -84,6 +115,7 @@ def parse_prometheus_metrics(raw_text: str) -> dict:
                 metrics["net_out"] += float(line.split()[1])
 
     return metrics
+
 
 def scrape_single_node(node: dict) -> dict:
     """Scrapes metrics from one node's node_exporter."""
@@ -125,11 +157,23 @@ def scrape_single_node(node: dict) -> dict:
                 
             result["net_in_bytes_sec"] = int(parsed["net_in"])
             result["net_out_bytes_sec"] = int(parsed["net_out"])
-    except Exception as e:
+        else:
+            logger.warning(f"Node {node['name']} returned HTTP {resp.status_code}")
+    except requests.exceptions.Timeout:
         result["scrape_duration_ms"] = int((time.time() - start_time) * 1000)
         result["status"] = "TIMEOUT"
+        logger.warning(f"Node {node['name']} scrape timed out")
+    except requests.exceptions.ConnectionError as e:
+        result["scrape_duration_ms"] = int((time.time() - start_time) * 1000)
+        result["status"] = "OFFLINE"
+        logger.warning(f"Node {node['name']} connection error: {e}")
+    except Exception as e:
+        result["scrape_duration_ms"] = int((time.time() - start_time) * 1000)
+        result["status"] = "ERROR"
+        logger.error(f"Node {node['name']} scrape error: {e}")
         
     return result
+
 
 def scrape_all_nodes() -> list:
     """Concurrently scrapes all nodes."""
@@ -137,18 +181,18 @@ def scrape_all_nodes() -> list:
     with ThreadPoolExecutor(max_workers=len(TARGET_NODES)) as executor:
         futures = {executor.submit(scrape_single_node, node): node for node in TARGET_NODES}
         for future in as_completed(futures):
+            node = futures[future]
             try:
                 results.append(future.result())
             except Exception as e:
-                pass
+                logger.error(f"Unexpected error scraping node {node['name']}: {e}")
     return results
 
+
 def insert_telemetry_batch(records: list):
-    """Inserts scraped telemetry batch into MySQL."""
+    """Inserts scraped telemetry batch into MySQL using connection pool."""
     if not records:
         return
-    
-    host, port, user, password, database = get_db_config()
         
     insert_sql = """
     INSERT INTO vm_telemetry (
@@ -164,29 +208,27 @@ def insert_telemetry_batch(records: list):
     );
     """
     try:
-        conn = pymysql.connect(
-            host=host,
-            port=port,
-            user=user,
-            password=password,
-            database=database,
-            connect_timeout=5
-        )
-        with conn.cursor() as cursor:
-            cursor.executemany(insert_sql, records)
-            conn.commit()
-        conn.close()
-        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Ingested {len(records)} records into MySQL.")
+        pool = get_db_pool()
+        conn = pool.connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.executemany(insert_sql, records)
+                conn.commit()
+            logger.info(f"Ingested {len(records)} records into MySQL")
+        finally:
+            conn.close()
     except Exception as err:
-        print(f"❌ MySQL Insert Error: {err}")
+        logger.error(f"MySQL insert error: {err}")
+
 
 def run_pipeline():
     """Single run of scrape and insert."""
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Scraping {len(TARGET_NODES)} nodes...")
+    logger.info(f"Scraping {len(TARGET_NODES)} nodes...")
     records = scrape_all_nodes()
     online_count = sum(1 for r in records if r["status"] == "ONLINE")
-    print(f"Scraped results: {online_count}/{len(records)} nodes ONLINE.")
+    logger.info(f"Scrape complete: {online_count}/{len(records)} nodes ONLINE")
     insert_telemetry_batch(records)
+
 
 def main():
     parser = argparse.ArgumentParser(description="Nexus Telemetry Ingestion Service")
@@ -196,13 +238,14 @@ def main():
     if args.once:
         run_pipeline()
     else:
-        print(f"Starting continuous telemetry ingestion daemon (interval: {SCRAPE_INTERVAL}s)...")
+        logger.info(f"Starting ingestion daemon (interval: {SCRAPE_INTERVAL}s)")
         while True:
             try:
                 run_pipeline()
             except Exception as e:
-                print(f"Pipeline error: {e}")
+                logger.error(f"Pipeline error: {e}")
             time.sleep(SCRAPE_INTERVAL)
+
 
 if __name__ == "__main__":
     main()

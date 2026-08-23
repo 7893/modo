@@ -4,17 +4,34 @@ Provides REST endpoints for Cloudflare Workers & Frontend UI
 to query telemetry data, node health, and AutoML insights.
 """
 import os
-import time
-from datetime import datetime, timedelta
+import logging
+from contextlib import contextmanager
+from datetime import datetime
 from typing import Optional
+
+import pymysql
+from dbutils.pooled_db import PooledDB
+from dotenv import load_dotenv
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import pymysql
-from dotenv import load_dotenv
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+logger = logging.getLogger(__name__)
 
 # Load environment configuration
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
 load_dotenv()
+
+# Allowed CORS origins
+ALLOWED_ORIGINS = [
+    "https://nexus.53.workers.dev",
+    "http://localhost:8787",  # wrangler dev
+]
 
 app = FastAPI(
     title="Nexus Data Bridge API",
@@ -25,44 +42,71 @@ app = FastAPI(
 # Enable CORS for Cloudflare Worker & local dev
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
+# Database connection pool (lazy initialization)
+_db_pool: Optional[PooledDB] = None
+
+
+def get_db_pool() -> PooledDB:
+    """Get or create the database connection pool."""
+    global _db_pool
+    if _db_pool is None:
+        host = os.getenv("MYSQL_HOST")
+        port = int(os.getenv("MYSQL_PORT", "3306"))
+        user = os.getenv("MYSQL_USER")
+        password = os.getenv("MYSQL_PASSWORD")
+        database = os.getenv("MYSQL_DATABASE", "nexus_db")
+        
+        if not all([host, user, password]):
+            raise RuntimeError("Missing required environment variables: MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD")
+        
+        _db_pool = PooledDB(
+            creator=pymysql,
+            maxconnections=10,
+            mincached=2,
+            maxcached=5,
+            blocking=True,
+            host=host,
+            port=port,
+            user=user,
+            password=password,
+            database=database,
+            cursorclass=pymysql.cursors.DictCursor,
+            connect_timeout=5,
+            autocommit=True,
+        )
+        logger.info(f"Database connection pool initialized (host={host}, database={database})")
+    
+    return _db_pool
+
+
+@contextmanager
 def get_db_connection():
-    """Create and return a MySQL connection."""
-    host = os.getenv("MYSQL_HOST")
-    port = int(os.getenv("MYSQL_PORT", "3306"))
-    user = os.getenv("MYSQL_USER")
-    password = os.getenv("MYSQL_PASSWORD")
-    database = os.getenv("MYSQL_DATABASE", "nexus_db")
-    
-    if not all([host, user, password]):
-        raise RuntimeError("Missing required environment variables: MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD")
-    
-    return pymysql.connect(
-        host=host,
-        port=port,
-        user=user,
-        password=password,
-        database=database,
-        cursorclass=pymysql.cursors.DictCursor,
-        connect_timeout=5
-    )
+    """Context manager for database connections from the pool."""
+    pool = get_db_pool()
+    conn = pool.connection()
+    try:
+        yield conn
+    finally:
+        conn.close()
+
 
 @app.get("/health")
 def health_check():
     """Health check endpoint for tunnel & latency monitoring."""
     db_ok = False
     try:
-        conn = get_db_connection()
-        with conn.cursor() as cur:
-            cur.execute("SELECT 1;")
-            db_ok = True
-        conn.close()
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1;")
+                db_ok = True
     except Exception as e:
+        logger.error(f"Health check DB error: {e}")
         db_ok = False
 
     return {
@@ -74,6 +118,7 @@ def health_check():
         "tunnel_endpoint": "api-nexus.8n8m.cfd"
     }
 
+
 @app.get("/api/nodes/summary")
 def get_nodes_summary():
     """Returns the registered global nodes and geographic metadata."""
@@ -83,6 +128,7 @@ def get_nodes_summary():
         "nodes": TARGET_NODES,
         "timestamp": datetime.now().isoformat()
     }
+
 
 @app.get("/api/metrics/latest")
 def get_latest_metrics():
@@ -107,11 +153,10 @@ def get_latest_metrics():
     ORDER BY t.node_name ASC;
     """
     try:
-        conn = get_db_connection()
-        with conn.cursor() as cur:
-            cur.execute(query, tuple(active_names))
-            rows = cur.fetchall()
-        conn.close()
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, tuple(active_names))
+                rows = cur.fetchall()
 
         enriched = []
         for r in rows:
@@ -130,7 +175,9 @@ def get_latest_metrics():
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
+        logger.error(f"Error fetching latest metrics: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/metrics/history")
 def get_metrics_history(
@@ -160,11 +207,10 @@ def get_metrics_history(
     params.append(limit)
 
     try:
-        conn = get_db_connection()
-        with conn.cursor() as cur:
-            cur.execute(query, tuple(params))
-            rows = cur.fetchall()
-        conn.close()
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, tuple(params))
+                rows = cur.fetchall()
 
         for r in rows:
             if isinstance(r["recorded_at"], datetime):
@@ -179,7 +225,9 @@ def get_metrics_history(
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
+        logger.error(f"Error fetching metrics history: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/ai/diagnostics")
 def get_ai_diagnostics():
@@ -202,11 +250,10 @@ def get_ai_diagnostics():
     ) latest ON t.id = latest.max_id;
     """
     try:
-        conn = get_db_connection()
-        with conn.cursor() as cur:
-            cur.execute(query, tuple(active_names))
-            rows = cur.fetchall()
-        conn.close()
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, tuple(active_names))
+                rows = cur.fetchall()
 
         total = len(rows)
         online = sum(1 for r in rows if r["status"] == "ONLINE")
@@ -236,7 +283,9 @@ def get_ai_diagnostics():
             "evaluated_at": datetime.now().isoformat()
         }
     except Exception as e:
+        logger.error(f"Error fetching AI diagnostics: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     import uvicorn
