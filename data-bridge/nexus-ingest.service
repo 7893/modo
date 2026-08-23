@@ -1,0 +1,16 @@
+[Unit]
+Description=Nexus Telemetry Ingestion Service
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/nexus/data-bridge
+ExecStart=/home/ubuntu/nexus/data-bridge/venv/bin/python ingest.py
+Restart=always
+RestartSec=5
+StandardOutput=append:/home/ubuntu/nexus/data-bridge/ingest.log
+StandardError=append:/home/ubuntu/nexus/data-bridge/ingest.log
+
+[Install]
+WantedBy=multi-user.target

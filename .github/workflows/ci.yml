@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_call:
+
+jobs:
+  test-backend:
+    name: Backend Unit Tests (Data Bridge)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: data-bridge
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: data-bridge/requirements.txt
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Pytest Suite
+        run: |
+          pytest -v tests/
+
+  test-frontend:
+    name: Frontend & Edge Worker Verification
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: edge-app
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Dependencies
+        run: |
+          npm install
+
+      - name: Verify Wrangler Types & Build
+        run: |
+          npx wrangler types --env-interface CloudflareBindings

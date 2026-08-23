@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nexus",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-20",
+  "account_id": "REDACTED_ACCOUNT_ID",
+  "workers_dev": true,
+  "vars": {
+    "API_BACKEND_URL": "https://tunnel.example.com",
+    "SUPABASE_URL": "https://service.example.com",
+    "SUPABASE_ANON_KEY": "replace-with-a-publishable-key"
+  }
+}
