@@ -429,11 +429,11 @@ app.get('/', (c) => {
   <script>
     const SUPABASE_URL = "${supabaseUrl}";
     const SUPABASE_KEY = "${supabaseKey}";
-    let supabase = null;
+    let supabaseClient = null;
 
     try {
       if (typeof window.supabase !== 'undefined' && window.supabase.createClient && SUPABASE_URL && SUPABASE_KEY) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       }
     } catch (e) {
       console.warn('Supabase init skipped:', e);
@@ -733,14 +733,14 @@ app.get('/', (c) => {
       const password = document.getElementById('auth-password').value;
       const errorDiv = document.getElementById('auth-error');
 
-      if (!supabase) {
+      if (!supabaseClient) {
         errorDiv.innerText = 'Supabase client is not configured.';
         errorDiv.classList.remove('hidden');
         return;
       }
 
       try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
         
         toggleAuthModal();
@@ -752,16 +752,16 @@ app.get('/', (c) => {
     }
 
     async function handleLogout() {
-      if (supabase) {
-        await supabase.auth.signOut();
+      if (supabaseClient) {
+        await supabaseClient.auth.signOut();
         checkUserSession();
       }
     }
 
     async function checkUserSession() {
-      if (!supabase) return;
+      if (!supabaseClient) return;
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await supabaseClient.auth.getSession();
         const loginBtn = document.getElementById('login-btn');
         const userProfile = document.getElementById('user-profile');
         const userEmail = document.getElementById('user-email');
