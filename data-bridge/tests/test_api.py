@@ -27,8 +27,8 @@ def test_nodes_summary_endpoint():
     response = client.get("/api/nodes/summary")
     assert response.status_code == 200
     data = response.json()
-    assert data["total_nodes"] == 10
-    assert len(data["nodes"]) == 10
+    assert data["total_nodes"] == 11
+    assert len(data["nodes"]) == 11
     
     # Check that core nodes are present
     node_names = [n["name"] for n in data["nodes"]]

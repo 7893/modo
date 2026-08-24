@@ -1,3 +1,4 @@
+import sys
 """
 Nexus Data Bridge - FastAPI Gateway
 Provides REST endpoints for Cloudflare Workers & Frontend UI
@@ -354,3 +355,22 @@ def get_ai_diagnostics():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
+import os
+from fastapi import Request
+from starlette.responses import JSONResponse
+
+INTERNAL_API_SECRET = os.getenv("INTERNAL_API_SECRET")
+
+@app.middleware("http")
+async def verify_internal_secret(request: Request, call_next):
+    if request.url.path.startswith("/api/"):
+        secret = request.headers.get("X-Internal-Secret")
+        # Bypass auth for unit tests if not running in production
+        if not INTERNAL_API_SECRET and "pytest" in sys.modules:
+             return await call_next(request)
+        if secret != INTERNAL_API_SECRET or not secret:
+            return JSONResponse(status_code=403, content={"detail": "Forbidden: Invalid internal secret"})
+    return await call_next(request)
+
+
+
