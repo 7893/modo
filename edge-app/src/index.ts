@@ -652,27 +652,39 @@ app.get('/', (c) => {
 
     function renderMapChart(nodes) {
       if (!mapChart) return;
-      
-      const coords = {
-        'example-node-1': [139.65, 35.67],
-        'example-node-2': [139.75, 35.68],
-        'example-node-3': [139.85, 35.69],
-        'example-node-4': [139.55, 35.66],
-        'example-node-5': [139.45, 35.65],
-        'example-node-6': [-77.48, 39.04],
-        'example-node-7': [-77.58, 39.14],
-        'example-node-8': [-77.38, 38.94],
-        'example-node-9': [103.81, 1.35],
-        'example-node-10': [116.40, 39.90],
-        'example-node-11': [121.57, 25.03]
-      };
 
-      const scatterData = nodes.map(n => {
-        const pos = coords[n.node_name] || [0, 0];
-        return {
-          name: n.node_name,
-          value: [pos[0], pos[1], n.scrape_duration_ms, n.status, n.mem_usage_percent, n.region, n.cpu_usage_percent || 0]
-        };
+      const regionGroups = {};
+      nodes.forEach(n => {
+        const region = n.region || 'unknown';
+        if (!regionGroups[region]) regionGroups[region] = [];
+        regionGroups[region].push(n);
+      });
+
+      const scatterData = [];
+      Object.keys(regionGroups).forEach(region => {
+        const group = regionGroups[region];
+        // Use coordinates from backend, fallback if missing
+        const centerLng = group[0].lng || 0;
+        const centerLat = group[0].lat || 0;
+        const count = group.length;
+
+        group.forEach((n, idx) => {
+          let lng = centerLng;
+          let lat = centerLat;
+          
+          // If multiple nodes in same region, spread them in a circle
+          if (count > 1) {
+            const radius = 3.5; // Visually spread out by 3.5 degrees
+            const angle = (2 * Math.PI * idx) / count - (Math.PI / 2); // Start at top
+            lng += radius * Math.cos(angle);
+            lat += radius * Math.sin(angle);
+          }
+          
+          scatterData.push({
+            name: n.node_name,
+            value: [lng, lat, n.scrape_duration_ms, n.status, n.mem_usage_percent, n.region, n.cpu_usage_percent || 0]
+          });
+        });
       });
 
       mapChart.setOption({
