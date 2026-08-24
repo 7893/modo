@@ -367,6 +367,7 @@ app.get('/', (c) => {
               <th class="py-3 px-4">云服务商 / 地区</th>
               <th class="py-3 px-4">主机 IP</th>
               <th class="py-3 px-4">状态</th>
+              <th class="py-3 px-4">CPU使用率</th>
               <th class="py-3 px-4">内存占用</th>
               <th class="py-3 px-4">磁盘占用</th>
               <th class="py-3 px-4">探测延迟</th>
@@ -570,6 +571,14 @@ app.get('/', (c) => {
           <td class="py-3 px-4">
             <div class="flex items-center space-x-2">
               <div class="w-16 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div class="bg-rose-400 h-full rounded-full" style="width: \${n.cpu_usage_percent || 0}%"></div>
+              </div>
+              <span>\${n.cpu_usage_percent || 0}%</span>
+            </div>
+          </td>
+          <td class="py-3 px-4">
+            <div class="flex items-center space-x-2">
+              <div class="w-16 bg-slate-800 rounded-full h-1.5 overflow-hidden">
                 <div class="bg-cyan-400 h-full rounded-full" style="width: \${n.mem_usage_percent}%"></div>
               </div>
               <span>\${n.mem_usage_percent}%</span>
@@ -596,6 +605,7 @@ app.get('/', (c) => {
     function renderResourceChart(nodes) {
       if (!resourceChart) return;
       const names = nodes.map(n => n.node_name);
+      const cpus = nodes.map(n => n.cpu_usage_percent || 0);
       const mems = nodes.map(n => n.mem_usage_percent);
       const disks = nodes.map(n => n.disk_usage_percent);
 
@@ -606,8 +616,9 @@ app.get('/', (c) => {
         xAxis: { type: 'category', data: names, axisLine: { lineStyle: { color: '#334155' } }, axisLabel: { color: '#cbd5e1', fontFamily: 'monospace' } },
         yAxis: { type: 'value', max: 100, splitLine: { lineStyle: { color: '#1e293b' } }, axisLabel: { color: '#94a3b8', formatter: '{value}%' } },
         series: [
-          { name: '内存占用', type: 'bar', data: mems, itemStyle: { color: '#06b6d4', borderRadius: [4, 4, 0, 0] } },
-          { name: '磁盘占用', type: 'bar', data: disks, itemStyle: { color: '#8b5cf6', borderRadius: [4, 4, 0, 0] } }
+          { name: 'CPU', type: 'bar', data: cpus, itemStyle: { color: '#fb7185', borderRadius: [4, 4, 0, 0] } },
+          { name: '内存', type: 'bar', data: mems, itemStyle: { color: '#06b6d4', borderRadius: [4, 4, 0, 0] } },
+          { name: '磁盘', type: 'bar', data: disks, itemStyle: { color: '#8b5cf6', borderRadius: [4, 4, 0, 0] } }
         ]
       });
     }
@@ -660,7 +671,7 @@ app.get('/', (c) => {
         const pos = coords[n.node_name] || [0, 0];
         return {
           name: n.node_name,
-          value: [pos[0], pos[1], n.scrape_duration_ms, n.status, n.mem_usage_percent, n.region]
+          value: [pos[0], pos[1], n.scrape_duration_ms, n.status, n.mem_usage_percent, n.region, n.cpu_usage_percent || 0]
         };
       });
 
@@ -669,7 +680,7 @@ app.get('/', (c) => {
         tooltip: {
           formatter: function (params) {
             const d = params.value;
-            return \`<div class="font-mono text-xs"><b>\${params.name}</b> (\${d[5]})<br/>状态: <span class="text-emerald-400">\${d[3]}</span><br/>延迟: \${d[2]}ms<br/>内存: \${d[4]}%</div>\`;
+            return \`<div class="font-mono text-xs"><b>\${params.name}</b> (\${d[5]})<br/>状态: <span class="\${d[3] === 'ONLINE' ? 'text-emerald-400' : 'text-rose-400'}">\${d[3]}</span><br/>延迟: \${d[2]}ms<br/>CPU: \${d[6]}%<br/>内存: \${d[4]}%</div>\`;
           }
         },
         grid: { top: 30, bottom: 40, left: 50, right: 30 },
