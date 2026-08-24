@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'edge-app/**'
+      - 'data-bridge/**'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
@@ -13,7 +14,7 @@ jobs:
     name: Run CI Checks
     uses: ./.github/workflows/ci.yml
 
-  deploy:
+  deploy-edge:
     name: Deploy Edge Application
     runs-on: ubuntu-latest
     needs: ci
@@ -41,3 +42,21 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           npx wrangler deploy --minify
+
+  deploy-backend:
+    name: Deploy Backend Services
+    runs-on: ubuntu-latest
+    needs: ci
+    steps:
+      - name: Deploy to USA Node
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST_IP }}
+          username: ubuntu
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/nexus
+            git fetch origin main
+            git reset --hard origin/main
+            sudo systemctl restart nexus-api.service
+            sudo systemctl restart nexus-ingest.service
