@@ -55,6 +55,9 @@ def load_target_nodes() -> list:
 # Target nodes (loaded from config)
 TARGET_NODES = load_target_nodes()
 
+# Global state for CPU usage calculation
+_previous_cpu_state = {}  # Format: { "node_name": {"timestamp": float, "cpu_total": float, "cpu_idle": float} }
+
 
 def get_db_pool() -> PooledDB:
     """Get or create the database connection pool."""
@@ -96,14 +99,23 @@ def parse_prometheus_metrics(raw_text: str) -> dict:
         "disk_free": 0,
         "net_in": 0,
         "net_out": 0,
+        "cpu_total_secs": 0.0,
+        "cpu_idle_secs": 0.0,
     }
     
     for line in raw_text.splitlines():
         if line.startswith("#") or not line.strip():
             continue
+            
+        # CPU metrics
+        if line.startswith("node_cpu_seconds_total{"):
+            val = float(line.split()[1])
+            metrics["cpu_total_secs"] += val
+            if 'mode="idle"' in line:
+                metrics["cpu_idle_secs"] += val
         
         # Memory metrics
-        if line.startswith("node_memory_MemTotal_bytes "):
+        elif line.startswith("node_memory_MemTotal_bytes "):
             metrics["mem_total"] = float(line.split()[1])
         elif line.startswith("node_memory_MemAvailable_bytes "):
             metrics["mem_avail"] = float(line.split()[1])
@@ -154,6 +166,25 @@ def scrape_single_node(node: dict) -> dict:
             result["status"] = "ONLINE"
             result["mem_total_bytes"] = int(parsed["mem_total"])
             result["mem_available_bytes"] = int(parsed["mem_avail"])
+            
+            # CPU Calculation
+            if parsed["cpu_total_secs"] > 0:
+                current_time = time.time()
+                prev_state = _previous_cpu_state.get(node["name"])
+                
+                if prev_state:
+                    total_diff = parsed["cpu_total_secs"] - prev_state["cpu_total"]
+                    idle_diff = parsed["cpu_idle_secs"] - prev_state["cpu_idle"]
+                    
+                    if total_diff > 0 and idle_diff >= 0 and total_diff >= idle_diff:
+                        usage = 100.0 * (1.0 - (idle_diff / total_diff))
+                        result["cpu_usage_percent"] = round(usage, 2)
+                        
+                _previous_cpu_state[node["name"]] = {
+                    "timestamp": current_time,
+                    "cpu_total": parsed["cpu_total_secs"],
+                    "cpu_idle": parsed["cpu_idle_secs"]
+                }
             
             if parsed["mem_total"] > 0:
                 used_mem = parsed["mem_total"] - parsed["mem_avail"]
