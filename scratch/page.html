@@ -1,72 +1,4 @@
-import { Hono } from 'hono'
-import { cors } from 'hono/cors'
-
-type Bindings = {
-  API_BACKEND_URL: string
-  SUPABASE_URL?: string
-  SUPABASE_ANON_KEY?: string
-}
-
-const app = new Hono<{ Bindings: Bindings }>()
-
-// Global CORS Middleware
-app.use('*', cors({
-  origin: '*',
-  allowMethods: ['GET', 'POST', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization']
-}))
-
-// Proxy API: Nodes Latest Telemetry
-app.get('/api/nodes/latest', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-nexus.8n8m.cfd'
-  try {
-    const res = await fetch(`${backend}/api/metrics/latest`, {
-      headers: { 'User-Agent': 'Nexus-Edge-Worker/1.0' }
-    })
-    const data = await res.json()
-    return c.json(data, res.status as any)
-  } catch (err: any) {
-    return c.json({ status: 'error', message: 'Backend gateway unreachable', error: err.message }, 502)
-  }
-})
-
-// Proxy API: AI Diagnostics
-app.get('/api/ai/diagnostics', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-nexus.8n8m.cfd'
-  try {
-    const res = await fetch(`${backend}/api/ai/diagnostics`, {
-      headers: { 'User-Agent': 'Nexus-Edge-Worker/1.0' }
-    })
-    const data = await res.json()
-    return c.json(data, res.status as any)
-  } catch (err: any) {
-    return c.json({ status: 'error', message: 'Diagnostics unreachable', error: err.message }, 502)
-  }
-})
-
-// Proxy API: Metrics History
-app.get('/api/metrics/history', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-nexus.8n8m.cfd'
-  const url = new URL(c.req.url)
-  const node = url.searchParams.get('node') || ''
-  const hours = url.searchParams.get('hours') || '24'
-  try {
-    const res = await fetch(`${backend}/api/metrics/history?node=${node}&hours=${hours}`, {
-      headers: { 'User-Agent': 'Nexus-Edge-Worker/1.0' }
-    })
-    const data = await res.json()
-    return c.json(data, res.status as any)
-  } catch (err: any) {
-    return c.json({ status: 'error', message: 'History query failed', error: err.message }, 502)
-  }
-})
-
-// Frontend Dashboard SPA
-app.get('/', (c) => {
-  const supabaseUrl = c.env.SUPABASE_URL || 'https://qkpwuxaylvzycapkojvq.supabase.co'
-  const supabaseKey = c.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrcHd1eGF5bHZ6eWNhcGtvanZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTI1NTksImV4cCI6MjA4ODk4ODU1OX0.iasxckoGYjRiLtaZcrmpwNW8QDuqh-BMGNy3rbmK4mQ'
-
-  const html = `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN" class="dark">
 <head>
   <meta charset="UTF-8">
@@ -139,7 +71,7 @@ app.get('/', (c) => {
     ::-webkit-scrollbar-thumb:hover { background: #0891b2; }
   </style>
 </head>
-<body class="min-h-screen font-sans antialiased flex flex-col selection:bg-cyan-500 selection:text-black">
+<body class="min-h-screen font-sans antialiased flex flex-col selection:bg-cyan-500 selection:text-black" onload="console.log('PAGE LOADED v2');">
 
   <!-- TOP NAVIGATION BAR -->
   <header class="sticky top-0 z-50 glass-card border-b border-dark-border px-6 py-3.5 flex items-center justify-between">
@@ -427,13 +359,13 @@ app.get('/', (c) => {
 
   <!-- SCRIPT LOGIC -->
   <script>
-    const SUPABASE_URL = "${supabaseUrl}";
-    const SUPABASE_KEY = "${supabaseKey}";
-    let supabaseClient = null;
+    const SUPABASE_URL = "https://qkpwuxaylvzycapkojvq.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrcHd1eGF5bHZ6eWNhcGtvanZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTI1NTksImV4cCI6MjA4ODk4ODU1OX0.iasxckoGYjRiLtaZcrmpwNW8QDuqh-BMGNy3rbmK4mQ";
+    let supabase = null;
 
     try {
       if (typeof window.supabase !== 'undefined' && window.supabase.createClient && SUPABASE_URL && SUPABASE_KEY) {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       }
     } catch (e) {
       console.warn('Supabase init skipped:', e);
@@ -475,16 +407,21 @@ app.get('/', (c) => {
       try {
         const latestRes = await fetch('/api/nodes/latest');
         const latestJson = await latestRes.json();
+        console.log('API response:', latestJson);
         
         if (latestJson.status === 'success' && Array.isArray(latestJson.data)) {
-          try { renderTable(latestJson.data); } catch(e) { console.error('renderTable error:', e); }
-          try { renderKPIs(latestJson.data); } catch(e) { console.error('renderKPIs error:', e); }
-          try { renderResourceChart(latestJson.data); } catch(e) { console.error('renderResourceChart error:', e); }
-          try { renderLatencyChart(latestJson.data); } catch(e) { console.error('renderLatencyChart error:', e); }
-          try { renderMapChart(latestJson.data); } catch(e) { console.error('renderMapChart error:', e); }
+          try { renderTable(latestJson.data); } catch(e) { console.error('renderTable error:', e); alert('renderTable error: ' + e.message); }
+          try { renderKPIs(latestJson.data); } catch(e) { console.error('renderKPIs error:', e); alert('renderKPIs error: ' + e.message); }
+          try { renderResourceChart(latestJson.data); } catch(e) { console.error('renderResourceChart error:', e); alert('renderResourceChart error: ' + e.message); }
+          try { renderLatencyChart(latestJson.data); } catch(e) { console.error('renderLatencyChart error:', e); alert('renderLatencyChart error: ' + e.message); }
+          try { renderMapChart(latestJson.data); } catch(e) { console.error('renderMapChart error:', e); alert('renderMapChart error: ' + e.message); }
+        } else {
+          console.error('Invalid response:', latestJson);
+          alert('Invalid API response: ' + JSON.stringify(latestJson).substring(0, 200));
         }
       } catch (err) {
         console.error('Failed to fetch telemetry:', err);
+        alert('Fetch error: ' + err.message);
       }
 
       try {
@@ -503,23 +440,23 @@ app.get('/', (c) => {
     function renderKPIs(nodes) {
       const online = nodes.filter(n => n.status === 'ONLINE').length;
       const onlineEl = document.getElementById('stat-online-nodes');
-      if (onlineEl) onlineEl.innerHTML = \`\${online} <span class="text-xs font-normal text-slate-400">/ \${nodes.length}</span>\`;
+      if (onlineEl) onlineEl.innerHTML = `${online} <span class="text-xs font-normal text-slate-400">/ ${nodes.length}</span>`;
       
       const countEl = document.getElementById('active-nodes-count');
-      if (countEl) countEl.innerText = \`\${online} / \${nodes.length} ONLINE\`;
+      if (countEl) countEl.innerText = `${online} / ${nodes.length} ONLINE`;
 
       const latencies = nodes.filter(n => n.scrape_duration_ms > 0).map(n => n.scrape_duration_ms);
       if (latencies.length > 0) {
         const avgLat = Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length);
         const latEl = document.getElementById('stat-avg-latency');
-        if (latEl) latEl.innerHTML = \`\${avgLat} <span class="text-xs font-normal text-slate-400">ms</span>\`;
+        if (latEl) latEl.innerHTML = `${avgLat} <span class="text-xs font-normal text-slate-400">ms</span>`;
       }
 
       const mems = nodes.filter(n => n.mem_usage_percent > 0).map(n => n.mem_usage_percent);
       if (mems.length > 0) {
         const avgMem = (mems.reduce((a, b) => a + b, 0) / mems.length).toFixed(1);
         const memEl = document.getElementById('stat-avg-mem');
-        if (memEl) memEl.innerHTML = \`\${avgMem} <span class="text-xs font-normal text-slate-400">%</span>\`;
+        if (memEl) memEl.innerHTML = `${avgMem} <span class="text-xs font-normal text-slate-400">%</span>`;
       }
     }
 
@@ -528,9 +465,9 @@ app.get('/', (c) => {
       const pill = document.getElementById('ai-score-pill');
       const badge = document.getElementById('fleet-health-badge');
 
-      if (pill) pill.innerText = \`HEALTH: \${score}%\`;
+      if (pill) pill.innerText = `HEALTH: ${score}%`;
       if (badge) {
-        badge.innerText = \`\${score}% \${diag.status || 'HEALTHY'}\`;
+        badge.innerText = `${score}% ${diag.status || 'HEALTHY'}`;
         badge.className = score >= 80 
           ? 'px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 font-semibold'
           : 'px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800/60 font-semibold';
@@ -538,15 +475,15 @@ app.get('/', (c) => {
 
       const list = document.getElementById('ai-diagnostics-list');
       if (list && diag.diagnostics && diag.diagnostics.length > 0) {
-        list.innerHTML = diag.diagnostics.map(item => \`
+        list.innerHTML = diag.diagnostics.map(item => `
           <div class="p-3 rounded-lg bg-slate-900/90 border border-slate-800 text-xs space-y-1">
             <div class="flex items-center justify-between text-cyan-400 font-mono font-semibold">
               <span><i class="fa-solid fa-shield-heart mr-1.5"></i>智能运维巡检</span>
               <span class="text-[10px] text-slate-500">AutoML Agent</span>
             </div>
-            <p class="text-slate-300 leading-relaxed text-[11px]">\${item}</p>
+            <p class="text-slate-300 leading-relaxed text-[11px]">${item}</p>
           </div>
-        \`).join('');
+        `).join('');
       }
     }
 
@@ -554,43 +491,43 @@ app.get('/', (c) => {
       const tbody = document.getElementById('nodes-table-body');
       if (!tbody) return;
 
-      tbody.innerHTML = nodes.map(n => \`
+      tbody.innerHTML = nodes.map(n => `
         <tr class="hover:bg-slate-800/40 transition">
           <td class="py-3 px-4 font-bold text-white flex items-center space-x-2">
-            <span class="w-2 h-2 rounded-full \${n.status === 'ONLINE' ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-rose-500'}"></span>
-            <span>\${n.node_name}</span>
+            <span class="w-2 h-2 rounded-full ${n.status === 'ONLINE' ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-rose-500'}"></span>
+            <span>${n.node_name}</span>
           </td>
-          <td class="py-3 px-4 text-slate-400">\${n.provider || 'Cloud'} (\${n.region})</td>
-          <td class="py-3 px-4 text-slate-300 font-mono">\${n.host_ip}</td>
+          <td class="py-3 px-4 text-slate-400">${n.provider || 'Cloud'} (${n.region})</td>
+          <td class="py-3 px-4 text-slate-300 font-mono">${n.host_ip}</td>
           <td class="py-3 px-4">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold \${n.status === 'ONLINE' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60' : 'bg-rose-950 text-rose-400 border border-rose-800/60'}">
-              \${n.status}
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${n.status === 'ONLINE' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60' : 'bg-rose-950 text-rose-400 border border-rose-800/60'}">
+              ${n.status}
             </span>
           </td>
           <td class="py-3 px-4">
             <div class="flex items-center space-x-2">
               <div class="w-16 bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                <div class="bg-cyan-400 h-full rounded-full" style="width: \${n.mem_usage_percent}%"></div>
+                <div class="bg-cyan-400 h-full rounded-full" style="width: ${n.mem_usage_percent}%"></div>
               </div>
-              <span>\${n.mem_usage_percent}%</span>
+              <span>${n.mem_usage_percent}%</span>
             </div>
           </td>
           <td class="py-3 px-4">
             <div class="flex items-center space-x-2">
               <div class="w-16 bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                <div class="bg-indigo-400 h-full rounded-full" style="width: \${n.disk_usage_percent}%"></div>
+                <div class="bg-indigo-400 h-full rounded-full" style="width: ${n.disk_usage_percent}%"></div>
               </div>
-              <span>\${n.disk_usage_percent}%</span>
+              <span>${n.disk_usage_percent}%</span>
             </div>
           </td>
-          <td class="py-3 px-4 font-mono font-semibold \${n.scrape_duration_ms < 50 ? 'text-emerald-400' : (n.scrape_duration_ms < 350 ? 'text-cyan-400' : 'text-amber-400')}">
-            \${n.scrape_duration_ms} ms
+          <td class="py-3 px-4 font-mono font-semibold ${n.scrape_duration_ms < 50 ? 'text-emerald-400' : (n.scrape_duration_ms < 350 ? 'text-cyan-400' : 'text-amber-400')}">
+            ${n.scrape_duration_ms} ms
           </td>
           <td class="py-3 px-4 text-slate-400 text-[11px]">
-            \${n.recorded_at ? (n.recorded_at.includes('T') ? n.recorded_at.split('T')[1].slice(0, 8) : n.recorded_at.split(' ')[1]) : '刚刚'}
+            ${n.recorded_at ? (n.recorded_at.includes('T') ? n.recorded_at.split('T')[1].slice(0, 8) : n.recorded_at.split(' ')[1]) : '刚刚'}
           </td>
         </tr>
-      \`).join('');
+      `).join('');
     }
 
     function renderResourceChart(nodes) {
@@ -652,8 +589,7 @@ app.get('/', (c) => {
         'usb': [-77.58, 39.14],
         'usc': [-77.38, 38.94],
         'sga': [103.81, 1.35],
-        'cna': [116.40, 39.90],
-        'gcp': [121.57, 25.03]
+        'cna': [116.40, 39.90]
       };
 
       const scatterData = nodes.map(n => {
@@ -669,7 +605,7 @@ app.get('/', (c) => {
         tooltip: {
           formatter: function (params) {
             const d = params.value;
-            return \`<div class="font-mono text-xs"><b>\${params.name}</b> (\${d[5]})<br/>状态: <span class="text-emerald-400">\${d[3]}</span><br/>延迟: \${d[2]}ms<br/>内存: \${d[4]}%</div>\`;
+            return `<div class="font-mono text-xs"><b>${params.name}</b> (${d[5]})<br/>状态: <span class="text-emerald-400">${d[3]}</span><br/>延迟: ${d[2]}ms<br/>内存: ${d[4]}%</div>`;
           }
         },
         grid: { top: 30, bottom: 40, left: 50, right: 30 },
@@ -729,14 +665,14 @@ app.get('/', (c) => {
       const password = document.getElementById('auth-password').value;
       const errorDiv = document.getElementById('auth-error');
 
-      if (!supabaseClient) {
+      if (!supabase) {
         errorDiv.innerText = 'Supabase client is not configured.';
         errorDiv.classList.remove('hidden');
         return;
       }
 
       try {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         
         toggleAuthModal();
@@ -748,16 +684,16 @@ app.get('/', (c) => {
     }
 
     async function handleLogout() {
-      if (supabaseClient) {
-        await supabaseClient.auth.signOut();
+      if (supabase) {
+        await supabase.auth.signOut();
         checkUserSession();
       }
     }
 
     async function checkUserSession() {
-      if (!supabaseClient) return;
+      if (!supabase) return;
       try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
         const loginBtn = document.getElementById('login-btn');
         const userProfile = document.getElementById('user-profile');
         const userEmail = document.getElementById('user-email');
@@ -786,7 +722,7 @@ app.get('/', (c) => {
           fetchData();
         }
         const timer = document.getElementById('sync-timer');
-        if (timer) timer.innerText = \`Auto: \${countdown}s\`;
+        if (timer) timer.innerText = `Auto: ${countdown}s`;
       }, 1000);
     }
 
@@ -799,12 +735,4 @@ app.get('/', (c) => {
     });
   </script>
 </body>
-</html>`
-
-  return c.html(html, 200, {
-    'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-    'Pragma': 'no-cache'
-  })
-})
-
-export default app
+</html>
