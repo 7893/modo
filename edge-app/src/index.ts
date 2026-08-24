@@ -139,7 +139,7 @@ app.get('/', (c) => {
     ::-webkit-scrollbar-thumb:hover { background: #0891b2; }
   </style>
 </head>
-<body class="min-h-screen font-sans antialiased flex flex-col selection:bg-cyan-500 selection:text-black">
+<body class="min-h-screen font-sans antialiased flex flex-col selection:bg-cyan-500 selection:text-black" onload="console.log('PAGE LOADED v2');">
 
   <!-- TOP NAVIGATION BAR -->
   <header class="sticky top-0 z-50 glass-card border-b border-dark-border px-6 py-3.5 flex items-center justify-between">
@@ -805,7 +805,10 @@ app.get('/', (c) => {
 </body>
 </html>`
 
-  return c.html(html)
+  return c.html(html, 200, {
+    'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+    'Pragma': 'no-cache'
+  })
 })
 
 export default app
