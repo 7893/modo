@@ -8,6 +8,14 @@
   "vars": {
     "API_BACKEND_URL": "https://tunnel.example.com",
     "SUPABASE_URL": "https://service.example.com",
+    "INTERNAL_API_SECRET": "replace-with-a-secret",
     "SUPABASE_ANON_KEY": "replace-with-a-publishable-key"
-  }
+  },
+  "rules": [
+    {
+      "type": "Text",
+      "globs": ["**/*.html"],
+      "fallthrough": true
+    }
+  ]
 }
