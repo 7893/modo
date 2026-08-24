@@ -139,7 +139,7 @@ app.get('/', (c) => {
     ::-webkit-scrollbar-thumb:hover { background: #0891b2; }
   </style>
 </head>
-<body class="min-h-screen font-sans antialiased flex flex-col selection:bg-cyan-500 selection:text-black" onload="console.log('PAGE LOADED v2');">
+<body class="min-h-screen font-sans antialiased flex flex-col selection:bg-cyan-500 selection:text-black">
 
   <!-- TOP NAVIGATION BAR -->
   <header class="sticky top-0 z-50 glass-card border-b border-dark-border px-6 py-3.5 flex items-center justify-between">
@@ -475,21 +475,16 @@ app.get('/', (c) => {
       try {
         const latestRes = await fetch('/api/nodes/latest');
         const latestJson = await latestRes.json();
-        console.log('API response:', latestJson);
         
         if (latestJson.status === 'success' && Array.isArray(latestJson.data)) {
-          try { renderTable(latestJson.data); } catch(e) { console.error('renderTable error:', e); alert('renderTable error: ' + e.message); }
-          try { renderKPIs(latestJson.data); } catch(e) { console.error('renderKPIs error:', e); alert('renderKPIs error: ' + e.message); }
-          try { renderResourceChart(latestJson.data); } catch(e) { console.error('renderResourceChart error:', e); alert('renderResourceChart error: ' + e.message); }
-          try { renderLatencyChart(latestJson.data); } catch(e) { console.error('renderLatencyChart error:', e); alert('renderLatencyChart error: ' + e.message); }
-          try { renderMapChart(latestJson.data); } catch(e) { console.error('renderMapChart error:', e); alert('renderMapChart error: ' + e.message); }
-        } else {
-          console.error('Invalid response:', latestJson);
-          alert('Invalid API response: ' + JSON.stringify(latestJson).substring(0, 200));
+          try { renderTable(latestJson.data); } catch(e) { console.error('renderTable error:', e); }
+          try { renderKPIs(latestJson.data); } catch(e) { console.error('renderKPIs error:', e); }
+          try { renderResourceChart(latestJson.data); } catch(e) { console.error('renderResourceChart error:', e); }
+          try { renderLatencyChart(latestJson.data); } catch(e) { console.error('renderLatencyChart error:', e); }
+          try { renderMapChart(latestJson.data); } catch(e) { console.error('renderMapChart error:', e); }
         }
       } catch (err) {
         console.error('Failed to fetch telemetry:', err);
-        alert('Fetch error: ' + err.message);
       }
 
       try {
