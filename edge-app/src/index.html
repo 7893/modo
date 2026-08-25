@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="dark">
+<html lang="zh-CN" class="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,13 +15,14 @@
         extend: {
           colors: {
             supabase: {
-              bg: '#0c0d12',
-              emerald: '#3ECF8E',
-              blue: '#3b82f6',
-              coral: '#f43f5e',
-              purple: '#8b5cf6',
-              amber: '#f59e0b',
-              slate: '#334155'
+              emerald: '#10B981',
+              emeraldDark: '#047857',
+              emeraldLight: '#ECFDF5',
+              blue: '#2563EB',
+              coral: '#E11D48',
+              purple: '#7C3AED',
+              amber: '#D97706',
+              slate: '#475569'
             }
           },
           fontFamily: {
@@ -42,12 +43,12 @@
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
     
     body {
-      background-color: #0c0d12;
+      background-color: #F8FAFC;
       background-image: 
-        radial-gradient(at 0% 0%, rgba(62, 207, 142, 0.08) 0px, transparent 40%),
-        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 40%),
-        radial-gradient(at 50% 100%, rgba(244, 63, 94, 0.06) 0px, transparent 50%);
-      color: #EDEDED;
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.05) 0px, transparent 40%),
+        radial-gradient(at 100% 0%, rgba(37, 99, 235, 0.05) 0px, transparent 40%),
+        radial-gradient(at 50% 100%, rgba(225, 29, 72, 0.03) 0px, transparent 50%);
+      color: #0F172A;
       font-family: 'Inter', sans-serif;
     }
     
@@ -60,19 +61,19 @@
       flex: 1 1 0%;
       min-width: 0;
       opacity: 1;
-      box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+      box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.06);
     }
     .curtain-collapsed {
       flex: 0 0 64px;
       cursor: pointer;
-      opacity: 0.88;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+      opacity: 0.92;
+      box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.06);
       padding: 1.25rem 0.35rem !important;
     }
     .curtain-collapsed:hover {
       opacity: 1;
       transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(16, 185, 129, 0.3);
     }
     .vertical-title {
       writing-mode: vertical-rl;
@@ -101,87 +102,88 @@
     
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
+    ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.3); }
 
-    .supabase-inner-card {
-      background: rgba(10, 10, 15, 0.65);
+    .supabase-light-card {
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.07);
     }
-    .supabase-inner-card:hover {
-      border-color: rgba(255, 255, 255, 0.25);
+    .supabase-light-card:hover {
+      border-color: rgba(16, 185, 129, 0.35);
+      box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.05);
     }
   </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden selection:bg-[#3ECF8E] selection:text-black">
+<body class="h-screen flex flex-col overflow-hidden selection:bg-emerald-100 selection:text-emerald-900">
 
-  <!-- TOP NAV BAR -->
-  <header class="z-50 border-b border-white/10 bg-[#0c0d12]/80 backdrop-blur-xl px-5 py-2.5 flex items-center justify-between shrink-0">
+  <!-- TOP NAV BAR (SUPABASE CLEAN WHITE HEADER) -->
+  <header class="z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl px-5 py-2.5 flex items-center justify-between shrink-0 shadow-sm">
     
     <!-- Left: Logo & Nav items -->
     <div class="flex items-center space-x-6">
       <div class="flex items-center space-x-2.5 cursor-pointer" onclick="handleCurtainClick('overview')">
-        <div class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-[#3ECF8E] shadow-[0_0_15px_rgba(62,207,142,0.4)]">
+        <div class="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-center text-emerald-600 shadow-sm">
           <svg class="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24">
             <path d="M21.362 9.354H12V.343a.343.343 0 0 0-.583-.245L.15 11.597a.343.343 0 0 0 .245.584h9.362v9.011a.343.343 0 0 0 .583.245l11.267-11.499a.343.343 0 0 0-.245-.584z"/>
           </svg>
         </div>
-        <span class="text-base font-bold tracking-tight text-white font-mono flex items-center gap-2">
+        <span class="text-base font-bold tracking-tight text-slate-900 font-mono flex items-center gap-2">
           <span>NEXUS</span>
-          <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950/80 text-[#3ECF8E] border border-[#3ECF8E]/30 font-sans font-medium">Telemetry Hub</span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-sans font-semibold">Telemetry Hub</span>
         </span>
       </div>
 
       <!-- Center Links (Jump to Curtains) -->
-      <nav class="hidden xl:flex items-center space-x-1 text-xs text-slate-300 font-medium">
-        <button onclick="handleCurtainClick('overview')" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-white/10 transition">总览 Overview</button>
-        <button onclick="handleCurtainClick('map')" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-white/10 transition">雷达 Radar</button>
-        <button onclick="handleCurtainClick('resource')" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-white/10 transition">算力 Compute</button>
-        <button onclick="handleCurtainClick('latency')" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-white/10 transition">时延 Latency</button>
-        <button onclick="handleCurtainClick('table')" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-white/10 transition">资产 Inventory</button>
-        <button onclick="handleCurtainClick('ai')" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-white/10 transition">AI Engine</button>
+      <nav class="hidden xl:flex items-center space-x-1 text-xs text-slate-600 font-medium">
+        <button onclick="handleCurtainClick('overview')" class="px-2.5 py-1 rounded-md hover:text-slate-900 hover:bg-slate-100 transition">总览 Overview</button>
+        <button onclick="handleCurtainClick('map')" class="px-2.5 py-1 rounded-md hover:text-slate-900 hover:bg-slate-100 transition">雷达 Radar</button>
+        <button onclick="handleCurtainClick('resource')" class="px-2.5 py-1 rounded-md hover:text-slate-900 hover:bg-slate-100 transition">算力 Compute</button>
+        <button onclick="handleCurtainClick('latency')" class="px-2.5 py-1 rounded-md hover:text-slate-900 hover:bg-slate-100 transition">时延 Latency</button>
+        <button onclick="handleCurtainClick('table')" class="px-2.5 py-1 rounded-md hover:text-slate-900 hover:bg-slate-100 transition">资产 Inventory</button>
+        <button onclick="handleCurtainClick('ai')" class="px-2.5 py-1 rounded-md hover:text-slate-900 hover:bg-slate-100 transition">AI Engine</button>
       </nav>
     </div>
 
     <!-- Center Status Badges -->
     <div class="hidden md:flex items-center space-x-5 text-xs font-mono">
       <div class="flex items-center space-x-2">
-        <span class="w-2.5 h-2.5 rounded-full bg-[#3ECF8E] animate-pulse shadow-[0_0_8px_#3ECF8E]"></span>
-        <span class="text-slate-400">服务状态:</span>
-        <span id="fleet-health-badge" class="px-2.5 py-0.5 rounded-full bg-emerald-950 text-[#3ECF8E] border border-[#3ECF8E]/30 font-semibold text-[11px]">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></span>
+        <span class="text-slate-500">服务状态:</span>
+        <span id="fleet-health-badge" class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold text-[11px]">
           100% HEALTHY
         </span>
       </div>
       <div class="flex items-center space-x-2">
-        <span class="text-slate-400">在线节点:</span>
-        <span id="active-nodes-count" class="text-white font-bold">11 / 11 ONLINE</span>
+        <span class="text-slate-500">在线节点:</span>
+        <span id="active-nodes-count" class="text-slate-800 font-bold">11 / 11 ONLINE</span>
       </div>
       <div class="flex items-center space-x-2">
-        <span class="text-slate-400">同步时钟:</span>
-        <span id="sync-timer" class="text-emerald-400 font-bold">15s</span>
+        <span class="text-slate-500">同步时钟:</span>
+        <span id="sync-timer" class="text-emerald-600 font-bold">15s</span>
       </div>
       <div class="flex items-center space-x-2">
-        <span id="live-clock-badge" class="text-slate-400 font-mono">--:--:--</span>
+        <span id="live-clock-badge" class="text-slate-500 font-mono">--:--:--</span>
       </div>
     </div>
 
     <!-- Right Actions -->
     <div class="flex items-center space-x-2.5">
-      <button id="refresh-btn" onclick="fetchData()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/10 hover:bg-white/20 text-white border border-white/10 transition flex items-center space-x-1.5 shadow-sm">
+      <button id="refresh-btn" onclick="fetchData()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition flex items-center space-x-1.5 shadow-sm">
         <i class="fa-solid fa-arrows-rotate text-[11px]" id="refresh-icon"></i>
         <span>刷新</span>
       </button>
       
       <div id="auth-section" class="flex items-center">
-        <button id="login-btn" onclick="toggleAuthModal()" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#3ECF8E] hover:bg-[#34b27b] text-black shadow-[0_0_15px_rgba(62,207,142,0.4)] transition flex items-center space-x-1.5">
+        <button id="login-btn" onclick="toggleAuthModal()" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition flex items-center space-x-1.5">
           <i class="fa-solid fa-shield-halved text-[11px]"></i>
           <span>控制台鉴权</span>
         </button>
         <div id="user-profile" class="hidden items-center space-x-2">
-          <span id="user-email" class="text-xs text-[#3ECF8E] font-mono font-bold"></span>
-          <button onclick="handleLogout()" class="px-2 py-1 text-xs text-rose-400 hover:text-rose-300 font-mono">
+          <span id="user-email" class="text-xs text-emerald-700 font-mono font-bold"></span>
+          <button onclick="handleLogout()" class="px-2 py-1 text-xs text-rose-600 hover:text-rose-700 font-mono">
             <i class="fa-solid fa-right-from-bracket"></i>
           </button>
         </div>
@@ -189,87 +191,87 @@
     </div>
   </header>
 
-  <!-- MAIN CONTAINER -->
+  <!-- MAIN CONTAINER (SUPABASE WHITE LIGHT THEME 6-PANEL ACCORDION) -->
   <main class="flex-1 p-3 lg:p-4 overflow-hidden flex flex-col w-full max-w-[1920px] mx-auto">
 
-    <!-- THE 6 MASTER FULL-SCREEN VIBRANT CURTAIN PANELS -->
+    <!-- THE 6 MASTER FULL-SCREEN CURTAIN PANELS -->
     <div id="master-curtain-container" class="flex flex-col lg:flex-row gap-3 h-full transition-all duration-500 ease-out flex-1 overflow-hidden">
 
-      <!-- ================= 🪟 CURTAIN 1: SUPABASE VIBRANT EMERALD (OVERVIEW) ================= -->
+      <!-- ================= 🪟 CURTAIN 1: SUPABASE EMERALD MINT (OVERVIEW) ================= -->
       <div id="panel-overview" onclick="handleCurtainClick('overview')"
            class="curtain-panel curtain-expanded p-5 lg:p-6 flex flex-col justify-between overflow-hidden relative group"
-           style="background: linear-gradient(135deg, #059669 0%, #10b981 30%, #047857 70%, #064e3b 100%);">
+           style="background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 40%, #E6FFFA 100%); border: 1px solid #A7F3D0;">
         
         <!-- Expanded View -->
-        <div id="content-overview-expanded" class="flex flex-col h-full w-full justify-between overflow-hidden gap-3.5 text-white">
+        <div id="content-overview-expanded" class="flex flex-col h-full w-full justify-between overflow-hidden gap-3.5 text-slate-800">
           
           <!-- Top Hero Header -->
           <div class="flex items-center justify-between shrink-0">
             <div class="flex items-center space-x-3.5">
-              <div class="w-11 h-11 rounded-2xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-lg">
+              <div class="w-11 h-11 rounded-2xl bg-white/90 border border-emerald-200 flex items-center justify-center text-emerald-600 shadow-sm">
                 <i class="fa-solid fa-gauge-high text-xl"></i>
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">全球多云算力集群基础设施总览</h2>
-                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-emerald-200 border border-white/20 font-mono font-bold uppercase">01 · Fleet Overview</span>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-slate-900">全球多云算力集群基础设施总览</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-100/80 text-emerald-800 border border-emerald-300 font-mono font-bold uppercase">01 · Fleet Overview</span>
                 </div>
-                <p class="text-xs text-emerald-100/90 mt-0.5">纳管 11 台生产虚拟机 · 15s 高频时序遥测入库 · 跨 5 大多云区域 QUIC 骨干互联</p>
+                <p class="text-xs text-slate-600 mt-0.5">纳管 11 台生产虚拟机 · 15s 高频时序遥测入库 · 跨 5 大多云区域 QUIC 骨干互联</p>
               </div>
             </div>
-            <span class="px-3.5 py-1.5 rounded-full bg-black/40 border border-white/20 text-xs font-mono text-emerald-200 font-bold flex items-center gap-1.5 shadow-md">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-300 animate-pulse shadow-[0_0_8px_#6ee7b7]"></span>
+            <span class="px-3.5 py-1.5 rounded-full bg-white/90 border border-emerald-200 text-xs font-mono text-emerald-700 font-bold flex items-center gap-1.5 shadow-sm">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></span>
               <span>系统运行正常 (100% ONLINE)</span>
             </span>
           </div>
 
-          <!-- Top 4 Glass KPI Cards (flex-1) -->
+          <!-- Top 4 KPI Cards (flex-1) -->
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 font-mono flex-[1] min-h-[105px]">
-            <div class="p-4 rounded-2xl supabase-inner-card flex flex-col justify-between shadow-lg">
-              <div class="flex items-center justify-between text-emerald-200 text-xs font-sans font-semibold">
+            <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between shadow-sm">
+              <div class="flex items-center justify-between text-slate-600 text-xs font-sans font-semibold">
                 <span>生产在线主机</span>
-                <i class="fa-solid fa-server"></i>
+                <i class="fa-solid fa-server text-emerald-600"></i>
               </div>
-              <div class="text-3xl font-extrabold text-white my-0.5" id="stat-online-nodes">11 <span class="text-sm font-normal text-emerald-200/70">/ 11</span></div>
-              <div class="text-[11px] text-emerald-100/80 flex items-center justify-between pt-1 border-t border-white/10">
+              <div class="text-3xl font-extrabold text-slate-900 my-0.5" id="stat-online-nodes">11 <span class="text-sm font-normal text-slate-400">/ 11</span></div>
+              <div class="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
                 <span>Oracle (8) · GCP · Ali · AWS</span>
-                <span class="text-emerald-300 font-bold">100%</span>
+                <span class="text-emerald-600 font-bold">100%</span>
               </div>
             </div>
 
-            <div class="p-4 rounded-2xl supabase-inner-card flex flex-col justify-between shadow-lg">
-              <div class="flex items-center justify-between text-teal-200 text-xs font-sans font-semibold">
+            <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between shadow-sm">
+              <div class="flex items-center justify-between text-slate-600 text-xs font-sans font-semibold">
                 <span>全球平均网络时延</span>
-                <i class="fa-solid fa-bolt"></i>
+                <i class="fa-solid fa-bolt text-teal-600"></i>
               </div>
-              <div class="text-3xl font-extrabold text-white my-0.5" id="stat-avg-latency">-- <span class="text-sm font-normal text-emerald-200/70">ms</span></div>
-              <div class="text-[11px] text-emerald-100/80 flex items-center justify-between pt-1 border-t border-white/10">
+              <div class="text-3xl font-extrabold text-slate-900 my-0.5" id="stat-avg-latency">-- <span class="text-sm font-normal text-slate-400">ms</span></div>
+              <div class="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
                 <span>同区 14ms · 跨洋 ~350ms</span>
-                <span class="text-teal-300 font-bold">正常</span>
+                <span class="text-teal-600 font-bold">正常</span>
               </div>
             </div>
 
-            <div class="p-4 rounded-2xl supabase-inner-card flex flex-col justify-between shadow-lg">
-              <div class="flex items-center justify-between text-cyan-200 text-xs font-sans font-semibold">
+            <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between shadow-sm">
+              <div class="flex items-center justify-between text-slate-600 text-xs font-sans font-semibold">
                 <span>全网平均内存利用率</span>
-                <i class="fa-solid fa-microchip"></i>
+                <i class="fa-solid fa-microchip text-cyan-600"></i>
               </div>
-              <div class="text-3xl font-extrabold text-white my-0.5" id="stat-avg-mem">-- <span class="text-sm font-normal text-emerald-200/70">%</span></div>
-              <div class="text-[11px] text-emerald-100/80 flex items-center justify-between pt-1 border-t border-white/10">
+              <div class="text-3xl font-extrabold text-slate-900 my-0.5" id="stat-avg-mem">-- <span class="text-sm font-normal text-slate-400">%</span></div>
+              <div class="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
                 <span>集群资源水位平衡</span>
-                <span class="text-cyan-300 font-bold">正常</span>
+                <span class="text-cyan-600 font-bold">正常</span>
               </div>
             </div>
 
-            <div class="p-4 rounded-2xl supabase-inner-card flex flex-col justify-between shadow-lg">
-              <div class="flex items-center justify-between text-amber-200 text-xs font-sans font-semibold">
+            <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between shadow-sm">
+              <div class="flex items-center justify-between text-slate-600 text-xs font-sans font-semibold">
                 <span>时序遥测存储引擎</span>
-                <i class="fa-solid fa-database"></i>
+                <i class="fa-solid fa-database text-amber-600"></i>
               </div>
-              <div class="text-3xl font-extrabold text-amber-300 my-0.5">HeatWave</div>
-              <div class="text-[11px] text-emerald-100/80 flex items-center justify-between pt-1 border-t border-white/10">
+              <div class="text-3xl font-extrabold text-amber-600 my-0.5">HeatWave</div>
+              <div class="text-[11px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
                 <span>MySQL 26.7 引擎 · 15s 周期</span>
-                <span class="text-amber-300 font-bold" id="kpi-db-records">同步中</span>
+                <span class="text-amber-600 font-bold" id="kpi-db-records">同步中</span>
               </div>
             </div>
           </div>
@@ -277,152 +279,152 @@
           <!-- Dual Column Main Body (flex-[3]) -->
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 flex-[3] min-h-[250px] overflow-hidden">
             <!-- Left 7 Cols: 5-Region Fleet Matrix -->
-            <div class="lg:col-span-7 p-4 rounded-2xl supabase-inner-card flex flex-col justify-between overflow-hidden shadow-lg">
+            <div class="lg:col-span-7 p-4 rounded-2xl supabase-light-card flex flex-col justify-between overflow-hidden shadow-sm">
               <div class="flex items-center justify-between mb-2 shrink-0">
-                <span class="text-xs font-bold text-white flex items-center gap-2">
-                  <i class="fa-solid fa-earth-asia text-emerald-300"></i>
+                <span class="text-xs font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-earth-asia text-emerald-600"></i>
                   <span>全球 5 大多云区域矩阵速览</span>
                 </span>
-                <span class="text-[11px] font-mono text-emerald-200/80">11 台生产主机</span>
+                <span class="text-[11px] font-mono text-slate-500">11 台生产主机</span>
               </div>
 
               <!-- 5 Region Rows -->
               <div class="flex-1 flex flex-col justify-between gap-2 overflow-hidden py-0.5">
-                <div class="flex-1 p-2.5 rounded-xl bg-black/30 border border-white/10 hover:border-white/30 transition flex items-center justify-between font-mono text-xs">
+                <div class="flex-1 p-2.5 rounded-xl bg-white/80 border border-slate-200/80 hover:border-emerald-300 transition flex items-center justify-between font-mono text-xs shadow-xs">
                   <div class="flex items-center space-x-3 w-1/3">
                     <span class="text-lg">🇯🇵</span>
                     <div>
-                      <div class="font-bold text-white flex items-center gap-1.5">
+                      <div class="font-bold text-slate-900 flex items-center gap-1.5">
                         <span>日本东京集群</span>
-                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-200 border border-rose-400/40">5台</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-rose-50 text-rose-700 border border-rose-200">5台</span>
                       </div>
-                      <div class="text-[10px] text-emerald-200/70">Oracle Cloud · ap-tokyo</div>
+                      <div class="text-[10px] text-slate-500">Oracle Cloud · ap-tokyo</div>
                     </div>
                   </div>
-                  <div class="flex items-center space-x-6 text-xs text-emerald-100">
-                    <div class="hidden sm:block">延迟: <strong class="text-emerald-300">~14ms</strong></div>
-                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 border border-emerald-400/40 font-bold text-[10px]">ONLINE</span>
+                  <div class="flex items-center space-x-6 text-xs text-slate-600">
+                    <div class="hidden sm:block">延迟: <strong class="text-emerald-600">~14ms</strong></div>
+                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px]">ONLINE</span>
                   </div>
                 </div>
 
-                <div class="flex-1 p-2.5 rounded-xl bg-black/30 border border-white/10 hover:border-white/30 transition flex items-center justify-between font-mono text-xs">
+                <div class="flex-1 p-2.5 rounded-xl bg-white/80 border border-slate-200/80 hover:border-emerald-300 transition flex items-center justify-between font-mono text-xs shadow-xs">
                   <div class="flex items-center space-x-3 w-1/3">
                     <span class="text-lg">🇺🇸</span>
                     <div>
-                      <div class="font-bold text-white flex items-center gap-1.5">
+                      <div class="font-bold text-slate-900 flex items-center gap-1.5">
                         <span>美东阿什本中枢</span>
-                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-200 border border-sky-400/40">3台</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-sky-50 text-sky-700 border border-sky-200">3台</span>
                       </div>
-                      <div class="text-[10px] text-emerald-200/70">Oracle Cloud · 数据中枢</div>
+                      <div class="text-[10px] text-slate-500">Oracle Cloud · 数据中枢</div>
                     </div>
                   </div>
-                  <div class="flex items-center space-x-6 text-xs text-emerald-100">
-                    <div class="hidden sm:block">延迟: <strong class="text-emerald-300">17ms</strong></div>
-                    <span class="px-2.5 py-0.5 rounded-full bg-sky-500/30 text-sky-200 border border-sky-400/40 font-bold text-[10px]">HUB ONLINE</span>
+                  <div class="flex items-center space-x-6 text-xs text-slate-600">
+                    <div class="hidden sm:block">延迟: <strong class="text-emerald-600">17ms</strong></div>
+                    <span class="px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 font-bold text-[10px]">HUB ONLINE</span>
                   </div>
                 </div>
 
-                <div class="flex-1 p-2.5 rounded-xl bg-black/30 border border-white/10 hover:border-white/30 transition flex items-center justify-between font-mono text-xs">
+                <div class="flex-1 p-2.5 rounded-xl bg-white/80 border border-slate-200/80 hover:border-emerald-300 transition flex items-center justify-between font-mono text-xs shadow-xs">
                   <div class="flex items-center space-x-3 w-1/3">
                     <span class="text-lg">🇹🇼</span>
                     <div>
-                      <div class="font-bold text-white flex items-center gap-1.5">
+                      <div class="font-bold text-slate-900 flex items-center gap-1.5">
                         <span>台湾省彰化节点</span>
-                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-200 border border-emerald-400/40">1台</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">1台</span>
                       </div>
-                      <div class="text-[10px] text-emerald-200/70">Google Cloud · asia-east1</div>
+                      <div class="text-[10px] text-slate-500">Google Cloud · asia-east1</div>
                     </div>
                   </div>
-                  <div class="flex items-center space-x-6 text-xs text-emerald-100">
-                    <div class="hidden sm:block">延迟: <strong class="text-cyan-300">~101ms</strong></div>
-                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 border border-emerald-400/40 font-bold text-[10px]">ONLINE</span>
+                  <div class="flex items-center space-x-6 text-xs text-slate-600">
+                    <div class="hidden sm:block">延迟: <strong class="text-cyan-600">~101ms</strong></div>
+                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px]">ONLINE</span>
                   </div>
                 </div>
 
-                <div class="flex-1 p-2.5 rounded-xl bg-black/30 border border-white/10 hover:border-white/30 transition flex items-center justify-between font-mono text-xs">
+                <div class="flex-1 p-2.5 rounded-xl bg-white/80 border border-slate-200/80 hover:border-emerald-300 transition flex items-center justify-between font-mono text-xs shadow-xs">
                   <div class="flex items-center space-x-3 w-1/3">
                     <span class="text-lg">🇨🇳</span>
                     <div>
-                      <div class="font-bold text-white flex items-center gap-1.5">
+                      <div class="font-bold text-slate-900 flex items-center gap-1.5">
                         <span>中国北京骨干</span>
-                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-200 border border-orange-400/40">1台</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 border border-amber-200">1台</span>
                       </div>
-                      <div class="text-[10px] text-emerald-200/70">阿里云 ECS · cn-beijing</div>
+                      <div class="text-[10px] text-slate-500">阿里云 ECS · cn-beijing</div>
                     </div>
                   </div>
-                  <div class="flex items-center space-x-6 text-xs text-emerald-100">
-                    <div class="hidden sm:block">延迟: <strong class="text-amber-300">~480ms</strong></div>
-                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 border border-emerald-400/40 font-bold text-[10px]">ONLINE</span>
+                  <div class="flex items-center space-x-6 text-xs text-slate-600">
+                    <div class="hidden sm:block">延迟: <strong class="text-amber-600">~480ms</strong></div>
+                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px]">ONLINE</span>
                   </div>
                 </div>
 
-                <div class="flex-1 p-2.5 rounded-xl bg-black/30 border border-white/10 hover:border-white/30 transition flex items-center justify-between font-mono text-xs">
+                <div class="flex-1 p-2.5 rounded-xl bg-white/80 border border-slate-200/80 hover:border-emerald-300 transition flex items-center justify-between font-mono text-xs shadow-xs">
                   <div class="flex items-center space-x-3 w-1/3">
                     <span class="text-lg">🇸🇬</span>
                     <div>
-                      <div class="font-bold text-white flex items-center gap-1.5">
+                      <div class="font-bold text-slate-900 flex items-center gap-1.5">
                         <span>新加坡枢纽</span>
-                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-200 border border-amber-400/40">1台</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 border border-amber-200">1台</span>
                       </div>
-                      <div class="text-[10px] text-emerald-200/70">AWS EC2 · ap-singapore</div>
+                      <div class="text-[10px] text-slate-500">AWS EC2 · ap-singapore</div>
                     </div>
                   </div>
-                  <div class="flex items-center space-x-6 text-xs text-emerald-100">
-                    <div class="hidden sm:block">延迟: <strong class="text-amber-300">~500ms</strong></div>
-                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 border border-emerald-400/40 font-bold text-[10px]">ONLINE</span>
+                  <div class="flex items-center space-x-6 text-xs text-slate-600">
+                    <div class="hidden sm:block">延迟: <strong class="text-amber-600">~500ms</strong></div>
+                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px]">ONLINE</span>
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- Right 5 Cols: Architecture & Security -->
-            <div class="lg:col-span-5 p-4 rounded-2xl supabase-inner-card flex flex-col justify-between overflow-hidden font-mono shadow-lg">
+            <div class="lg:col-span-5 p-4 rounded-2xl supabase-light-card flex flex-col justify-between overflow-hidden font-mono shadow-sm">
               <div class="flex items-center justify-between mb-2 shrink-0">
-                <span class="text-xs font-bold text-white flex items-center gap-2">
-                  <i class="fa-solid fa-shield-halved text-emerald-300"></i>
+                <span class="text-xs font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-shield-halved text-emerald-600"></i>
                   <span>算力架构与安全状态</span>
                 </span>
-                <span class="text-[10px] text-emerald-300 px-2 py-0.5 rounded-full bg-black/40 border border-emerald-400/40 font-bold">ACTIVE</span>
+                <span class="text-[10px] text-emerald-700 px-2 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 font-bold">ACTIVE</span>
               </div>
 
               <div class="grid grid-cols-2 gap-2.5 flex-1 py-0.5">
-                <div class="p-3 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
-                  <div class="text-emerald-200/70 text-[10px] uppercase font-semibold">遥测采样周期</div>
-                  <div class="text-white font-extrabold text-lg my-0.5">15 秒 / 批次</div>
-                  <div class="text-[10px] text-emerald-200/60">4,320 批次 / 天</div>
+                <div class="p-3 rounded-xl bg-white/80 border border-slate-200/80 flex flex-col justify-between">
+                  <div class="text-slate-500 text-[10px] uppercase font-semibold">遥测采样周期</div>
+                  <div class="text-slate-900 font-extrabold text-lg my-0.5">15 秒 / 批次</div>
+                  <div class="text-[10px] text-slate-400">4,320 批次 / 天</div>
                 </div>
 
-                <div class="p-3 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
-                  <div class="text-emerald-200/70 text-[10px] uppercase font-semibold">传输隧道通道</div>
-                  <div class="text-sky-300 font-extrabold text-lg my-0.5">Cloudflare QUIC</div>
-                  <div class="text-[10px] text-emerald-200/60">双向加密穿透</div>
+                <div class="p-3 rounded-xl bg-white/80 border border-slate-200/80 flex flex-col justify-between">
+                  <div class="text-slate-500 text-[10px] uppercase font-semibold">传输隧道通道</div>
+                  <div class="text-sky-600 font-extrabold text-lg my-0.5">Cloudflare QUIC</div>
+                  <div class="text-[10px] text-slate-400">双向加密穿透</div>
                 </div>
 
-                <div class="p-3 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
-                  <div class="text-emerald-200/70 text-[10px] uppercase font-semibold">API 访问鉴权</div>
-                  <div class="text-indigo-200 font-extrabold text-lg my-0.5">X-Internal-Secret</div>
-                  <div class="text-[10px] text-emerald-200/60">网关全流量验证</div>
+                <div class="p-3 rounded-xl bg-white/80 border border-slate-200/80 flex flex-col justify-between">
+                  <div class="text-slate-500 text-[10px] uppercase font-semibold">API 访问鉴权</div>
+                  <div class="text-indigo-600 font-extrabold text-lg my-0.5">X-Internal-Secret</div>
+                  <div class="text-[10px] text-slate-400">网关全流量验证</div>
                 </div>
 
-                <div class="p-3 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
-                  <div class="text-emerald-200/70 text-[10px] uppercase font-semibold">底层时序数据库</div>
-                  <div class="text-amber-300 font-extrabold text-lg my-0.5">MySQL HeatWave</div>
-                  <div class="text-[10px] text-emerald-200/60">时序聚集索引</div>
+                <div class="p-3 rounded-xl bg-white/80 border border-slate-200/80 flex flex-col justify-between">
+                  <div class="text-slate-500 text-[10px] uppercase font-semibold">底层时序数据库</div>
+                  <div class="text-amber-600 font-extrabold text-lg my-0.5">MySQL HeatWave</div>
+                  <div class="text-[10px] text-slate-400">时序聚集索引</div>
                 </div>
               </div>
 
-              <div class="p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-emerald-100 flex items-center justify-between mt-2 shrink-0">
-                <span><i class="fa-solid fa-arrow-pointer mr-1.5 text-emerald-300"></i>点击右侧各面板展开对应独立模块</span>
-                <span class="text-white font-bold">5 个独立视图 &rarr;</span>
+              <div class="p-2.5 rounded-xl bg-white/90 border border-slate-200/80 text-xs text-slate-600 flex items-center justify-between mt-2 shrink-0">
+                <span><i class="fa-solid fa-arrow-pointer mr-1.5 text-emerald-600"></i>点击右侧各面板展开对应独立模块</span>
+                <span class="text-emerald-700 font-bold">5 个独立视图 &rarr;</span>
               </div>
             </div>
           </div>
 
           <!-- Bottom Footer -->
-          <div class="flex items-center justify-between pt-2 border-t border-white/10 text-xs font-mono text-emerald-100/70 shrink-0">
-            <span>数据源: Oracle Ashburn Ingest · 数据库实时记录: <strong class="text-white font-bold text-sm tracking-wide" id="total-db-records">-- 条</strong></span>
-            <span class="text-emerald-300 font-semibold flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"></span>
+          <div class="flex items-center justify-between pt-2 border-t border-emerald-200/60 text-xs font-mono text-slate-500 shrink-0">
+            <span>数据源: Oracle Ashburn Ingest · 数据库实时记录: <strong class="text-slate-900 font-bold text-sm tracking-wide" id="total-db-records">-- 条</strong></span>
+            <span class="text-emerald-700 font-semibold flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></span>
               <span>实时同步</span>
             </span>
           </div>
@@ -430,26 +432,26 @@
 
         <!-- Collapsed Slat View -->
         <div id="content-overview-collapsed" class="hidden h-full w-full flex-col items-center justify-between">
-          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md shrink-0">
+          <div class="w-9 h-9 rounded-xl bg-white/90 border border-emerald-300 flex items-center justify-center text-emerald-700 shadow-sm shrink-0">
             <i class="fa-solid fa-gauge-high text-sm"></i>
           </div>
           <div class="flex-1 flex flex-col items-center justify-center my-auto w-full py-2">
             <div class="flex-1 flex items-end justify-center w-full">
-              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-white drop-shadow">
+              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-slate-800">
                 集群总览
               </span>
             </div>
-            <div class="my-1 flex items-center justify-center text-emerald-300 font-bold text-sm select-none">
+            <div class="my-1 flex items-center justify-center text-emerald-600 font-bold text-sm select-none">
               ·
             </div>
             <div class="flex-1 flex items-start justify-center w-full">
-              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-white/90 uppercase drop-shadow">
+              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-slate-500 uppercase">
                 OVERVIEW
               </span>
             </div>
           </div>
           <div class="w-full flex justify-center shrink-0">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-emerald-200 border border-white/20 text-center whitespace-nowrap">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/90 text-emerald-800 border border-emerald-300 text-center whitespace-nowrap shadow-xs">
               11 节点
             </span>
           </div>
@@ -457,72 +459,72 @@
 
       </div>
 
-      <!-- ================= 🪟 CURTAIN 2: ELECTRIC COBALT BLUE (RADAR) ================= -->
+      <!-- ================= 🪟 CURTAIN 2: ELECTRIC SKY BLUE (RADAR) ================= -->
       <div id="panel-map" onclick="handleCurtainClick('map')"
            class="curtain-panel curtain-collapsed p-5 lg:p-6 flex flex-col justify-between overflow-hidden relative group"
-           style="background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 30%, #1e40af 70%, #172554 100%);">
+           style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 40%, #E0F2FE 100%); border: 1px solid #BFDBFE;">
         
         <!-- Expanded View -->
-        <div id="content-map-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden gap-3 text-white">
+        <div id="content-map-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden gap-3 text-slate-800">
           <div class="flex items-center justify-between shrink-0">
             <div class="flex items-center space-x-3.5">
-              <div class="w-11 h-11 rounded-2xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-lg">
+              <div class="w-11 h-11 rounded-2xl bg-white/90 border border-blue-200 flex items-center justify-center text-blue-600 shadow-sm">
                 <i class="fa-solid fa-satellite-dish text-xl"></i>
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">全球多云拓扑与节点雷达</h2>
-                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-sky-200 border border-white/20 font-mono font-bold uppercase">02 · Topology Radar</span>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-slate-900">全球多云拓扑与节点雷达</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-300 font-mono font-bold uppercase">02 · Topology Radar</span>
                 </div>
-                <p class="text-xs text-sky-100/90 mt-0.5">11 节点地理测距分布 · 5 节点区域星团离散投影 · 实时探测时延</p>
+                <p class="text-xs text-slate-600 mt-0.5">11 节点地理测距分布 · 5 节点区域星团离散投影 · 实时探测时延</p>
               </div>
             </div>
-            <div class="flex items-center space-x-3 text-xs font-mono text-sky-100">
-              <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-sky-300 animate-pulse shadow-[0_0_8px_#7dd3fc]"></span><span>在线探针</span></span>
-              <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-300"></span><span>美东数据中枢</span></span>
+            <div class="flex items-center space-x-3 text-xs font-mono text-slate-600">
+              <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_#3b82f6]"></span><span>在线探针</span></span>
+              <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span><span>美东数据中枢</span></span>
             </div>
           </div>
 
           <!-- Radar Map Container -->
-          <div class="flex-1 w-full relative rounded-2xl overflow-hidden supabase-inner-card min-h-0">
+          <div class="flex-1 w-full relative rounded-2xl overflow-hidden supabase-light-card min-h-0 shadow-sm">
             <div id="world-map-chart" class="w-full h-full"></div>
           </div>
 
           <!-- Bottom Bar -->
-          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10 text-xs font-mono text-sky-100/80 shrink-0">
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-blue-200/60 text-xs font-mono text-slate-600 shrink-0">
             <div class="flex items-center gap-2">
-              <span class="px-2.5 py-0.5 rounded-lg bg-black/30 border border-white/10 text-white">🇯🇵 东京 (5)</span>
-              <span class="px-2.5 py-0.5 rounded-lg bg-black/30 border border-white/10 text-white">🇺🇸 美东 (3)</span>
-              <span class="px-2.5 py-0.5 rounded-lg bg-black/30 border border-white/10 text-white">🇹🇼 台湾 (1)</span>
-              <span class="px-2.5 py-0.5 rounded-lg bg-black/30 border border-white/10 text-white">🇨🇳 北京 (1)</span>
-              <span class="px-2.5 py-0.5 rounded-lg bg-black/30 border border-white/10 text-white">🇸🇬 新加坡 (1)</span>
+              <span class="px-2.5 py-0.5 rounded-lg bg-white/90 border border-slate-200 text-slate-700 shadow-xs">🇯🇵 东京 (5)</span>
+              <span class="px-2.5 py-0.5 rounded-lg bg-white/90 border border-slate-200 text-slate-700 shadow-xs">🇺🇸 美东 (3)</span>
+              <span class="px-2.5 py-0.5 rounded-lg bg-white/90 border border-slate-200 text-slate-700 shadow-xs">🇹🇼 台湾 (1)</span>
+              <span class="px-2.5 py-0.5 rounded-lg bg-white/90 border border-slate-200 text-slate-700 shadow-xs">🇨🇳 北京 (1)</span>
+              <span class="px-2.5 py-0.5 rounded-lg bg-white/90 border border-slate-200 text-slate-700 shadow-xs">🇸🇬 新加坡 (1)</span>
             </div>
-            <span class="text-sky-300 font-semibold text-[11px]"><i class="fa-solid fa-crosshairs mr-1"></i>悬停节点查看实时遥测数据</span>
+            <span class="text-blue-600 font-semibold text-[11px]"><i class="fa-solid fa-crosshairs mr-1"></i>悬停节点查看实时遥测数据</span>
           </div>
         </div>
 
         <!-- Collapsed Slat View -->
         <div id="content-map-collapsed" class="flex h-full w-full flex-col items-center justify-between">
-          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md shrink-0">
+          <div class="w-9 h-9 rounded-xl bg-white/90 border border-blue-300 flex items-center justify-center text-blue-700 shadow-sm shrink-0">
             <i class="fa-solid fa-satellite-dish text-sm"></i>
           </div>
           <div class="flex-1 flex flex-col items-center justify-center my-auto w-full py-2">
             <div class="flex-1 flex items-end justify-center w-full">
-              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-white drop-shadow">
+              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-slate-800">
                 拓扑雷达
               </span>
             </div>
-            <div class="my-1 flex items-center justify-center text-sky-300 font-bold text-sm select-none">
+            <div class="my-1 flex items-center justify-center text-blue-600 font-bold text-sm select-none">
               ·
             </div>
             <div class="flex-1 flex items-start justify-center w-full">
-              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-white/90 uppercase drop-shadow">
+              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-slate-500 uppercase">
                 RADAR
               </span>
             </div>
           </div>
           <div class="w-full flex justify-center shrink-0">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-sky-200 border border-white/20 text-center whitespace-nowrap">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/90 text-blue-800 border border-blue-300 text-center whitespace-nowrap shadow-xs">
               全球雷达
             </span>
           </div>
@@ -530,81 +532,81 @@
 
       </div>
 
-      <!-- ================= 🪟 CURTAIN 3: SUNSET CORAL / ROSE (RESOURCE) ================= -->
+      <!-- ================= 🪟 CURTAIN 3: SUNSET ROSE CORAL (RESOURCE) ================= -->
       <div id="panel-resource" onclick="handleCurtainClick('resource')"
            class="curtain-panel curtain-collapsed p-5 lg:p-6 flex flex-col justify-between overflow-hidden relative group"
-           style="background: linear-gradient(135deg, #e11d48 0%, #f43f5e 30%, #be123c 70%, #881337 100%);">
+           style="background: linear-gradient(135deg, #FFF1F2 0%, #FFE4E6 40%, #FEE2E2 100%); border: 1px solid #FECDD3;">
         
         <!-- Expanded View -->
-        <div id="content-resource-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden gap-3 text-white">
+        <div id="content-resource-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden gap-3 text-slate-800">
           <div class="flex items-center justify-between shrink-0">
             <div class="flex items-center space-x-3.5">
-              <div class="w-11 h-11 rounded-2xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-lg">
+              <div class="w-11 h-11 rounded-2xl bg-white/90 border border-rose-200 flex items-center justify-center text-rose-600 shadow-sm">
                 <i class="fa-solid fa-microchip text-xl"></i>
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">全网算力资源负载监控</h2>
-                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-rose-200 border border-white/20 font-mono font-bold uppercase">03 · Compute Resource</span>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-slate-900">全网算力资源负载监控</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300 font-mono font-bold uppercase">03 · Compute Resource</span>
                 </div>
-                <p class="text-xs text-rose-100/90 mt-0.5">11 节点 CPU 瞬时差分计算 · 内存可用率 · 磁盘使用率多维监控</p>
+                <p class="text-xs text-slate-600 mt-0.5">11 节点 CPU 瞬时差分计算 · 内存可用率 · 磁盘使用率多维监控</p>
               </div>
             </div>
-            <span class="px-3 py-1 rounded-full bg-black/40 border border-white/20 text-xs font-mono text-rose-200 font-bold">
+            <span class="px-3 py-1 rounded-full bg-white/90 border border-rose-200 text-xs font-mono text-rose-700 font-bold shadow-sm">
               <i class="fa-solid fa-chart-column mr-1"></i>资源占用分析
             </span>
           </div>
 
           <!-- 3 Resource Metric Pills -->
           <div class="grid grid-cols-3 gap-3 font-mono text-xs shrink-0">
-            <div class="p-3 rounded-2xl supabase-inner-card flex items-center justify-between">
-              <span class="text-rose-200">CPU 负载最高主机</span>
-              <span class="text-white font-extrabold text-sm" id="res-peak-cpu">cna (12%)</span>
+            <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
+              <span class="text-slate-600">CPU 负载最高主机</span>
+              <span class="text-rose-600 font-extrabold text-sm" id="res-peak-cpu">cna (12%)</span>
             </div>
-            <div class="p-3 rounded-2xl supabase-inner-card flex items-center justify-between">
-              <span class="text-rose-200">内存平均利用率</span>
-              <span class="text-white font-extrabold text-sm" id="res-avg-mem">34.2%</span>
+            <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
+              <span class="text-slate-600">内存平均利用率</span>
+              <span class="text-cyan-700 font-extrabold text-sm" id="res-avg-mem">34.2%</span>
             </div>
-            <div class="p-3 rounded-2xl supabase-inner-card flex items-center justify-between">
-              <span class="text-rose-200">磁盘平均利用率</span>
-              <span class="text-emerald-300 font-extrabold text-sm">22.4% (正常)</span>
+            <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
+              <span class="text-slate-600">磁盘平均利用率</span>
+              <span class="text-emerald-700 font-extrabold text-sm">22.4% (正常)</span>
             </div>
           </div>
 
           <!-- Resource Chart -->
-          <div class="flex-1 w-full p-3 rounded-2xl supabase-inner-card flex flex-col min-h-0">
+          <div class="flex-1 w-full p-3 rounded-2xl supabase-light-card flex flex-col min-h-0 shadow-sm">
             <div id="resource-bar-chart" class="w-full flex-1"></div>
           </div>
 
           <!-- Footer -->
-          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-xs font-mono text-rose-100/80 shrink-0">
-            <span>指标说明: <strong class="text-white">CPU 占用率</strong> · <strong class="text-emerald-300">内存占用率</strong> · <strong class="text-amber-300">磁盘占用率</strong></span>
-            <span class="text-rose-200 font-bold">采样频率: 15s</span>
+          <div class="pt-2 border-t border-rose-200/60 flex items-center justify-between text-xs font-mono text-slate-600 shrink-0">
+            <span>指标说明: <strong class="text-rose-700">CPU 占用率</strong> · <strong class="text-emerald-700">内存占用率</strong> · <strong class="text-amber-700">磁盘占用率</strong></span>
+            <span class="text-rose-600 font-bold">采样频率: 15s</span>
           </div>
         </div>
 
         <!-- Collapsed Slat View -->
         <div id="content-resource-collapsed" class="flex h-full w-full flex-col items-center justify-between">
-          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md shrink-0">
+          <div class="w-9 h-9 rounded-xl bg-white/90 border border-rose-300 flex items-center justify-center text-rose-700 shadow-sm shrink-0">
             <i class="fa-solid fa-microchip text-sm"></i>
           </div>
           <div class="flex-1 flex flex-col items-center justify-center my-auto w-full py-2">
             <div class="flex-1 flex items-end justify-center w-full">
-              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-white drop-shadow">
+              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-slate-800">
                 算力占用
               </span>
             </div>
-            <div class="my-1 flex items-center justify-center text-rose-300 font-bold text-sm select-none">
+            <div class="my-1 flex items-center justify-center text-rose-600 font-bold text-sm select-none">
               ·
             </div>
             <div class="flex-1 flex items-start justify-center w-full">
-              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-white/90 uppercase drop-shadow">
+              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-slate-500 uppercase">
                 RESOURCE
               </span>
             </div>
           </div>
           <div class="w-full flex justify-center shrink-0">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-rose-200 border border-white/20 text-center whitespace-nowrap">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/90 text-rose-800 border border-rose-300 text-center whitespace-nowrap shadow-xs">
               算力负载
             </span>
           </div>
@@ -612,81 +614,81 @@
 
       </div>
 
-      <!-- ================= 🪟 CURTAIN 4: NEON IRIS PURPLE (LATENCY) ================= -->
+      <!-- ================= 🪟 CURTAIN 4: ROYAL IRIS PURPLE (LATENCY) ================= -->
       <div id="panel-latency" onclick="handleCurtainClick('latency')"
            class="curtain-panel curtain-collapsed p-5 lg:p-6 flex flex-col justify-between overflow-hidden relative group"
-           style="background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 30%, #5b21b6 70%, #3b0764 100%);">
+           style="background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 40%, #E0E7FF 100%); border: 1px solid #DDD6FE;">
         
         <!-- Expanded View -->
-        <div id="content-latency-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden gap-3 text-white">
+        <div id="content-latency-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden gap-3 text-slate-800">
           <div class="flex items-center justify-between shrink-0">
             <div class="flex items-center space-x-3.5">
-              <div class="w-11 h-11 rounded-2xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-lg">
+              <div class="w-11 h-11 rounded-2xl bg-white/90 border border-purple-200 flex items-center justify-center text-purple-600 shadow-sm">
                 <i class="fa-solid fa-wave-square text-xl"></i>
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">全球网络端到端延迟分布</h2>
-                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-purple-200 border border-white/20 font-mono font-bold uppercase">04 · Latency Spectrum</span>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-slate-900">全球网络端到端延迟分布</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-300 font-mono font-bold uppercase">04 · Latency Spectrum</span>
                 </div>
-                <p class="text-xs text-purple-100/90 mt-0.5">美东数据中枢至全球 11 节点 Prometheus 探测延迟阶梯分析</p>
+                <p class="text-xs text-slate-600 mt-0.5">美东数据中枢至全球 11 节点 Prometheus 探测延迟阶梯分析</p>
               </div>
             </div>
-            <span class="px-3 py-1 rounded-full bg-black/40 border border-white/20 text-xs font-mono text-purple-200 font-bold">
+            <span class="px-3 py-1 rounded-full bg-white/90 border border-purple-200 text-xs font-mono text-purple-700 font-bold shadow-sm">
               <i class="fa-solid fa-gauge-high mr-1"></i>延迟阶梯分析
             </span>
           </div>
 
           <!-- Latency 3-Tier Badges -->
           <div class="grid grid-cols-3 gap-3 font-mono text-xs shrink-0">
-            <div class="p-3 rounded-2xl supabase-inner-card flex items-center justify-between">
-              <span class="text-emerald-300 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>第一梯队 (<30ms)</span>
-              <span class="text-white font-extrabold">东京 · 美东 (14~17ms)</span>
+            <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
+              <span class="text-emerald-700 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>第一梯队 (<30ms)</span>
+              <span class="text-slate-900 font-extrabold">东京 · 美东 (14~17ms)</span>
             </div>
-            <div class="p-3 rounded-2xl supabase-inner-card flex items-center justify-between">
-              <span class="text-sky-300 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>第二梯队 (~100-350ms)</span>
-              <span class="text-white font-extrabold">台湾 GCP (101ms)</span>
+            <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
+              <span class="text-blue-700 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>第二梯队 (~100-350ms)</span>
+              <span class="text-slate-900 font-extrabold">台湾 GCP (101ms)</span>
             </div>
-            <div class="p-3 rounded-2xl supabase-inner-card flex items-center justify-between">
-              <span class="text-amber-300 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>第三梯队 (~480ms)</span>
-              <span class="text-white font-extrabold">北京 Ali · 新加坡 AWS</span>
+            <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
+              <span class="text-amber-700 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>第三梯队 (~480ms)</span>
+              <span class="text-slate-900 font-extrabold">北京 Ali · 新加坡 AWS</span>
             </div>
           </div>
 
           <!-- Latency Chart -->
-          <div class="flex-1 w-full p-3 rounded-2xl supabase-inner-card flex flex-col min-h-0">
+          <div class="flex-1 w-full p-3 rounded-2xl supabase-light-card flex flex-col min-h-0 shadow-sm">
             <div id="latency-chart" class="w-full flex-1"></div>
           </div>
 
           <!-- Footer -->
-          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-xs font-mono text-purple-100/80 shrink-0">
+          <div class="pt-2 border-t border-purple-200/60 flex items-center justify-between text-xs font-mono text-slate-600 shrink-0">
             <span>探测协议: ICMP / Prometheus TCP Ping</span>
-            <span class="text-purple-200 font-bold">高精度时序绘制</span>
+            <span class="text-purple-700 font-bold">高精度时序绘制</span>
           </div>
         </div>
 
         <!-- Collapsed Slat View -->
         <div id="content-latency-collapsed" class="flex h-full w-full flex-col items-center justify-between">
-          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md shrink-0">
+          <div class="w-9 h-9 rounded-xl bg-white/90 border border-purple-300 flex items-center justify-center text-purple-700 shadow-sm shrink-0">
             <i class="fa-solid fa-wave-square text-sm"></i>
           </div>
           <div class="flex-1 flex flex-col items-center justify-center my-auto w-full py-2">
             <div class="flex-1 flex items-end justify-center w-full">
-              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-white drop-shadow">
+              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-slate-800">
                 时延波形
               </span>
             </div>
-            <div class="my-1 flex items-center justify-center text-purple-300 font-bold text-sm select-none">
+            <div class="my-1 flex items-center justify-center text-purple-600 font-bold text-sm select-none">
               ·
             </div>
             <div class="flex-1 flex items-start justify-center w-full">
-              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-white/90 uppercase drop-shadow">
+              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-slate-500 uppercase">
                 LATENCY
               </span>
             </div>
           </div>
           <div class="w-full flex justify-center shrink-0">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-purple-200 border border-white/20 text-center whitespace-nowrap">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/90 text-purple-800 border border-purple-300 text-center whitespace-nowrap shadow-xs">
               网络时延
             </span>
           </div>
@@ -694,38 +696,38 @@
 
       </div>
 
-      <!-- ================= 🪟 CURTAIN 5: PREMIUM DARK SLATE (INVENTORY) ================= -->
+      <!-- ================= 🪟 CURTAIN 5: PLATINUM SLATE (INVENTORY) ================= -->
       <div id="panel-table" onclick="handleCurtainClick('table')"
            class="curtain-panel curtain-collapsed p-5 lg:p-6 flex flex-col justify-between overflow-hidden relative group"
-           style="background: linear-gradient(135deg, #334155 0%, #1e293b 40%, #0f172a 100%);">
+           style="background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 40%, #E2E8F0 100%); border: 1px solid #CBD5E1;">
         
         <!-- Expanded View -->
-        <div id="content-table-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden gap-3 text-white">
+        <div id="content-table-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden gap-3 text-slate-800">
           <div class="flex items-center justify-between shrink-0">
             <div class="flex items-center space-x-3.5">
-              <div class="w-11 h-11 rounded-2xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-lg">
+              <div class="w-11 h-11 rounded-2xl bg-white/90 border border-slate-300 flex items-center justify-center text-slate-700 shadow-sm">
                 <i class="fa-solid fa-table-list text-xl"></i>
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">全球生产节点实时遥测清单</h2>
-                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-slate-200 border border-white/20 font-mono font-bold uppercase">05 · Asset Inventory</span>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-slate-900">全球生产节点实时遥测清单</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-800 border border-slate-300 font-mono font-bold uppercase">05 · Asset Inventory</span>
                 </div>
-                <p class="text-xs text-slate-200/90 mt-0.5">11 台生产主机实时运行状态 · 资源指标瞬时差分计算</p>
+                <p class="text-xs text-slate-600 mt-0.5">11 台生产主机实时运行状态 · 资源指标瞬时差分计算</p>
               </div>
             </div>
-            <span class="px-3.5 py-1 rounded-full bg-black/40 border border-white/20 text-xs font-mono text-white font-bold flex items-center gap-1.5">
-              <i class="fa-solid fa-server text-[#3ECF8E]"></i>
+            <span class="px-3.5 py-1 rounded-full bg-white/90 border border-slate-300 text-xs font-mono text-slate-800 font-bold flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-server text-emerald-600"></i>
               <span>共 11 台主机 (全部正常)</span>
             </span>
           </div>
 
           <!-- Table Container (Occupies 100% of Available Height) -->
-          <div class="flex-1 w-full overflow-hidden rounded-2xl supabase-inner-card full-height-table min-h-0 shadow-lg">
+          <div class="flex-1 w-full overflow-hidden rounded-2xl supabase-light-card full-height-table min-h-0 shadow-sm">
             <table class="w-full text-left text-xs font-mono">
-              <thead class="bg-black/40 text-slate-200 uppercase text-[11px] border-b border-white/10 shrink-0">
+              <thead class="bg-slate-100/90 text-slate-700 uppercase text-[11px] border-b border-slate-200 shrink-0">
                 <tr class="h-10">
-                  <th class="py-2.5 px-3.5 font-bold text-white">节点标识</th>
+                  <th class="py-2.5 px-3.5 font-bold text-slate-900">节点标识</th>
                   <th class="py-2.5 px-3.5">云厂商 / 区域</th>
                   <th class="py-2.5 px-3.5">网络接入模式</th>
                   <th class="py-2.5 px-3.5">运行状态</th>
@@ -736,9 +738,9 @@
                   <th class="py-2.5 px-3.5">最后采集时间</th>
                 </tr>
               </thead>
-              <tbody id="nodes-table-body" class="divide-y divide-white/10 text-white flex-1">
+              <tbody id="nodes-table-body" class="divide-y divide-slate-100 text-slate-700 flex-1">
                 <tr>
-                  <td colspan="9" class="text-center py-12 text-slate-300">
+                  <td colspan="9" class="text-center py-12 text-slate-400">
                     <i class="fa-solid fa-spinner fa-spin mr-2"></i>正在拉取最新资产明细...
                   </td>
                 </tr>
@@ -747,34 +749,34 @@
           </div>
 
           <!-- Footer -->
-          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-xs font-mono text-slate-200/80 shrink-0">
+          <div class="pt-2 border-t border-slate-300/60 flex items-center justify-between text-xs font-mono text-slate-600 shrink-0">
             <span>数据格式: CPU 瞬时差分 · 内存实时占用 · 磁盘物理挂载</span>
-            <span class="text-[#3ECF8E] font-bold">数据持续更新中</span>
+            <span class="text-emerald-700 font-bold">数据持续更新中</span>
           </div>
         </div>
 
         <!-- Collapsed Slat View -->
         <div id="content-table-collapsed" class="flex h-full w-full flex-col items-center justify-between">
-          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md shrink-0">
+          <div class="w-9 h-9 rounded-xl bg-white/90 border border-slate-300 flex items-center justify-center text-slate-700 shadow-sm shrink-0">
             <i class="fa-solid fa-table-list text-sm"></i>
           </div>
           <div class="flex-1 flex flex-col items-center justify-center my-auto w-full py-2">
             <div class="flex-1 flex items-end justify-center w-full">
-              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-white drop-shadow">
+              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-slate-800">
                 资产清单
               </span>
             </div>
-            <div class="my-1 flex items-center justify-center text-slate-300 font-bold text-sm select-none">
+            <div class="my-1 flex items-center justify-center text-slate-500 font-bold text-sm select-none">
               ·
             </div>
             <div class="flex-1 flex items-start justify-center w-full">
-              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-white/90 uppercase drop-shadow">
+              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-slate-500 uppercase">
                 INVENTORY
               </span>
             </div>
           </div>
           <div class="w-full flex justify-center shrink-0">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-slate-200 border border-white/20 text-center whitespace-nowrap">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/90 text-slate-800 border border-slate-300 text-center whitespace-nowrap shadow-xs">
               资产明细
             </span>
           </div>
@@ -782,27 +784,27 @@
 
       </div>
 
-      <!-- ================= 🪟 CURTAIN 6: RADIANT AMBER / GOLD (AI ENGINE) ================= -->
+      <!-- ================= 🪟 CURTAIN 6: RADIANT AMBER HONEY (AI ENGINE) ================= -->
       <div id="panel-ai" onclick="handleCurtainClick('ai')"
            class="curtain-panel curtain-collapsed p-5 lg:p-6 flex flex-col justify-between overflow-hidden relative group"
-           style="background: linear-gradient(135deg, #b45309 0%, #d97706 30%, #92400e 70%, #451a03 100%);">
+           style="background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 40%, #FEF9C3 100%); border: 1px solid #FDE68A;">
         
         <!-- Expanded View -->
-        <div id="content-ai-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden gap-3 text-white">
+        <div id="content-ai-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden gap-3 text-slate-800">
           <div class="flex items-center justify-between shrink-0">
             <div class="flex items-center space-x-3.5">
-              <div class="w-11 h-11 rounded-2xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-lg">
+              <div class="w-11 h-11 rounded-2xl bg-white/90 border border-amber-300 flex items-center justify-center text-amber-600 shadow-sm">
                 <i class="fa-solid fa-brain text-xl"></i>
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">AI 智能运维中枢与异常诊断</h2>
-                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-amber-200 border border-white/20 font-mono font-bold uppercase">06 · Autonomous AI</span>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-slate-900">AI 智能运维中枢与异常诊断</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-mono font-bold uppercase">06 · Autonomous AI</span>
                 </div>
-                <p class="text-xs text-amber-100/90 mt-0.5">AutoML Agent 自动化集群巡检 · 异常启发式规则引擎 · 时序存储健康评估</p>
+                <p class="text-xs text-slate-600 mt-0.5">AutoML Agent 自动化集群巡检 · 异常启发式规则引擎 · 时序存储健康评估</p>
               </div>
             </div>
-            <span id="ai-score-pill" class="px-4 py-1.5 rounded-full text-xs font-mono font-extrabold bg-black/40 text-amber-300 border border-white/20 shadow-md">
+            <span id="ai-score-pill" class="px-4 py-1.5 rounded-full text-xs font-mono font-extrabold bg-white/90 text-amber-800 border border-amber-300 shadow-sm">
               HEALTH: 100%
             </span>
           </div>
@@ -810,14 +812,14 @@
           <!-- AI Body Grid (Full Height Extended Space) -->
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 flex-1 overflow-hidden min-h-0">
             <!-- Left: Heuristics & Diagnostics List -->
-            <div class="p-4 rounded-2xl supabase-inner-card flex flex-col justify-between overflow-hidden shadow-lg">
-              <div class="text-xs font-mono font-bold text-amber-200 flex items-center justify-between mb-2 shrink-0">
-                <span><i class="fa-solid fa-shield-heart mr-1.5 text-amber-300"></i>智能全网实时巡检日志</span>
-                <span class="text-[10px] text-amber-100/70">AutoML Agent 持续监听</span>
+            <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between overflow-hidden shadow-sm">
+              <div class="text-xs font-mono font-bold text-amber-800 flex items-center justify-between mb-2 shrink-0">
+                <span><i class="fa-solid fa-shield-heart mr-1.5 text-amber-600"></i>智能全网实时巡检日志</span>
+                <span class="text-[10px] text-slate-500">AutoML Agent 持续监听</span>
               </div>
               <div class="flex-1 overflow-y-auto space-y-2 pr-1" id="ai-diagnostics-list">
-                <div class="p-3 rounded-xl bg-black/30 border border-white/10 text-xs space-y-1">
-                  <p class="text-white leading-relaxed text-[11px]" id="diag-summary-text">
+                <div class="p-3 rounded-xl bg-white/80 border border-amber-200/80 text-xs space-y-1">
+                  <p class="text-slate-800 leading-relaxed text-[11px]" id="diag-summary-text">
                     全网 11 台生产虚拟机运行正常，东京、美东、台湾、新加坡与北京网络时延与负载均在基线阈值内。
                   </p>
                 </div>
@@ -825,65 +827,65 @@
             </div>
 
             <!-- Right: System Core Indicators -->
-            <div class="p-4 rounded-2xl supabase-inner-card flex flex-col justify-between font-mono overflow-hidden shadow-lg">
-              <div class="text-xs font-bold text-amber-200 uppercase flex items-center justify-between mb-2 shrink-0">
-                <span><i class="fa-solid fa-sliders mr-1.5 text-amber-300"></i>中枢运行核心指标</span>
-                <span class="text-[10px] text-emerald-300 px-2 py-0.5 rounded-full bg-emerald-500/30 border border-emerald-400/40 font-bold">RUNNING</span>
+            <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between font-mono overflow-hidden shadow-sm">
+              <div class="text-xs font-bold text-amber-800 uppercase flex items-center justify-between mb-2 shrink-0">
+                <span><i class="fa-solid fa-sliders mr-1.5 text-amber-600"></i>中枢运行核心指标</span>
+                <span class="text-[10px] text-emerald-700 px-2 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 font-bold">RUNNING</span>
               </div>
               <div class="grid grid-cols-2 gap-2.5 flex-1">
-                <div class="p-3.5 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
-                  <div class="text-amber-200/80 text-xs uppercase font-semibold">遥测入库周期</div>
-                  <div class="text-white font-extrabold text-lg my-0.5">15 秒 / 批次</div>
-                  <div class="text-[10px] text-amber-100/70">高频瞬时指标同步</div>
+                <div class="p-3.5 rounded-xl bg-white/80 border border-amber-200/80 flex flex-col justify-between">
+                  <div class="text-slate-500 text-xs uppercase font-semibold">遥测入库周期</div>
+                  <div class="text-slate-900 font-extrabold text-lg my-0.5">15 秒 / 批次</div>
+                  <div class="text-[10px] text-slate-400">高频瞬时指标同步</div>
                 </div>
-                <div class="p-3.5 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
-                  <div class="text-amber-200/80 text-xs uppercase font-semibold">安全隧道通道</div>
-                  <div class="text-sky-300 font-extrabold text-lg my-0.5">Cloudflare QUIC</div>
-                  <div class="text-[10px] text-amber-100/70">加密穿透网关</div>
+                <div class="p-3.5 rounded-xl bg-white/80 border border-amber-200/80 flex flex-col justify-between">
+                  <div class="text-slate-500 text-xs uppercase font-semibold">安全隧道通道</div>
+                  <div class="text-sky-600 font-extrabold text-lg my-0.5">Cloudflare QUIC</div>
+                  <div class="text-[10px] text-slate-400">加密穿透网关</div>
                 </div>
-                <div class="p-3.5 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
-                  <div class="text-amber-200/80 text-xs uppercase font-semibold">API 访问鉴权</div>
-                  <div class="text-[#3ECF8E] font-extrabold text-lg my-0.5">Active (Secret)</div>
-                  <div class="text-[10px] text-amber-100/70">全流量防爬拦截</div>
+                <div class="p-3.5 rounded-xl bg-white/80 border border-amber-200/80 flex flex-col justify-between">
+                  <div class="text-slate-500 text-xs uppercase font-semibold">API 访问鉴权</div>
+                  <div class="text-emerald-600 font-extrabold text-lg my-0.5">Active (Secret)</div>
+                  <div class="text-[10px] text-slate-400">全流量防爬拦截</div>
                 </div>
-                <div class="p-3.5 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
-                  <div class="text-amber-200/80 text-xs uppercase font-semibold">底层时序数据库</div>
-                  <div class="text-cyan-300 font-extrabold text-lg my-0.5">MySQL HeatWave</div>
-                  <div class="text-[10px] text-amber-100/70">自适应索引检索</div>
+                <div class="p-3.5 rounded-xl bg-white/80 border border-amber-200/80 flex flex-col justify-between">
+                  <div class="text-slate-500 text-xs uppercase font-semibold">底层时序数据库</div>
+                  <div class="text-amber-600 font-extrabold text-lg my-0.5">MySQL HeatWave</div>
+                  <div class="text-[10px] text-slate-400">自适应索引检索</div>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Footer -->
-          <div class="pt-2 border-t border-white/10 flex items-center justify-between text-xs font-mono text-amber-100/80 shrink-0">
+          <div class="pt-2 border-t border-amber-200/60 flex items-center justify-between text-xs font-mono text-slate-600 shrink-0">
             <span>AI 诊断引擎: v2.7.0 Neural Agent</span>
-            <span class="text-emerald-300 flex items-center font-bold"><i class="fa-solid fa-circle-check mr-1"></i>巡检服务正常</span>
+            <span class="text-emerald-700 flex items-center font-bold"><i class="fa-solid fa-circle-check mr-1"></i>巡检服务正常</span>
           </div>
         </div>
 
         <!-- Collapsed Slat View -->
         <div id="content-ai-collapsed" class="flex h-full w-full flex-col items-center justify-between">
-          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md shrink-0">
+          <div class="w-9 h-9 rounded-xl bg-white/90 border border-amber-300 flex items-center justify-center text-amber-700 shadow-sm shrink-0">
             <i class="fa-solid fa-brain text-sm"></i>
           </div>
           <div class="flex-1 flex flex-col items-center justify-center my-auto w-full py-2">
             <div class="flex-1 flex items-end justify-center w-full">
-              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-white drop-shadow">
+              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-slate-800">
                 智能诊断
               </span>
             </div>
-            <div class="my-1 flex items-center justify-center text-amber-300 font-bold text-sm select-none">
+            <div class="my-1 flex items-center justify-center text-amber-600 font-bold text-sm select-none">
               ·
             </div>
             <div class="flex-1 flex items-start justify-center w-full">
-              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-white/90 uppercase drop-shadow">
+              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-slate-500 uppercase">
                 AI ENGINE
               </span>
             </div>
           </div>
           <div class="w-full flex justify-center shrink-0">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-amber-200 border border-white/20 text-center whitespace-nowrap">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/90 text-amber-800 border border-amber-300 text-center whitespace-nowrap shadow-xs">
               健康巡检
             </span>
           </div>
@@ -895,36 +897,36 @@
 
   </main>
 
-  <!-- SUPABASE AUTH MODAL -->
-  <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#181818] rounded-3xl p-6 max-w-md w-full border border-white/10 relative shadow-2xl">
-      <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+  <!-- SUPABASE AUTH MODAL (CLEAN LIGHT THEME) -->
+  <div id="auth-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full border border-slate-200 relative shadow-2xl">
+      <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
       <div class="text-center mb-6 space-y-1.5">
-        <div class="inline-block p-3 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-[#3ECF8E] mb-1">
+        <div class="inline-block p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 mb-1 shadow-sm">
           <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
             <path d="M21.362 9.354H12V.343a.343.343 0 0 0-.583-.245L.15 11.597a.343.343 0 0 0 .245.584h9.362v9.011a.343.343 0 0 0 .583.245l11.267-11.499a.343.343 0 0 0-.245-.584z"/>
           </svg>
         </div>
-        <h3 class="text-lg font-bold font-mono text-white">NEXUS COMMAND ACCESS</h3>
-        <p class="text-xs text-slate-400">使用 Supabase 账号安全验证身份</p>
+        <h3 class="text-lg font-bold font-mono text-slate-900">NEXUS COMMAND ACCESS</h3>
+        <p class="text-xs text-slate-500">使用 Supabase 账号安全验证身份</p>
       </div>
 
       <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4 font-mono text-xs">
         <div>
-          <label class="block text-slate-300 mb-1">邮箱地址</label>
-          <input type="email" id="auth-email" required class="w-full px-3.5 py-2.5 rounded-xl bg-[#121212] border border-[#2a2a2a] text-white focus:outline-none focus:border-[#3ECF8E]" placeholder="admin@example.com">
+          <label class="block text-slate-700 mb-1 font-semibold">邮箱地址</label>
+          <input type="email" id="auth-email" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500 focus:bg-white transition" placeholder="admin@example.com">
         </div>
         <div>
-          <label class="block text-slate-300 mb-1">登录密码</label>
-          <input type="password" id="auth-password" required class="w-full px-3.5 py-2.5 rounded-xl bg-[#121212] border border-[#2a2a2a] text-white focus:outline-none focus:border-[#3ECF8E]" placeholder="••••••••">
+          <label class="block text-slate-700 mb-1 font-semibold">登录密码</label>
+          <input type="password" id="auth-password" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500 focus:bg-white transition" placeholder="••••••••">
         </div>
 
-        <div id="auth-error" class="hidden p-2.5 rounded-lg bg-rose-950/80 border border-rose-800/60 text-rose-300 text-[11px]"></div>
+        <div id="auth-error" class="hidden p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-[11px]"></div>
 
-        <button type="submit" id="auth-submit-btn" class="w-full py-2.5 rounded-xl bg-[#3ECF8E] hover:bg-[#34b27b] text-black font-bold tracking-wider shadow-lg transition">
+        <button type="submit" id="auth-submit-btn" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold tracking-wider shadow-sm transition">
           立即登录
         </button>
       </form>
@@ -1014,7 +1016,7 @@
       }, 300);
     }
 
-    // Initialize Charts with High-Contrast Theme
+    // Initialize Charts with Supabase Light Theme
     function initCharts() {
       if (typeof echarts === 'undefined') return;
       try {
@@ -1075,7 +1077,7 @@
     function renderKPIs(nodes) {
       const online = nodes.filter(n => n.status === 'ONLINE').length;
       const onlineEl = document.getElementById('stat-online-nodes');
-      if (onlineEl) onlineEl.innerHTML = `${online} <span class="text-xs font-normal text-white/70">/ ${nodes.length}</span>`;
+      if (onlineEl) onlineEl.innerHTML = `${online} <span class="text-xs font-normal text-slate-400">/ ${nodes.length}</span>`;
       
       const countEl = document.getElementById('active-nodes-count');
       if (countEl) countEl.innerText = `${online} / ${nodes.length} ONLINE`;
@@ -1097,14 +1099,14 @@
       if (latencies.length > 0) {
         const avgLat = Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length);
         const latEl = document.getElementById('stat-avg-latency');
-        if (latEl) latEl.innerHTML = `${avgLat} <span class="text-xs font-normal text-white/70">ms</span>`;
+        if (latEl) latEl.innerHTML = `${avgLat} <span class="text-xs font-normal text-slate-400">ms</span>`;
       }
 
       const mems = nodes.filter(n => n.mem_usage_percent > 0).map(n => n.mem_usage_percent);
       if (mems.length > 0) {
         const avgMem = (mems.reduce((a, b) => a + b, 0) / mems.length).toFixed(1);
         const memEl = document.getElementById('stat-avg-mem');
-        if (memEl) memEl.innerHTML = `${avgMem} <span class="text-xs font-normal text-white/70">%</span>`;
+        if (memEl) memEl.innerHTML = `${avgMem} <span class="text-xs font-normal text-slate-400">%</span>`;
         const resMemEl = document.getElementById('res-avg-mem');
         if (resMemEl) resMemEl.innerText = `${avgMem}%`;
       }
@@ -1125,19 +1127,19 @@
       if (badge) {
         badge.innerText = `${score}% ${diag.status || 'HEALTHY'}`;
         badge.className = score >= 80 
-          ? 'px-2.5 py-0.5 rounded-full bg-emerald-950 text-[#3ECF8E] border border-[#3ECF8E]/30 font-semibold text-[11px]'
-          : 'px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-800/60 font-semibold text-[11px]';
+          ? 'px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold text-[11px]'
+          : 'px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300 font-semibold text-[11px]';
       }
 
       const list = document.getElementById('ai-diagnostics-list');
       if (list && diag.diagnostics && diag.diagnostics.length > 0) {
         list.innerHTML = diag.diagnostics.map(item => `
-          <div class="p-3 rounded-xl bg-black/30 border border-white/10 text-xs space-y-1">
-            <div class="flex items-center justify-between text-amber-300 font-mono font-semibold">
-              <span><i class="fa-solid fa-shield-heart mr-1.5"></i>智能运维巡检</span>
-              <span class="text-[10px] text-amber-200/70">AutoML Agent</span>
+          <div class="p-3 rounded-xl bg-white/80 border border-amber-200/80 text-xs space-y-1 shadow-xs">
+            <div class="flex items-center justify-between text-amber-800 font-mono font-semibold">
+              <span><i class="fa-solid fa-shield-heart mr-1.5 text-amber-600"></i>智能运维巡检</span>
+              <span class="text-[10px] text-slate-500">AutoML Agent</span>
             </div>
-            <p class="text-white leading-relaxed text-[11px]">${item}</p>
+            <p class="text-slate-800 leading-relaxed text-[11px]">${item}</p>
           </div>
         `).join('');
       }
@@ -1148,46 +1150,46 @@
       if (!tbody) return;
 
       tbody.innerHTML = nodes.map(n => `
-        <tr class="hover:bg-white/10 transition">
-          <td class="py-2 px-3.5 font-bold text-white flex items-center space-x-2">
-            <span class="w-2.5 h-2.5 rounded-full ${n.status === 'ONLINE' ? 'bg-[#3ECF8E] shadow-[0_0_8px_#3ECF8E]' : 'bg-rose-500'}"></span>
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="py-2 px-3.5 font-bold text-slate-900 flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 rounded-full ${n.status === 'ONLINE' ? 'bg-emerald-500 shadow-[0_0_6px_#10b981]' : 'bg-rose-500'}"></span>
             <span class="text-xs lg:text-sm">${n.node_name}</span>
           </td>
-          <td class="py-2 px-3.5 text-slate-300">${n.provider || 'Cloud'} (${n.region})</td>
-          <td class="py-2 px-3.5 text-slate-300 font-mono"><span class="px-2 py-0.5 rounded-md bg-black/40 text-emerald-200 border border-white/10 text-[11px] inline-flex items-center gap-1.5"><i class="fa-solid fa-lock text-[10px] text-[#3ECF8E]"></i><span>QUIC 隧道 (隐藏)</span></span></td>
+          <td class="py-2 px-3.5 text-slate-600">${n.provider || 'Cloud'} (${n.region})</td>
+          <td class="py-2 px-3.5 text-slate-600 font-mono"><span class="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700 text-[11px] inline-flex items-center gap-1.5 shadow-xs"><i class="fa-solid fa-lock text-[10px] text-emerald-600"></i><span>QUIC 隧道 (隐藏)</span></span></td>
           <td class="py-2 px-3.5">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${n.status === 'ONLINE' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40' : 'bg-rose-500/20 text-rose-300 border border-rose-400/40'}">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${n.status === 'ONLINE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
               ${n.status}
             </span>
           </td>
           <td class="py-2 px-3.5">
             <div class="flex items-center space-x-2">
-              <div class="w-16 lg:w-20 bg-black/40 rounded-full h-2 overflow-hidden border border-white/10">
-                <div class="bg-rose-400 h-full rounded-full" style="width: ${n.cpu_usage_percent || 0}%"></div>
+              <div class="w-16 lg:w-20 bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+                <div class="bg-rose-500 h-full rounded-full" style="width: ${n.cpu_usage_percent || 0}%"></div>
               </div>
-              <span class="font-semibold">${n.cpu_usage_percent || 0}%</span>
+              <span class="font-semibold text-slate-800">${n.cpu_usage_percent || 0}%</span>
             </div>
           </td>
           <td class="py-2 px-3.5">
             <div class="flex items-center space-x-2">
-              <div class="w-16 lg:w-20 bg-black/40 rounded-full h-2 overflow-hidden border border-white/10">
-                <div class="bg-[#3ECF8E] h-full rounded-full" style="width: ${n.mem_usage_percent}%"></div>
+              <div class="w-16 lg:w-20 bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+                <div class="bg-emerald-500 h-full rounded-full" style="width: ${n.mem_usage_percent}%"></div>
               </div>
-              <span class="font-semibold">${n.mem_usage_percent}%</span>
+              <span class="font-semibold text-slate-800">${n.mem_usage_percent}%</span>
             </div>
           </td>
           <td class="py-2 px-3.5">
             <div class="flex items-center space-x-2">
-              <div class="w-16 lg:w-20 bg-black/40 rounded-full h-2 overflow-hidden border border-white/10">
-                <div class="bg-indigo-300 h-full rounded-full" style="width: ${n.disk_usage_percent}%"></div>
+              <div class="w-16 lg:w-20 bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+                <div class="bg-indigo-500 h-full rounded-full" style="width: ${n.disk_usage_percent}%"></div>
               </div>
-              <span class="font-semibold">${n.disk_usage_percent}%</span>
+              <span class="font-semibold text-slate-800">${n.disk_usage_percent}%</span>
             </div>
           </td>
-          <td class="py-2 px-3.5 font-mono font-semibold ${n.scrape_duration_ms < 50 ? 'text-[#3ECF8E]' : (n.scrape_duration_ms < 350 ? 'text-sky-300' : 'text-amber-300')}">
+          <td class="py-2 px-3.5 font-mono font-semibold ${n.scrape_duration_ms < 50 ? 'text-emerald-700' : (n.scrape_duration_ms < 350 ? 'text-blue-700' : 'text-amber-700')}">
             ${n.scrape_duration_ms} ms
           </td>
-          <td class="py-2 px-3.5 text-slate-300 text-xs font-mono">
+          <td class="py-2 px-3.5 text-slate-500 text-xs font-mono">
             ${formatCleanTime(n.recorded_at)}
           </td>
         </tr>
@@ -1203,14 +1205,14 @@
 
       resourceChart.setOption({
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-        legend: { textStyle: { color: '#ffffff' }, right: 15, top: 5 },
+        legend: { textStyle: { color: '#475569' }, right: 15, top: 5 },
         grid: { top: 35, bottom: 25, left: 45, right: 15 },
-        xAxis: { type: 'category', data: names, axisLine: { lineStyle: { color: 'rgba(255,255,255,0.2)' } }, axisLabel: { color: '#ffffff', fontFamily: 'monospace', fontSize: 11 } },
-        yAxis: { type: 'value', max: 100, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } }, axisLabel: { color: 'rgba(255,255,255,0.8)', formatter: '{value}%' } },
+        xAxis: { type: 'category', data: names, axisLine: { lineStyle: { color: '#E2E8F0' } }, axisLabel: { color: '#475569', fontFamily: 'monospace', fontSize: 11 } },
+        yAxis: { type: 'value', max: 100, splitLine: { lineStyle: { color: '#F1F5F9' } }, axisLabel: { color: '#64748B', formatter: '{value}%' } },
         series: [
-          { name: 'CPU', type: 'bar', data: cpus, itemStyle: { color: '#ffffff', borderRadius: [4, 4, 0, 0] } },
-          { name: '内存', type: 'bar', data: mems, itemStyle: { color: '#6ee7b7', borderRadius: [4, 4, 0, 0] } },
-          { name: '磁盘', type: 'bar', data: disks, itemStyle: { color: '#fcd34d', borderRadius: [4, 4, 0, 0] } }
+          { name: 'CPU', type: 'bar', data: cpus, itemStyle: { color: '#E11D48', borderRadius: [4, 4, 0, 0] } },
+          { name: '内存', type: 'bar', data: mems, itemStyle: { color: '#10B981', borderRadius: [4, 4, 0, 0] } },
+          { name: '磁盘', type: 'bar', data: disks, itemStyle: { color: '#8B5CF6', borderRadius: [4, 4, 0, 0] } }
         ]
       });
     }
@@ -1224,19 +1226,19 @@
       latencyChart.setOption({
         tooltip: { trigger: 'axis', formatter: '{b}: {c} ms' },
         grid: { top: 30, bottom: 25, left: 50, right: 20 },
-        xAxis: { type: 'category', data: names, axisLine: { lineStyle: { color: 'rgba(255,255,255,0.2)' } }, axisLabel: { color: '#ffffff', fontFamily: 'monospace', fontSize: 11 } },
-        yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } }, axisLabel: { color: 'rgba(255,255,255,0.8)', formatter: '{value}ms' } },
+        xAxis: { type: 'category', data: names, axisLine: { lineStyle: { color: '#E2E8F0' } }, axisLabel: { color: '#475569', fontFamily: 'monospace', fontSize: 11 } },
+        yAxis: { type: 'value', splitLine: { lineStyle: { color: '#F1F5F9' } }, axisLabel: { color: '#64748B', formatter: '{value}ms' } },
         series: [{
           name: '探测延迟',
           type: 'line',
           smooth: true,
           data: latencies,
           symbolSize: 8,
-          itemStyle: { color: '#ffffff' },
+          itemStyle: { color: '#7C3AED' },
           areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: 'rgba(255, 255, 255, 0.4)' },
-              { offset: 1, color: 'rgba(255, 255, 255, 0.02)' }
+              { offset: 0, color: 'rgba(124, 58, 237, 0.25)' },
+              { offset: 1, color: 'rgba(124, 58, 237, 0.01)' }
             ])
           }
         }]
@@ -1283,7 +1285,7 @@
         tooltip: {
           formatter: function (params) {
             const d = params.value;
-            return `<div class="font-mono text-xs text-black"><b>${params.name}</b> (${d[5]})<br/>状态: <span class="${d[3] === 'ONLINE' ? 'text-emerald-600' : 'text-rose-600'} font-bold">${d[3]}</span><br/>延迟: ${d[2]}ms<br/>CPU: ${d[6]}%<br/>内存: ${d[4]}%</div>`;
+            return `<div class="font-mono text-xs text-slate-800"><b>${params.name}</b> (${d[5]})<br/>状态: <span class="${d[3] === 'ONLINE' ? 'text-emerald-600' : 'text-rose-600'} font-bold">${d[3]}</span><br/>延迟: ${d[2]}ms<br/>CPU: ${d[6]}%<br/>内存: ${d[4]}%</div>`;
           }
         },
         grid: { top: 30, bottom: 40, left: 50, right: 30 },
@@ -1291,15 +1293,15 @@
           type: 'value',
           min: -115,
           max: 165,
-          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.15)', type: 'dashed' } },
-          axisLabel: { color: 'rgba(255,255,255,0.8)', formatter: function(v) { return v > 0 ? v + '°E' : Math.abs(v) + '°W'; } }
+          splitLine: { lineStyle: { color: 'rgba(37, 99, 235, 0.1)', type: 'dashed' } },
+          axisLabel: { color: '#64748B', formatter: function(v) { return v > 0 ? v + '°E' : Math.abs(v) + '°W'; } }
         },
         yAxis: {
           type: 'value',
           min: -15,
           max: 65,
-          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.15)', type: 'dashed' } },
-          axisLabel: { color: 'rgba(255,255,255,0.8)', formatter: function(v) { return v + '°N'; } }
+          splitLine: { lineStyle: { color: 'rgba(37, 99, 235, 0.1)', type: 'dashed' } },
+          axisLabel: { color: '#64748B', formatter: function(v) { return v + '°N'; } }
         },
         series: [
           {
@@ -1314,17 +1316,17 @@
               show: true,
               formatter: '{b}',
               position: 'top',
-              color: '#ffffff',
+              color: '#1E3A8A',
               fontFamily: 'monospace',
               fontWeight: 'bold',
               fontSize: 11
             },
             itemStyle: {
               color: function(params) {
-                return params.value[3] === 'ONLINE' ? '#ffffff' : '#fda4af';
+                return params.value[3] === 'ONLINE' ? '#2563EB' : '#E11D48';
               },
-              shadowBlur: 14,
-              shadowColor: '#ffffff'
+              shadowBlur: 10,
+              shadowColor: 'rgba(37, 99, 235, 0.4)'
             }
           }
         ]
