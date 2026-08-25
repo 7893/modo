@@ -669,7 +669,7 @@
                 <tr class="h-10">
                   <th class="py-2.5 px-3.5 font-bold text-white">节点标识</th>
                   <th class="py-2.5 px-3.5">云厂商 / 区域</th>
-                  <th class="py-2.5 px-3.5">主机 IP</th>
+                  <th class="py-2.5 px-3.5">网络接入模式</th>
                   <th class="py-2.5 px-3.5">运行状态</th>
                   <th class="py-2.5 px-3.5">CPU 占用率</th>
                   <th class="py-2.5 px-3.5">内存占用率</th>
@@ -1068,7 +1068,7 @@
             <span class="text-xs lg:text-sm">${n.node_name}</span>
           </td>
           <td class="py-2 px-3.5 text-slate-300">${n.provider || 'Cloud'} (${n.region})</td>
-          <td class="py-2 px-3.5 text-slate-200 font-mono">${n.host_ip}</td>
+          <td class="py-2 px-3.5 text-slate-300 font-mono"><span class="px-2 py-0.5 rounded-md bg-black/40 text-emerald-200 border border-white/10 text-[11px] inline-flex items-center gap-1.5"><i class="fa-solid fa-lock text-[10px] text-[#3ECF8E]"></i><span>QUIC 隧道 (隐藏)</span></span></td>
           <td class="py-2 px-3.5">
             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${n.status === 'ONLINE' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40' : 'bg-rose-500/20 text-rose-300 border border-rose-400/40'}">
               ${n.status}
