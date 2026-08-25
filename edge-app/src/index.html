@@ -63,10 +63,11 @@
       box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
     }
     .curtain-collapsed {
-      flex: 0 0 68px;
+      flex: 0 0 64px;
       cursor: pointer;
       opacity: 0.88;
       box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+      padding: 1.25rem 0.35rem !important;
     }
     .curtain-collapsed:hover {
       opacity: 1;
@@ -76,7 +77,8 @@
     .vertical-title {
       writing-mode: vertical-rl;
       text-orientation: mixed;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.22em;
+      white-space: nowrap;
     }
     
     .full-height-table {
@@ -427,16 +429,20 @@
         </div>
 
         <!-- Collapsed Slat View -->
-        <div id="content-overview-collapsed" class="hidden h-full w-full flex-col items-center justify-between py-6">
-          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md">
+        <div id="content-overview-collapsed" class="hidden h-full w-full flex-col items-center justify-between">
+          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md shrink-0">
             <i class="fa-solid fa-gauge-high text-sm"></i>
           </div>
-          <div class="vertical-title font-mono font-bold text-xs tracking-widest text-white uppercase drop-shadow">
-            集群总览 · OVERVIEW
+          <div class="flex-1 flex items-center justify-center my-auto w-full py-4">
+            <div class="vertical-title font-mono font-bold text-xs tracking-widest text-white uppercase drop-shadow text-center">
+              集群总览 · OVERVIEW
+            </div>
           </div>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-emerald-200 border border-white/20">
-            11 节点
-          </span>
+          <div class="w-full flex justify-center shrink-0">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-emerald-200 border border-white/20 text-center whitespace-nowrap">
+              11 节点
+            </span>
+          </div>
         </div>
 
       </div>
@@ -486,16 +492,20 @@
         </div>
 
         <!-- Collapsed Slat View -->
-        <div id="content-map-collapsed" class="flex h-full w-full flex-col items-center justify-between py-6">
-          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md">
+        <div id="content-map-collapsed" class="flex h-full w-full flex-col items-center justify-between">
+          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md shrink-0">
             <i class="fa-solid fa-satellite-dish text-sm"></i>
           </div>
-          <div class="vertical-title font-mono font-bold text-xs tracking-widest text-white uppercase drop-shadow">
-            拓扑雷达 · RADAR
+          <div class="flex-1 flex items-center justify-center my-auto w-full py-4">
+            <div class="vertical-title font-mono font-bold text-xs tracking-widest text-white uppercase drop-shadow text-center">
+              拓扑雷达 · RADAR
+            </div>
           </div>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-sky-200 border border-white/20">
-            雷达
-          </span>
+          <div class="w-full flex justify-center shrink-0">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-sky-200 border border-white/20 text-center whitespace-nowrap">
+              全球雷达
+            </span>
+          </div>
         </div>
 
       </div>
@@ -554,16 +564,20 @@
         </div>
 
         <!-- Collapsed Slat View -->
-        <div id="content-resource-collapsed" class="flex h-full w-full flex-col items-center justify-between py-6">
-          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md">
+        <div id="content-resource-collapsed" class="flex h-full w-full flex-col items-center justify-between">
+          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md shrink-0">
             <i class="fa-solid fa-microchip text-sm"></i>
           </div>
-          <div class="vertical-title font-mono font-bold text-xs tracking-widest text-white uppercase drop-shadow">
-            算力占用 · RESOURCE
+          <div class="flex-1 flex items-center justify-center my-auto w-full py-4">
+            <div class="vertical-title font-mono font-bold text-xs tracking-widest text-white uppercase drop-shadow text-center">
+              算力占用 · RESOURCE
+            </div>
           </div>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-rose-200 border border-white/20">
-            算力
-          </span>
+          <div class="w-full flex justify-center shrink-0">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-rose-200 border border-white/20 text-center whitespace-nowrap">
+              算力负载
+            </span>
+          </div>
         </div>
 
       </div>
@@ -622,16 +636,20 @@
         </div>
 
         <!-- Collapsed Slat View -->
-        <div id="content-latency-collapsed" class="flex h-full w-full flex-col items-center justify-between py-6">
-          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md">
+        <div id="content-latency-collapsed" class="flex h-full w-full flex-col items-center justify-between">
+          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md shrink-0">
             <i class="fa-solid fa-wave-square text-sm"></i>
           </div>
-          <div class="vertical-title font-mono font-bold text-xs tracking-widest text-white uppercase drop-shadow">
-            时延波形 · LATENCY
+          <div class="flex-1 flex items-center justify-center my-auto w-full py-4">
+            <div class="vertical-title font-mono font-bold text-xs tracking-widest text-white uppercase drop-shadow text-center">
+              时延波形 · LATENCY
+            </div>
           </div>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-purple-200 border border-white/20">
-            时延
-          </span>
+          <div class="w-full flex justify-center shrink-0">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-purple-200 border border-white/20 text-center whitespace-nowrap">
+              网络时延
+            </span>
+          </div>
         </div>
 
       </div>
@@ -696,16 +714,20 @@
         </div>
 
         <!-- Collapsed Slat View -->
-        <div id="content-table-collapsed" class="flex h-full w-full flex-col items-center justify-between py-6">
-          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md">
+        <div id="content-table-collapsed" class="flex h-full w-full flex-col items-center justify-between">
+          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md shrink-0">
             <i class="fa-solid fa-table-list text-sm"></i>
           </div>
-          <div class="vertical-title font-mono font-bold text-xs tracking-widest text-white uppercase drop-shadow">
-            节点清单 · INVENTORY
+          <div class="flex-1 flex items-center justify-center my-auto w-full py-4">
+            <div class="vertical-title font-mono font-bold text-xs tracking-widest text-white uppercase drop-shadow text-center">
+              资产清单 · INVENTORY
+            </div>
           </div>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-slate-200 border border-white/20">
-            11 主机
-          </span>
+          <div class="w-full flex justify-center shrink-0">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-slate-200 border border-white/20 text-center whitespace-nowrap">
+              资产明细
+            </span>
+          </div>
         </div>
 
       </div>
@@ -791,16 +813,20 @@
         </div>
 
         <!-- Collapsed Slat View -->
-        <div id="content-ai-collapsed" class="flex h-full w-full flex-col items-center justify-between py-6">
-          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md">
+        <div id="content-ai-collapsed" class="flex h-full w-full flex-col items-center justify-between">
+          <div class="w-9 h-9 rounded-xl bg-black/30 border border-white/20 flex items-center justify-center text-white shadow-md shrink-0">
             <i class="fa-solid fa-brain text-sm"></i>
           </div>
-          <div class="vertical-title font-mono font-bold text-xs tracking-widest text-white uppercase drop-shadow">
-            AI 诊断 · AI ENGINE
+          <div class="flex-1 flex items-center justify-center my-auto w-full py-4">
+            <div class="vertical-title font-mono font-bold text-xs tracking-widest text-white uppercase drop-shadow text-center">
+              智能诊断 · AI ENGINE
+            </div>
           </div>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-amber-200 border border-white/20">
-            100%
-          </span>
+          <div class="w-full flex justify-center shrink-0">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-amber-200 border border-white/20 text-center whitespace-nowrap">
+              健康巡检
+            </span>
+          </div>
         </div>
 
       </div>
