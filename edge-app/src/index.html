@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NEXUS // 全球多云算力遥测与 AI 智能中枢</title>
+  <title>NEXUS // 全球多云基础设施遥测与智能中枢</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
   
   <!-- Tailwind CSS & FontAwesome -->
@@ -15,7 +15,7 @@
         extend: {
           colors: {
             supabase: {
-              bg: '#0a0a0c',
+              bg: '#0c0d12',
               emerald: '#3ECF8E',
               blue: '#3b82f6',
               coral: '#f43f5e',
@@ -97,7 +97,6 @@
       height: calc(100% / 11);
     }
     
-    /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
@@ -116,13 +115,12 @@
 </head>
 <body class="h-screen flex flex-col overflow-hidden selection:bg-[#3ECF8E] selection:text-black">
 
-  <!-- TOP NAV BAR (CLEAN SUPABASE HERO HEADER) -->
+  <!-- TOP NAV BAR -->
   <header class="z-50 border-b border-white/10 bg-[#0c0d12]/80 backdrop-blur-xl px-5 py-2.5 flex items-center justify-between shrink-0">
     
     <!-- Left: Logo & Nav items -->
     <div class="flex items-center space-x-6">
       <div class="flex items-center space-x-2.5 cursor-pointer" onclick="handleCurtainClick('overview')">
-        <!-- Supabase Green Bolt -->
         <div class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-[#3ECF8E] shadow-[0_0_15px_rgba(62,207,142,0.4)]">
           <svg class="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24">
             <path d="M21.362 9.354H12V.343a.343.343 0 0 0-.583-.245L.15 11.597a.343.343 0 0 0 .245.584h9.362v9.011a.343.343 0 0 0 .583.245l11.267-11.499a.343.343 0 0 0-.245-.584z"/>
@@ -130,7 +128,7 @@
         </div>
         <span class="text-base font-bold tracking-tight text-white font-mono flex items-center gap-2">
           <span>NEXUS</span>
-          <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950/80 text-[#3ECF8E] border border-[#3ECF8E]/30 font-sans font-medium">Supabase Cockpit</span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950/80 text-[#3ECF8E] border border-[#3ECF8E]/30 font-sans font-medium">Telemetry Hub</span>
         </span>
       </div>
 
@@ -149,18 +147,21 @@
     <div class="hidden md:flex items-center space-x-5 text-xs font-mono">
       <div class="flex items-center space-x-2">
         <span class="w-2.5 h-2.5 rounded-full bg-[#3ECF8E] animate-pulse shadow-[0_0_8px_#3ECF8E]"></span>
-        <span class="text-slate-400">集群状态:</span>
-        <span id="fleet-health-badge" class="px-2 py-0.5 rounded-full bg-emerald-950 text-[#3ECF8E] border border-[#3ECF8E]/30 font-semibold text-[11px]">
+        <span class="text-slate-400">服务状态:</span>
+        <span id="fleet-health-badge" class="px-2.5 py-0.5 rounded-full bg-emerald-950 text-[#3ECF8E] border border-[#3ECF8E]/30 font-semibold text-[11px]">
           100% HEALTHY
         </span>
       </div>
       <div class="flex items-center space-x-2">
-        <span class="text-slate-400">活跃节点:</span>
+        <span class="text-slate-400">在线节点:</span>
         <span id="active-nodes-count" class="text-white font-bold">11 / 11 ONLINE</span>
       </div>
       <div class="flex items-center space-x-2">
-        <span class="text-slate-400">时钟:</span>
-        <span id="live-clock-badge" class="text-emerald-400 font-mono">--:--:--</span>
+        <span class="text-slate-400">同步时钟:</span>
+        <span id="sync-timer" class="text-emerald-400 font-bold">15s</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span id="live-clock-badge" class="text-slate-400 font-mono">--:--:--</span>
       </div>
     </div>
 
@@ -174,7 +175,7 @@
       <div id="auth-section" class="flex items-center">
         <button id="login-btn" onclick="toggleAuthModal()" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#3ECF8E] hover:bg-[#34b27b] text-black shadow-[0_0_15px_rgba(62,207,142,0.4)] transition flex items-center space-x-1.5">
           <i class="fa-solid fa-shield-halved text-[11px]"></i>
-          <span>登录控制台</span>
+          <span>控制台鉴权</span>
         </button>
         <div id="user-profile" class="hidden items-center space-x-2">
           <span id="user-email" class="text-xs text-[#3ECF8E] font-mono font-bold"></span>
@@ -186,7 +187,7 @@
     </div>
   </header>
 
-  <!-- MAIN CONTAINER (SUPABASE STYLE 6-PANEL VIBRANT ACCORDION) -->
+  <!-- MAIN CONTAINER -->
   <main class="flex-1 p-3 lg:p-4 overflow-hidden flex flex-col w-full max-w-[1920px] mx-auto">
 
     <!-- THE 6 MASTER FULL-SCREEN VIBRANT CURTAIN PANELS -->
@@ -208,15 +209,15 @@
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">全球多云算力集群全景纵览</h2>
-                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-emerald-200 border border-white/20 font-mono font-bold uppercase">Overview</span>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">全球多云算力集群基础设施总览</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-emerald-200 border border-white/20 font-mono font-bold uppercase">01 · Fleet Overview</span>
                 </div>
-                <p class="text-xs text-emerald-100/90 mt-0.5">纳管 11 台生产虚拟机 · 15s 高频时序遥测入库 · 跨 5 大多云区 QUIC 骨干互联</p>
+                <p class="text-xs text-emerald-100/90 mt-0.5">纳管 11 台生产虚拟机 · 15s 高频时序遥测入库 · 跨 5 大多云区域 QUIC 骨干互联</p>
               </div>
             </div>
             <span class="px-3.5 py-1.5 rounded-full bg-black/40 border border-white/20 text-xs font-mono text-emerald-200 font-bold flex items-center gap-1.5 shadow-md">
               <span class="w-2.5 h-2.5 rounded-full bg-emerald-300 animate-pulse shadow-[0_0_8px_#6ee7b7]"></span>
-              <span>100% 满血在线</span>
+              <span>系统运行正常 (100% ONLINE)</span>
             </span>
           </div>
 
@@ -229,32 +230,32 @@
               </div>
               <div class="text-3xl font-extrabold text-white my-0.5" id="stat-online-nodes">11 <span class="text-sm font-normal text-emerald-200/70">/ 11</span></div>
               <div class="text-[11px] text-emerald-100/80 flex items-center justify-between pt-1 border-t border-white/10">
-                <span>Oracle(8) · GCP · Ali · AWS</span>
+                <span>Oracle (8) · GCP · Ali · AWS</span>
                 <span class="text-emerald-300 font-bold">100%</span>
               </div>
             </div>
 
             <div class="p-4 rounded-2xl supabase-inner-card flex flex-col justify-between shadow-lg">
               <div class="flex items-center justify-between text-teal-200 text-xs font-sans font-semibold">
-                <span>全球平均探测时延</span>
+                <span>全球平均网络时延</span>
                 <i class="fa-solid fa-bolt"></i>
               </div>
               <div class="text-3xl font-extrabold text-white my-0.5" id="stat-avg-latency">-- <span class="text-sm font-normal text-emerald-200/70">ms</span></div>
               <div class="text-[11px] text-emerald-100/80 flex items-center justify-between pt-1 border-t border-white/10">
                 <span>同区 14ms · 跨洋 ~350ms</span>
-                <span class="text-teal-300 font-bold">极速</span>
+                <span class="text-teal-300 font-bold">正常</span>
               </div>
             </div>
 
             <div class="p-4 rounded-2xl supabase-inner-card flex flex-col justify-between shadow-lg">
               <div class="flex items-center justify-between text-cyan-200 text-xs font-sans font-semibold">
-                <span>全网平均内存占用</span>
+                <span>全网平均内存利用率</span>
                 <i class="fa-solid fa-microchip"></i>
               </div>
               <div class="text-3xl font-extrabold text-white my-0.5" id="stat-avg-mem">-- <span class="text-sm font-normal text-emerald-200/70">%</span></div>
               <div class="text-[11px] text-emerald-100/80 flex items-center justify-between pt-1 border-t border-white/10">
-                <span>全集群水位平稳</span>
-                <span class="text-cyan-300 font-bold">健康</span>
+                <span>集群资源水位平衡</span>
+                <span class="text-cyan-300 font-bold">正常</span>
               </div>
             </div>
 
@@ -265,8 +266,8 @@
               </div>
               <div class="text-3xl font-extrabold text-amber-300 my-0.5">HeatWave</div>
               <div class="text-[11px] text-emerald-100/80 flex items-center justify-between pt-1 border-t border-white/10">
-                <span>MySQL 26.7 · 15s/批次</span>
-                <span class="text-amber-300 font-bold">2.5w+ 条</span>
+                <span>MySQL 26.7 引擎 · 15s 周期</span>
+                <span class="text-amber-300 font-bold" id="kpi-db-records">同步中</span>
               </div>
             </div>
           </div>
@@ -298,7 +299,7 @@
                   </div>
                   <div class="flex items-center space-x-6 text-xs text-emerald-100">
                     <div class="hidden sm:block">延迟: <strong class="text-emerald-300">~14ms</strong></div>
-                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 border border-emerald-400/40 font-bold text-[10px]">100% ONLINE</span>
+                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 border border-emerald-400/40 font-bold text-[10px]">ONLINE</span>
                   </div>
                 </div>
 
@@ -315,7 +316,7 @@
                   </div>
                   <div class="flex items-center space-x-6 text-xs text-emerald-100">
                     <div class="hidden sm:block">延迟: <strong class="text-emerald-300">17ms</strong></div>
-                    <span class="px-2.5 py-0.5 rounded-full bg-sky-500/30 text-sky-200 border border-sky-400/40 font-bold text-[10px]">HUB RUNNING</span>
+                    <span class="px-2.5 py-0.5 rounded-full bg-sky-500/30 text-sky-200 border border-sky-400/40 font-bold text-[10px]">HUB ONLINE</span>
                   </div>
                 </div>
 
@@ -377,48 +378,48 @@
               <div class="flex items-center justify-between mb-2 shrink-0">
                 <span class="text-xs font-bold text-white flex items-center gap-2">
                   <i class="fa-solid fa-shield-halved text-emerald-300"></i>
-                  <span>算力架构与中枢安全</span>
+                  <span>算力架构与安全状态</span>
                 </span>
                 <span class="text-[10px] text-emerald-300 px-2 py-0.5 rounded-full bg-black/40 border border-emerald-400/40 font-bold">ACTIVE</span>
               </div>
 
               <div class="grid grid-cols-2 gap-2.5 flex-1 py-0.5">
                 <div class="p-3 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
-                  <div class="text-emerald-200/70 text-[10px] uppercase font-semibold">采集同步周期</div>
-                  <div class="text-white font-extrabold text-lg my-0.5">15s / 批次</div>
-                  <div class="text-[10px] text-emerald-200/60">4,320 轮/天 持续写入</div>
+                  <div class="text-emerald-200/70 text-[10px] uppercase font-semibold">遥测采样周期</div>
+                  <div class="text-white font-extrabold text-lg my-0.5">15 秒 / 批次</div>
+                  <div class="text-[10px] text-emerald-200/60">4,320 批次 / 天</div>
                 </div>
 
                 <div class="p-3 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
-                  <div class="text-emerald-200/70 text-[10px] uppercase font-semibold">安全隧道通道</div>
-                  <div class="text-sky-300 font-extrabold text-lg my-0.5">CF QUIC</div>
-                  <div class="text-[10px] text-emerald-200/60">零公网暴露穿透</div>
+                  <div class="text-emerald-200/70 text-[10px] uppercase font-semibold">传输隧道通道</div>
+                  <div class="text-sky-300 font-extrabold text-lg my-0.5">Cloudflare QUIC</div>
+                  <div class="text-[10px] text-emerald-200/60">双向加密穿透</div>
                 </div>
 
                 <div class="p-3 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
-                  <div class="text-emerald-200/70 text-[10px] uppercase font-semibold">API 内部鉴权</div>
-                  <div class="text-indigo-200 font-extrabold text-lg my-0.5">Active (Secret)</div>
-                  <div class="text-[10px] text-emerald-200/60">全链路请求加密</div>
+                  <div class="text-emerald-200/70 text-[10px] uppercase font-semibold">API 访问鉴权</div>
+                  <div class="text-indigo-200 font-extrabold text-lg my-0.5">X-Internal-Secret</div>
+                  <div class="text-[10px] text-emerald-200/60">网关全流量验证</div>
                 </div>
 
                 <div class="p-3 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
-                  <div class="text-emerald-200/70 text-[10px] uppercase font-semibold">底层时序存储</div>
-                  <div class="text-amber-300 font-extrabold text-lg my-0.5">HeatWave</div>
-                  <div class="text-[10px] text-emerald-200/60">MySQL 26.7 索引</div>
+                  <div class="text-emerald-200/70 text-[10px] uppercase font-semibold">底层时序数据库</div>
+                  <div class="text-amber-300 font-extrabold text-lg my-0.5">MySQL HeatWave</div>
+                  <div class="text-[10px] text-emerald-200/60">时序聚集索引</div>
                 </div>
               </div>
 
               <div class="p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-emerald-100 flex items-center justify-between mt-2 shrink-0">
-                <span><i class="fa-solid fa-arrow-pointer mr-1.5 text-emerald-300"></i>点击右侧各窗帘展开独立大盘</span>
-                <span class="text-white font-bold">5 个独立窗帘 &rarr;</span>
+                <span><i class="fa-solid fa-arrow-pointer mr-1.5 text-emerald-300"></i>点击右侧各面板展开对应独立模块</span>
+                <span class="text-white font-bold">5 个独立视图 &rarr;</span>
               </div>
             </div>
           </div>
 
           <!-- Bottom Footer -->
           <div class="flex items-center justify-between pt-2 border-t border-white/10 text-xs font-mono text-emerald-100/70 shrink-0">
-            <span>数据源: Oracle Ashburn Hub · 数据库记录: <strong class="text-white">25,000+ 条</strong></span>
-            <span class="text-emerald-300 font-bold">100% 满屏自适应</span>
+            <span>数据源: Oracle Ashburn Ingest · 数据库实时记录: <strong class="text-white font-bold" id="total-db-records">拉取中...</strong></span>
+            <span class="text-emerald-300 font-semibold flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>数据实时同步中</span>
           </div>
         </div>
 
@@ -428,7 +429,7 @@
             <i class="fa-solid fa-gauge-high text-sm"></i>
           </div>
           <div class="vertical-title font-mono font-bold text-xs tracking-widest text-white uppercase drop-shadow">
-            全网总览 · OVERVIEW
+            集群总览 · OVERVIEW
           </div>
           <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/40 text-emerald-200 border border-white/20">
             11 节点
@@ -452,14 +453,14 @@
               <div>
                 <div class="flex items-center gap-2">
                   <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">全球多云拓扑与节点雷达</h2>
-                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-sky-200 border border-white/20 font-mono font-bold uppercase">Radar Mesh</span>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-sky-200 border border-white/20 font-mono font-bold uppercase">02 · Topology Radar</span>
                 </div>
-                <p class="text-xs text-sky-100/90 mt-0.5">11 节点地理测距 · 5 节点星团几何自适应离散 · 毫秒级探测延迟</p>
+                <p class="text-xs text-sky-100/90 mt-0.5">11 节点地理测距分布 · 5 节点区域星团离散投影 · 实时探测时延</p>
               </div>
             </div>
             <div class="flex items-center space-x-3 text-xs font-mono text-sky-100">
               <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-sky-300 animate-pulse shadow-[0_0_8px_#7dd3fc]"></span><span>在线探针</span></span>
-              <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-300"></span><span>美东中枢</span></span>
+              <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-300"></span><span>美东数据中枢</span></span>
             </div>
           </div>
 
@@ -477,7 +478,7 @@
               <span class="px-2.5 py-0.5 rounded-lg bg-black/30 border border-white/10 text-white">🇨🇳 北京 (1)</span>
               <span class="px-2.5 py-0.5 rounded-lg bg-black/30 border border-white/10 text-white">🇸🇬 新加坡 (1)</span>
             </div>
-            <span class="text-sky-300 font-semibold text-[11px]"><i class="fa-solid fa-crosshairs mr-1"></i>悬停发光圆点查看独立遥测</span>
+            <span class="text-sky-300 font-semibold text-[11px]"><i class="fa-solid fa-crosshairs mr-1"></i>悬停节点查看实时遥测数据</span>
           </div>
         </div>
 
@@ -510,30 +511,30 @@
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">全网算力资源占用大盘</h2>
-                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-rose-200 border border-white/20 font-mono font-bold uppercase">Compute Load</span>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">全网算力资源负载监控</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-rose-200 border border-white/20 font-mono font-bold uppercase">03 · Compute Resource</span>
                 </div>
-                <p class="text-xs text-rose-100/90 mt-0.5">11 节点 CPU 实时瞬时差分 · 内存可用率 · 磁盘使用率三维对照</p>
+                <p class="text-xs text-rose-100/90 mt-0.5">11 节点 CPU 瞬时差分计算 · 内存可用率 · 磁盘使用率多维监控</p>
               </div>
             </div>
             <span class="px-3 py-1 rounded-full bg-black/40 border border-white/20 text-xs font-mono text-rose-200 font-bold">
-              <i class="fa-solid fa-chart-column mr-1"></i>三维负载对比
+              <i class="fa-solid fa-chart-column mr-1"></i>资源占用分析
             </span>
           </div>
 
           <!-- 3 Resource Metric Pills -->
           <div class="grid grid-cols-3 gap-3 font-mono text-xs shrink-0">
             <div class="p-3 rounded-2xl supabase-inner-card flex items-center justify-between">
-              <span class="text-rose-200">CPU 峰值主机</span>
+              <span class="text-rose-200">CPU 负载最高主机</span>
               <span class="text-white font-extrabold text-sm" id="res-peak-cpu">cna (12%)</span>
             </div>
             <div class="p-3 rounded-2xl supabase-inner-card flex items-center justify-between">
-              <span class="text-rose-200">内存均值水位</span>
+              <span class="text-rose-200">内存平均利用率</span>
               <span class="text-white font-extrabold text-sm" id="res-avg-mem">34.2%</span>
             </div>
             <div class="p-3 rounded-2xl supabase-inner-card flex items-center justify-between">
-              <span class="text-rose-200">磁盘安全利用率</span>
-              <span class="text-emerald-300 font-extrabold text-sm">22.4% (健康)</span>
+              <span class="text-rose-200">磁盘平均利用率</span>
+              <span class="text-emerald-300 font-extrabold text-sm">22.4% (正常)</span>
             </div>
           </div>
 
@@ -544,8 +545,8 @@
 
           <!-- Footer -->
           <div class="pt-2 border-t border-white/10 flex items-center justify-between text-xs font-mono text-rose-100/80 shrink-0">
-            <span>图例: <strong class="text-white">CPU 占用率</strong> · <strong class="text-emerald-300">内存占用率</strong> · <strong class="text-amber-300">磁盘占用率</strong></span>
-            <span class="text-rose-200 font-bold">15s 自动刷新</span>
+            <span>指标说明: <strong class="text-white">CPU 占用率</strong> · <strong class="text-emerald-300">内存占用率</strong> · <strong class="text-amber-300">磁盘占用率</strong></span>
+            <span class="text-rose-200 font-bold">采样频率: 15s</span>
           </div>
         </div>
 
@@ -578,14 +579,14 @@
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">全球网络端到端延迟波形</h2>
-                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-purple-200 border border-white/20 font-mono font-bold uppercase">Latency Mesh</span>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">全球网络端到端延迟分布</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-purple-200 border border-white/20 font-mono font-bold uppercase">04 · Latency Spectrum</span>
                 </div>
-                <p class="text-xs text-purple-100/90 mt-0.5">美东中枢机至全球 11 节点 Prometheus 握手时延阶梯分析</p>
+                <p class="text-xs text-purple-100/90 mt-0.5">美东数据中枢至全球 11 节点 Prometheus 探测延迟阶梯分析</p>
               </div>
             </div>
             <span class="px-3 py-1 rounded-full bg-black/40 border border-white/20 text-xs font-mono text-purple-200 font-bold">
-              <i class="fa-solid fa-gauge-high mr-1"></i>全网阶梯波形
+              <i class="fa-solid fa-gauge-high mr-1"></i>延迟阶梯分析
             </span>
           </div>
 
@@ -613,7 +614,7 @@
           <!-- Footer -->
           <div class="pt-2 border-t border-white/10 flex items-center justify-between text-xs font-mono text-purple-100/80 shrink-0">
             <span>探测协议: ICMP / Prometheus TCP Ping</span>
-            <span class="text-purple-200 font-bold">高精度实时绘制</span>
+            <span class="text-purple-200 font-bold">高精度时序绘制</span>
           </div>
         </div>
 
@@ -646,15 +647,15 @@
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">全球节点实时遥测全景清单</h2>
-                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-slate-200 border border-white/20 font-mono font-bold uppercase">Asset Table</span>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">全球生产节点实时遥测清单</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-slate-200 border border-white/20 font-mono font-bold uppercase">05 · Asset Inventory</span>
                 </div>
-                <p class="text-xs text-slate-200/90 mt-0.5">11 生产节点 100% 满屏等比自适应排布 · 实时指标瞬时差分计算</p>
+                <p class="text-xs text-slate-200/90 mt-0.5">11 台生产主机实时运行状态 · 资源指标瞬时差分计算</p>
               </div>
             </div>
             <span class="px-3.5 py-1 rounded-full bg-black/40 border border-white/20 text-xs font-mono text-white font-bold flex items-center gap-1.5">
               <i class="fa-solid fa-server text-[#3ECF8E]"></i>
-              <span>共 11 台主机 (100% 撑满)</span>
+              <span>共 11 台主机 (全部正常)</span>
             </span>
           </div>
 
@@ -663,7 +664,7 @@
             <table class="w-full text-left text-xs font-mono">
               <thead class="bg-black/40 text-slate-200 uppercase text-[11px] border-b border-white/10 shrink-0">
                 <tr class="h-10">
-                  <th class="py-2.5 px-3.5 font-bold text-white">节点名称</th>
+                  <th class="py-2.5 px-3.5 font-bold text-white">节点标识</th>
                   <th class="py-2.5 px-3.5">云厂商 / 区域</th>
                   <th class="py-2.5 px-3.5">主机 IP</th>
                   <th class="py-2.5 px-3.5">运行状态</th>
@@ -686,8 +687,8 @@
 
           <!-- Footer -->
           <div class="pt-2 border-t border-white/10 flex items-center justify-between text-xs font-mono text-slate-200/80 shrink-0">
-            <span>展示格式: 瞬时 CPU 差分 · 内存使用 · 磁盘挂载</span>
-            <span class="text-[#3ECF8E] font-bold">实时热更新中</span>
+            <span>数据格式: CPU 瞬时差分 · 内存实时占用 · 磁盘物理挂载</span>
+            <span class="text-[#3ECF8E] font-bold">数据持续更新中</span>
           </div>
         </div>
 
@@ -720,10 +721,10 @@
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">AI 智能运维中枢与自愈诊断</h2>
-                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-amber-200 border border-white/20 font-mono font-bold uppercase">AI Autopilot</span>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white drop-shadow">AI 智能运维中枢与异常诊断</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-black/40 text-amber-200 border border-white/20 font-mono font-bold uppercase">06 · Autonomous AI</span>
                 </div>
-                <p class="text-xs text-amber-100/90 mt-0.5">Autonomous Agent 全集群巡检 · 异常启发式规则 · HeatWave 时序存储监控</p>
+                <p class="text-xs text-amber-100/90 mt-0.5">AutoML Agent 自动化集群巡检 · 异常启发式规则引擎 · 时序存储健康评估</p>
               </div>
             </div>
             <span id="ai-score-pill" class="px-4 py-1.5 rounded-full text-xs font-mono font-extrabold bg-black/40 text-amber-300 border border-white/20 shadow-md">
@@ -742,7 +743,7 @@
               <div class="flex-1 overflow-y-auto space-y-2 pr-1" id="ai-diagnostics-list">
                 <div class="p-3 rounded-xl bg-black/30 border border-white/10 text-xs space-y-1">
                   <p class="text-white leading-relaxed text-[11px]" id="diag-summary-text">
-                    全网 11 台生产虚拟机运行平稳，东京、美东、台湾、新加坡与北京网络时延与负载正常。
+                    全网 11 台生产虚拟机运行正常，东京、美东、台湾、新加坡与北京网络时延与负载均在基线阈值内。
                   </p>
                 </div>
               </div>
@@ -756,19 +757,19 @@
               </div>
               <div class="grid grid-cols-2 gap-2.5 flex-1">
                 <div class="p-3.5 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
-                  <div class="text-amber-200/80 text-xs uppercase font-semibold">时序入库周期</div>
-                  <div class="text-white font-extrabold text-lg my-0.5">15s / 批次</div>
+                  <div class="text-amber-200/80 text-xs uppercase font-semibold">遥测入库周期</div>
+                  <div class="text-white font-extrabold text-lg my-0.5">15 秒 / 批次</div>
                   <div class="text-[10px] text-amber-100/70">高频瞬时指标同步</div>
                 </div>
                 <div class="p-3.5 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
-                  <div class="text-amber-200/80 text-xs uppercase font-semibold">隧道协议通道</div>
+                  <div class="text-amber-200/80 text-xs uppercase font-semibold">安全隧道通道</div>
                   <div class="text-sky-300 font-extrabold text-lg my-0.5">Cloudflare QUIC</div>
-                  <div class="text-[10px] text-amber-100/70">零公网暴露安全网关</div>
+                  <div class="text-[10px] text-amber-100/70">加密穿透网关</div>
                 </div>
                 <div class="p-3.5 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
-                  <div class="text-amber-200/80 text-xs uppercase font-semibold">API 内部鉴权</div>
+                  <div class="text-amber-200/80 text-xs uppercase font-semibold">API 访问鉴权</div>
                   <div class="text-[#3ECF8E] font-extrabold text-lg my-0.5">Active (Secret)</div>
-                  <div class="text-[10px] text-amber-100/70">全流量防爬虫拦截</div>
+                  <div class="text-[10px] text-amber-100/70">全流量防爬拦截</div>
                 </div>
                 <div class="p-3.5 rounded-xl bg-black/30 border border-white/10 flex flex-col justify-between">
                   <div class="text-amber-200/80 text-xs uppercase font-semibold">底层时序数据库</div>
@@ -782,7 +783,7 @@
           <!-- Footer -->
           <div class="pt-2 border-t border-white/10 flex items-center justify-between text-xs font-mono text-amber-100/80 shrink-0">
             <span>AI 诊断引擎: v2.7.0 Neural Agent</span>
-            <span class="text-emerald-300 flex items-center font-bold"><i class="fa-solid fa-circle-check mr-1"></i>实时自愈在线</span>
+            <span class="text-emerald-300 flex items-center font-bold"><i class="fa-solid fa-circle-check mr-1"></i>巡检服务正常</span>
           </div>
         </div>
 
@@ -989,6 +990,17 @@
       const countEl = document.getElementById('active-nodes-count');
       if (countEl) countEl.innerText = `${online} / ${nodes.length} ONLINE`;
 
+      // Real-time dynamic DB record count from latest ingested telemetry ID
+      const recordIds = nodes.map(n => n.id).filter(id => typeof id === 'number' && id > 0);
+      if (recordIds.length > 0) {
+        const maxRecordId = Math.max(...recordIds);
+        const totalDbEl = document.getElementById('total-db-records');
+        if (totalDbEl) totalDbEl.innerText = `${maxRecordId.toLocaleString()} 条`;
+        
+        const kpiDbEl = document.getElementById('kpi-db-records');
+        if (kpiDbEl) kpiDbEl.innerText = `${maxRecordId.toLocaleString()} 条`;
+      }
+
       const latencies = nodes.filter(n => n.scrape_duration_ms > 0).map(n => n.scrape_duration_ms);
       if (latencies.length > 0) {
         const avgLat = Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length);
@@ -1021,8 +1033,8 @@
       if (badge) {
         badge.innerText = `${score}% ${diag.status || 'HEALTHY'}`;
         badge.className = score >= 80 
-          ? 'px-2 py-0.5 rounded-full bg-emerald-950 text-[#3ECF8E] border border-[#3ECF8E]/30 font-semibold text-[11px]'
-          : 'px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-800/60 font-semibold text-[11px]';
+          ? 'px-2.5 py-0.5 rounded-full bg-emerald-950 text-[#3ECF8E] border border-[#3ECF8E]/30 font-semibold text-[11px]'
+          : 'px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-800/60 font-semibold text-[11px]';
       }
 
       const list = document.getElementById('ai-diagnostics-list');
