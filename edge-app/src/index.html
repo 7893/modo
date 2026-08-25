@@ -418,8 +418,11 @@
 
           <!-- Bottom Footer -->
           <div class="flex items-center justify-between pt-2 border-t border-white/10 text-xs font-mono text-emerald-100/70 shrink-0">
-            <span>数据源: Oracle Ashburn Ingest · 数据库实时记录: <strong class="text-white font-bold" id="total-db-records">拉取中...</strong></span>
-            <span class="text-emerald-300 font-semibold flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>数据实时同步中</span>
+            <span>数据源: Oracle Ashburn Ingest · 数据库实时记录: <strong class="text-white font-bold text-sm tracking-wide" id="total-db-records">-- 条</strong></span>
+            <span class="text-emerald-300 font-semibold flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]"></span>
+              <span>实时同步</span>
+            </span>
           </div>
         </div>
 
@@ -954,7 +957,8 @@
       icon?.classList.add('fa-spin');
 
       try {
-        const latestRes = await fetch('/api/nodes/latest');
+        const timestamp = Date.now();
+        const latestRes = await fetch(`/api/nodes/latest?_t=${timestamp}`);
         const latestJson = await latestRes.json();
         
         if (latestJson.status === 'success' && Array.isArray(latestJson.data)) {
@@ -970,7 +974,7 @@
       }
 
       try {
-        const diagRes = await fetch('/api/ai/diagnostics');
+        const diagRes = await fetch(`/api/ai/diagnostics?_t=${Date.now()}`);
         const diagJson = await diagRes.json();
         if (diagJson) {
           try { renderDiagnostics(diagJson); } catch(e) { console.error('renderDiagnostics error:', e); }
@@ -991,14 +995,16 @@
       if (countEl) countEl.innerText = `${online} / ${nodes.length} ONLINE`;
 
       // Real-time dynamic DB record count from latest ingested telemetry ID
-      const recordIds = nodes.map(n => n.id).filter(id => typeof id === 'number' && id > 0);
+      const recordIds = nodes.map(n => parseInt(n.id, 10)).filter(id => !isNaN(id) && id > 0);
       if (recordIds.length > 0) {
         const maxRecordId = Math.max(...recordIds);
+        const formatted = `${maxRecordId.toLocaleString()} 条`;
+        
         const totalDbEl = document.getElementById('total-db-records');
-        if (totalDbEl) totalDbEl.innerText = `${maxRecordId.toLocaleString()} 条`;
+        if (totalDbEl) totalDbEl.innerText = formatted;
         
         const kpiDbEl = document.getElementById('kpi-db-records');
-        if (kpiDbEl) kpiDbEl.innerText = `${maxRecordId.toLocaleString()} 条`;
+        if (kpiDbEl) kpiDbEl.innerText = formatted;
       }
 
       const latencies = nodes.filter(n => n.scrape_duration_ms > 0).map(n => n.scrape_duration_ms);
