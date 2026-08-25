@@ -49,38 +49,38 @@
       color: #e2e8f0;
     }
     .glass-card {
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.8);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(30, 41, 59, 0.85);
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
     .curtain-panel {
-      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .curtain-expanded {
       flex: 1 1 0%;
       min-width: 0;
       opacity: 1;
       border-color: rgba(6, 182, 212, 0.5);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 10px 30px -10px rgba(6, 182, 212, 0.3);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 35px -10px rgba(6, 182, 212, 0.3);
     }
     .curtain-collapsed {
-      flex: 0 0 68px;
+      flex: 0 0 62px;
       cursor: pointer;
       border-color: rgba(30, 41, 59, 0.8);
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(15, 23, 42, 0.55);
     }
     .curtain-collapsed:hover {
-      background: rgba(30, 41, 59, 0.8);
-      border-color: rgba(71, 85, 105, 0.9);
+      background: rgba(30, 41, 59, 0.85);
+      border-color: rgba(94, 234, 212, 0.5);
     }
     .vertical-title {
       writing-mode: vertical-rl;
       text-orientation: mixed;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.22em;
     }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: #070a13; }
     ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #0891b2; }
@@ -99,7 +99,7 @@
         </span>
       </div>
       <span class="hidden md:inline-block text-[11px] uppercase px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-400 border border-cyan-800/50 font-mono">
-        全屏五联风琴窗帘中控台
+        六联全屏风琴中控台
       </span>
     </div>
 
@@ -143,13 +143,13 @@
     </div>
   </header>
 
-  <!-- MAIN CONTAINER (IMMERSIVE FULL-HEIGHT 5-CURTAIN COCKPIT) -->
-  <main class="flex-1 p-3 md:p-4 overflow-hidden flex flex-col w-full max-w-[1880px] mx-auto">
+  <!-- MAIN CONTAINER (IMMERSIVE FULL-HEIGHT 6-CURTAIN COCKPIT) -->
+  <main class="flex-1 p-3 md:p-4 overflow-hidden flex flex-col w-full max-w-[1920px] mx-auto">
 
-    <!-- THE 5 MASTER FULL-SCREEN CURTAIN PANELS -->
+    <!-- THE 6 MASTER FULL-SCREEN CURTAIN PANELS -->
     <div id="master-curtain-container" class="flex flex-col lg:flex-row gap-2.5 h-full transition-all duration-500 ease-out flex-1">
 
-      <!-- ================= 🪟 CURTAIN 1: 集群纵览与核心指标 (DEFAULT OPEN) ================= -->
+      <!-- ================= 🪟 CURTAIN 1: 集群总览 (DEFAULT OPEN) ================= -->
       <div id="panel-overview" onclick="handleCurtainClick('overview')"
            class="curtain-panel curtain-expanded glass-card rounded-2xl p-5 flex flex-col justify-between overflow-hidden relative group">
         
@@ -163,29 +163,28 @@
               </div>
               <div>
                 <h2 class="text-base font-bold font-mono uppercase tracking-wider text-slate-100 flex items-center gap-2">
-                  <span>集群纵览与全局核心指标</span>
+                  <span>集群全景纵览与核心指标</span>
                   <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800/50">CURTAIN 01 · OVERVIEW</span>
                 </h2>
-                <p class="text-xs text-slate-400">全网 11 节点实时纳管 · 15s 级高频指标入库 · 多云骨干互联全景摘要</p>
+                <p class="text-xs text-slate-400">11 生产节点全域纳管 · 15s 高频指标时序入库 · 5 大云大区骨干互通</p>
               </div>
             </div>
             <span class="text-xs font-mono text-slate-400 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-cyan-300">
-              <i class="fa-solid fa-network-wired mr-1"></i>5 大云区 · 11 台生产主机
+              <i class="fa-solid fa-server mr-1"></i>全网 100% 满血在线
             </span>
           </div>
 
-          <!-- Body: The 4 Top KPIs + 5 Regions Grid -->
+          <!-- Body: Top KPIs + 5 Regions Grid -->
           <div class="space-y-4 my-auto">
             <!-- 4 KPI Cards -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 font-mono">
-              <!-- KPI 1 -->
-              <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between">
+              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
                 <div>
                   <div class="text-[10px] text-slate-400 uppercase tracking-wider">生产在线节点</div>
                   <div class="text-2xl font-bold text-cyan-400 mt-0.5" id="stat-online-nodes">11 <span class="text-xs font-normal text-slate-400">/ 11</span></div>
                   <div class="text-[10px] text-emerald-400 flex items-center space-x-1 mt-0.5">
                     <i class="fa-solid fa-circle-check text-[9px]"></i>
-                    <span>全集群 100% 满血在线</span>
+                    <span>全集群零宕机</span>
                   </div>
                 </div>
                 <div class="w-10 h-10 rounded-lg bg-cyan-950/60 border border-cyan-800/40 flex items-center justify-center text-cyan-400 text-base">
@@ -193,8 +192,7 @@
                 </div>
               </div>
 
-              <!-- KPI 2 -->
-              <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between">
+              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
                 <div>
                   <div class="text-[10px] text-slate-400 uppercase tracking-wider">全球平均探测延迟</div>
                   <div class="text-2xl font-bold text-indigo-400 mt-0.5" id="stat-avg-latency">-- <span class="text-xs font-normal text-slate-400">ms</span></div>
@@ -205,26 +203,24 @@
                 </div>
               </div>
 
-              <!-- KPI 3 -->
-              <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between">
+              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
                 <div>
                   <div class="text-[10px] text-slate-400 uppercase tracking-wider">全网平均内存占用</div>
                   <div class="text-2xl font-bold text-teal-400 mt-0.5" id="stat-avg-mem">-- <span class="text-xs font-normal text-slate-400">%</span></div>
-                  <div class="text-[10px] text-slate-400 mt-0.5">全集群负载平稳健康</div>
+                  <div class="text-[10px] text-slate-400 mt-0.5">全集群负载良好</div>
                 </div>
                 <div class="w-10 h-10 rounded-lg bg-teal-950/60 border border-teal-800/40 flex items-center justify-center text-teal-400 text-base">
                   <i class="fa-solid fa-microchip"></i>
                 </div>
               </div>
 
-              <!-- KPI 4 -->
-              <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between">
+              <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
                 <div>
                   <div class="text-[10px] text-slate-400 uppercase tracking-wider">时序入库引擎</div>
                   <div class="text-2xl font-bold text-amber-400 mt-0.5">HeatWave</div>
                   <div class="text-[10px] text-emerald-400 flex items-center space-x-1 mt-0.5">
                     <i class="fa-solid fa-database text-[9px]"></i>
-                    <span>MySQL 26.7 · 15s 批次</span>
+                    <span>MySQL 26.7 · 15s/批次</span>
                   </div>
                 </div>
                 <div class="w-10 h-10 rounded-lg bg-amber-950/60 border border-amber-800/40 flex items-center justify-center text-amber-400 text-base">
@@ -237,11 +233,11 @@
             <div>
               <div class="text-xs font-mono font-bold text-slate-300 mb-2 flex items-center justify-between">
                 <span><i class="fa-solid fa-cloud mr-1.5 text-cyan-400"></i>全球 5 大多云区域矩阵速览</span>
-                <span class="text-[10px] text-slate-500 font-normal">点击右侧窗帘可查看独立图表与雷达</span>
+                <span class="text-[10px] text-slate-500 font-normal">点击右侧窗帘展开独立图表与雷达</span>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 font-mono">
-                <!-- Region 1: Tokyo -->
+                <!-- Tokyo -->
                 <div class="p-3 rounded-xl bg-slate-900/80 border border-rose-900/40 hover:border-rose-500/60 transition space-y-1.5">
                   <div class="flex items-center justify-between">
                     <span class="text-sm font-bold text-white flex items-center gap-1.5"><span>🇯🇵</span> 东京集群</span>
@@ -254,20 +250,20 @@
                   </div>
                 </div>
 
-                <!-- Region 2: Ashburn -->
+                <!-- Ashburn -->
                 <div class="p-3 rounded-xl bg-slate-900/80 border border-cyan-900/40 hover:border-cyan-500/60 transition space-y-1.5">
                   <div class="flex items-center justify-between">
                     <span class="text-sm font-bold text-white flex items-center gap-1.5"><span>🇺🇸</span> 美东阿什本</span>
                     <span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 font-semibold">3 节点</span>
                   </div>
-                  <div class="text-[10px] text-slate-400">Oracle Cloud · 中枢机驻扎</div>
+                  <div class="text-[10px] text-slate-400">Oracle Cloud · 数据中枢机</div>
                   <div class="text-[10px] text-emerald-400 flex items-center justify-between pt-1 border-t border-slate-800">
                     <span>状态: HUB RUNNING</span>
                     <span class="text-slate-300">17ms</span>
                   </div>
                 </div>
 
-                <!-- Region 3: Taiwan -->
+                <!-- Taiwan -->
                 <div class="p-3 rounded-xl bg-slate-900/80 border border-emerald-900/40 hover:border-emerald-500/60 transition space-y-1.5">
                   <div class="flex items-center justify-between">
                     <span class="text-sm font-bold text-white flex items-center gap-1.5"><span>🇹🇼</span> 台湾省彰化</span>
@@ -280,7 +276,7 @@
                   </div>
                 </div>
 
-                <!-- Region 4: Beijing -->
+                <!-- Beijing -->
                 <div class="p-3 rounded-xl bg-slate-900/80 border border-orange-900/40 hover:border-orange-500/60 transition space-y-1.5">
                   <div class="flex items-center justify-between">
                     <span class="text-sm font-bold text-white flex items-center gap-1.5"><span>🇨🇳</span> 中国北京</span>
@@ -293,7 +289,7 @@
                   </div>
                 </div>
 
-                <!-- Region 5: Singapore -->
+                <!-- Singapore -->
                 <div class="p-3 rounded-xl bg-slate-900/80 border border-amber-900/40 hover:border-amber-500/60 transition space-y-1.5">
                   <div class="flex items-center justify-between">
                     <span class="text-sm font-bold text-white flex items-center gap-1.5"><span>🇸🇬</span> 新加坡</span>
@@ -309,10 +305,10 @@
             </div>
           </div>
 
-          <!-- Bottom Footer -->
+          <!-- Footer -->
           <div class="flex items-center justify-between pt-3 border-t border-dark-border text-xs font-mono text-slate-400 shrink-0">
-            <span>中枢引擎状态: <strong class="text-emerald-400">Prometheus Ingesting (15s)</strong></span>
-            <span class="text-cyan-400">点击右侧任意窗帘立即可拉开对应大屏</span>
+            <span>数据源: Oracle Ashburn Ingest · HeatWave 存储 (25,000+ 记录)</span>
+            <span class="text-cyan-400">点击右侧任意窗帘立即可拉开独立大屏</span>
           </div>
         </div>
 
@@ -325,7 +321,7 @@
             集群总览 · OVERVIEW
           </div>
           <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800/60">
-            11 节点
+            全网总览
           </span>
         </div>
 
@@ -356,12 +352,12 @@
             </div>
           </div>
 
-          <!-- Interactive Radar Map Container -->
+          <!-- Radar Map Container -->
           <div class="flex-1 w-full min-h-[360px] relative rounded-xl overflow-hidden bg-slate-950/40 border border-slate-800/60 my-2">
             <div id="world-map-chart" class="w-full h-full"></div>
           </div>
 
-          <!-- Region Fast Badges -->
+          <!-- Region Badges -->
           <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-dark-border text-xs font-mono text-slate-400 shrink-0">
             <div class="flex items-center gap-2">
               <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300">🇯🇵 东京 (5台)</span>
@@ -389,73 +385,111 @@
 
       </div>
 
-      <!-- ================= 🪟 CURTAIN 3: 多维算力与时延波形 ================= -->
-      <div id="panel-charts" onclick="handleCurtainClick('charts')"
+      <!-- ================= 🪟 CURTAIN 3: 算力资源占用 (CPU/内存/磁盘) ================= -->
+      <div id="panel-resource" onclick="handleCurtainClick('resource')"
            class="curtain-panel curtain-collapsed glass-card rounded-2xl p-5 flex flex-col justify-between overflow-hidden relative group">
         
         <!-- Expanded View -->
-        <div id="content-charts-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden">
+        <div id="content-resource-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden">
           <div class="flex items-center justify-between mb-2 shrink-0">
             <div class="flex items-center space-x-2.5">
-              <div class="w-8 h-8 rounded-lg bg-indigo-950/80 border border-indigo-800/40 flex items-center justify-center text-indigo-400">
-                <i class="fa-solid fa-chart-column"></i>
+              <div class="w-8 h-8 rounded-lg bg-rose-950/80 border border-rose-800/40 flex items-center justify-center text-rose-400">
+                <i class="fa-solid fa-microchip"></i>
               </div>
               <div>
                 <h2 class="text-base font-bold font-mono uppercase tracking-wider text-slate-100 flex items-center gap-2">
-                  <span>多维算力资源与网络延迟波形</span>
-                  <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/50">CURTAIN 03 · CHARTS</span>
+                  <span>全网算力资源占用大盘</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800/50">CURTAIN 03 · RESOURCE</span>
                 </h2>
-                <p class="text-xs text-slate-400">CPU / 内存 / 磁盘三维柱状对比 · 全网端到端阶梯延迟分析</p>
+                <p class="text-xs text-slate-400">11 节点 CPU 实时瞬时差分 · 内存可用率 · 磁盘使用率三维对照</p>
               </div>
             </div>
             <div class="text-xs font-mono text-slate-400">
-              <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-indigo-300 font-semibold">
-                <i class="fa-solid fa-wave-square mr-1"></i>实时时序波形
+              <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-rose-300 font-semibold">
+                <i class="fa-solid fa-chart-column mr-1"></i>三维占用柱状图
               </span>
             </div>
           </div>
 
-          <!-- Charts Dual Grid -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 my-2 min-h-0">
-            <div class="p-3.5 rounded-xl bg-slate-950/40 border border-slate-800/60 flex flex-col">
-              <div class="text-xs font-mono font-bold text-slate-300 mb-2 flex items-center justify-between">
-                <span><i class="fa-solid fa-server mr-1.5 text-cyan-400"></i>各节点 CPU / 内存 / 磁盘占用率 (%)</span>
-                <span class="text-[10px] text-slate-500">MAX 100%</span>
-              </div>
-              <div id="resource-bar-chart" class="w-full flex-1 min-h-[220px]"></div>
-            </div>
-
-            <div class="p-3.5 rounded-xl bg-slate-950/40 border border-slate-800/60 flex flex-col">
-              <div class="text-xs font-mono font-bold text-slate-300 mb-2 flex items-center justify-between">
-                <span><i class="fa-solid fa-gauge-high mr-1.5 text-indigo-400"></i>全网延迟阶梯波形 (ms)</span>
-                <span class="text-[10px] text-slate-500">PROMETHEUS PING</span>
-              </div>
-              <div id="latency-chart" class="w-full flex-1 min-h-[220px]"></div>
-            </div>
+          <!-- Resource Chart Full Height -->
+          <div class="flex-1 w-full min-h-[340px] p-4 rounded-xl bg-slate-950/40 border border-slate-800/60 my-2 flex flex-col">
+            <div id="resource-bar-chart" class="w-full flex-1"></div>
           </div>
 
           <div class="pt-2 border-t border-dark-border flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
-            <span>数据源: Oracle Ashburn Hub Prometheus Ingest</span>
-            <span class="text-indigo-400">15s 自动无感拉取更新</span>
+            <span>图例: <strong class="text-rose-400">CPU 占用率</strong> · <strong class="text-cyan-400">内存占用率</strong> · <strong class="text-purple-400">磁盘占用率</strong></span>
+            <span class="text-rose-400">15s 自动刷新</span>
           </div>
         </div>
 
         <!-- Collapsed Slat View -->
-        <div id="content-charts-collapsed" class="flex h-full w-full flex-col items-center justify-between py-4">
-          <div class="w-8 h-8 rounded-lg bg-indigo-950/80 border border-indigo-800/40 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
-            <i class="fa-solid fa-chart-column text-sm"></i>
+        <div id="content-resource-collapsed" class="flex h-full w-full flex-col items-center justify-between py-4">
+          <div class="w-8 h-8 rounded-lg bg-rose-950/80 border border-rose-800/40 flex items-center justify-center text-rose-400 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-microchip text-sm"></i>
           </div>
-          <div class="vertical-title font-mono font-bold text-xs tracking-widest text-slate-300 group-hover:text-indigo-300 uppercase">
-            图表分析 · CHARTS
+          <div class="vertical-title font-mono font-bold text-xs tracking-widest text-slate-300 group-hover:text-rose-300 uppercase">
+            算力占用 · RESOURCE
           </div>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-indigo-950 text-indigo-300 border border-indigo-800/60">
-            资源波形
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-950 text-rose-300 border border-rose-800/60">
+            CPU/内存
           </span>
         </div>
 
       </div>
 
-      <!-- ================= 🪟 CURTAIN 4: 全球节点遥测全景明细 ================= -->
+      <!-- ================= 🪟 CURTAIN 4: 网络探测时延波形 ================= -->
+      <div id="panel-latency" onclick="handleCurtainClick('latency')"
+           class="curtain-panel curtain-collapsed glass-card rounded-2xl p-5 flex flex-col justify-between overflow-hidden relative group">
+        
+        <!-- Expanded View -->
+        <div id="content-latency-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden">
+          <div class="flex items-center justify-between mb-2 shrink-0">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-8 h-8 rounded-lg bg-indigo-950/80 border border-indigo-800/40 flex items-center justify-center text-indigo-400">
+                <i class="fa-solid fa-wave-square"></i>
+              </div>
+              <div>
+                <h2 class="text-base font-bold font-mono uppercase tracking-wider text-slate-100 flex items-center gap-2">
+                  <span>全球网络端到端延迟波形</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/50">CURTAIN 04 · LATENCY</span>
+                </h2>
+                <p class="text-xs text-slate-400">美东中枢机至全球 11 节点 Prometheus 握手时延阶梯分析</p>
+              </div>
+            </div>
+            <div class="text-xs font-mono text-slate-400">
+              <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-indigo-300 font-semibold">
+                <i class="fa-solid fa-gauge-high mr-1"></i>阶梯延迟分析
+              </span>
+            </div>
+          </div>
+
+          <!-- Latency Chart Full Height -->
+          <div class="flex-1 w-full min-h-[340px] p-4 rounded-xl bg-slate-950/40 border border-slate-800/60 my-2 flex flex-col">
+            <div id="latency-chart" class="w-full flex-1"></div>
+          </div>
+
+          <div class="pt-2 border-t border-dark-border flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
+            <span>梯队: <span class="text-emerald-400">同大区 (<30ms)</span> · <span class="text-cyan-400">亚太跨洋 (~100-350ms)</span> · <span class="text-amber-400">跨大西洋 (~480ms)</span></span>
+            <span class="text-indigo-400">高精度探测</span>
+          </div>
+        </div>
+
+        <!-- Collapsed Slat View -->
+        <div id="content-latency-collapsed" class="flex h-full w-full flex-col items-center justify-between py-4">
+          <div class="w-8 h-8 rounded-lg bg-indigo-950/80 border border-indigo-800/40 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-wave-square text-sm"></i>
+          </div>
+          <div class="vertical-title font-mono font-bold text-xs tracking-widest text-slate-300 group-hover:text-indigo-300 uppercase">
+            时延波形 · LATENCY
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-indigo-950 text-indigo-300 border border-indigo-800/60">
+            网络阶梯
+          </span>
+        </div>
+
+      </div>
+
+      <!-- ================= 🪟 CURTAIN 5: 全球节点遥测明细表格 ================= -->
       <div id="panel-table" onclick="handleCurtainClick('table')"
            class="curtain-panel curtain-collapsed glass-card rounded-2xl p-5 flex flex-col justify-between overflow-hidden relative group">
         
@@ -469,7 +503,7 @@
               <div>
                 <h2 class="text-base font-bold font-mono uppercase tracking-wider text-slate-100 flex items-center gap-2">
                   <span>全球节点实时遥测全景明细</span>
-                  <span class="text-[10px] px-2 py-0.5 rounded bg-teal-950 text-teal-300 border border-teal-800/50">CURTAIN 04 · INVENTORY</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded bg-teal-950 text-teal-300 border border-teal-800/50">CURTAIN 05 · INVENTORY</span>
                 </h2>
                 <p class="text-xs text-slate-400">纳管 11 台生产虚拟机 · 实时 IP、状态、CPU/内存/磁盘与延迟明细</p>
               </div>
@@ -526,7 +560,7 @@
 
       </div>
 
-      <!-- ================= 🪟 CURTAIN 5: AI 智能中枢与集群巡检 ================= -->
+      <!-- ================= 🪟 CURTAIN 6: AI 智能中枢与集群巡检 ================= -->
       <div id="panel-ai" onclick="handleCurtainClick('ai')"
            class="curtain-panel curtain-collapsed glass-card rounded-2xl p-5 flex flex-col justify-between overflow-hidden relative group">
         
@@ -540,7 +574,7 @@
               <div>
                 <h2 class="text-base font-bold font-mono uppercase tracking-wider text-slate-100 flex items-center gap-2">
                   <span>AI 智能运维中枢与自愈诊断</span>
-                  <span class="text-[10px] px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800/50">CURTAIN 05 · AI ENGINE</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800/50">CURTAIN 06 · AI ENGINE</span>
                 </h2>
                 <p class="text-xs text-slate-400">Autonomous Agent 巡检 · 异常启发式规则 · HeatWave 存储监控</p>
               </div>
@@ -678,12 +712,12 @@
     let currentActiveCurtain = 'overview';
     let cachedNodesData = [];
 
-    // Master 5-Curtain Switcher Logic (Supabase Accordion Style)
+    // Master 6-Curtain Switcher Logic (Supabase Accordion Style)
     function handleCurtainClick(panelId) {
       if (currentActiveCurtain === panelId) return;
       currentActiveCurtain = panelId;
 
-      const panels = ['overview', 'map', 'charts', 'table', 'ai'];
+      const panels = ['overview', 'map', 'resource', 'latency', 'table', 'ai'];
 
       panels.forEach(id => {
         const panelEl = document.getElementById(`panel-${id}`);
@@ -691,7 +725,6 @@
         const collapsedContent = document.getElementById(`content-${id}-collapsed`);
 
         if (id === panelId) {
-          // Expand selected curtain
           panelEl?.classList.remove('curtain-collapsed');
           panelEl?.classList.add('curtain-expanded');
           expandedContent?.classList.remove('hidden');
@@ -699,7 +732,6 @@
           collapsedContent?.classList.remove('flex');
           collapsedContent?.classList.add('hidden');
         } else {
-          // Collapse other curtains
           panelEl?.classList.remove('curtain-expanded');
           panelEl?.classList.add('curtain-collapsed');
           expandedContent?.classList.remove('flex');
@@ -712,11 +744,9 @@
       // Trigger chart resize on smooth accordion animation end
       setTimeout(() => {
         if (panelId === 'map') mapChart?.resize();
-        if (panelId === 'charts') {
-          resourceChart?.resize();
-          latencyChart?.resize();
-        }
-      }, 320);
+        if (panelId === 'resource') resourceChart?.resize();
+        if (panelId === 'latency') latencyChart?.resize();
+      }, 300);
     }
 
     // Initialize Charts safely
@@ -886,8 +916,8 @@
 
       resourceChart.setOption({
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-        legend: { textStyle: { color: '#94a3b8' }, right: 10 },
-        grid: { top: 35, bottom: 25, left: 40, right: 15 },
+        legend: { textStyle: { color: '#94a3b8' }, right: 15, top: 5 },
+        grid: { top: 40, bottom: 30, left: 45, right: 15 },
         xAxis: { type: 'category', data: names, axisLine: { lineStyle: { color: '#334155' } }, axisLabel: { color: '#cbd5e1', fontFamily: 'monospace' } },
         yAxis: { type: 'value', max: 100, splitLine: { lineStyle: { color: '#1e293b' } }, axisLabel: { color: '#94a3b8', formatter: '{value}%' } },
         series: [
@@ -906,19 +936,20 @@
 
       latencyChart.setOption({
         tooltip: { trigger: 'axis', formatter: '{b}: {c} ms' },
-        grid: { top: 20, bottom: 25, left: 45, right: 15 },
+        grid: { top: 35, bottom: 30, left: 50, right: 20 },
         xAxis: { type: 'category', data: names, axisLine: { lineStyle: { color: '#334155' } }, axisLabel: { color: '#cbd5e1', fontFamily: 'monospace' } },
         yAxis: { type: 'value', splitLine: { lineStyle: { color: '#1e293b' } }, axisLabel: { color: '#94a3b8', formatter: '{value}ms' } },
         series: [{
+          name: '探测延迟',
           type: 'line',
           smooth: true,
           data: latencies,
           symbolSize: 8,
-          itemStyle: { color: '#38bdf8' },
+          itemStyle: { color: '#818cf8' },
           areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: 'rgba(56, 189, 248, 0.4)' },
-              { offset: 1, color: 'rgba(56, 189, 248, 0.01)' }
+              { offset: 0, color: 'rgba(129, 140, 248, 0.45)' },
+              { offset: 1, color: 'rgba(129, 140, 248, 0.02)' }
             ])
           }
         }]
@@ -968,7 +999,7 @@
             return `<div class="font-mono text-xs"><b>${params.name}</b> (${d[5]})<br/>状态: <span class="${d[3] === 'ONLINE' ? 'text-emerald-400' : 'text-rose-400'}">${d[3]}</span><br/>延迟: ${d[2]}ms<br/>CPU: ${d[6]}%<br/>内存: ${d[4]}%</div>`;
           }
         },
-        grid: { top: 30, bottom: 40, left: 50, right: 30 },
+        grid: { top: 25, bottom: 35, left: 45, right: 25 },
         xAxis: {
           type: 'value',
           min: -100,
