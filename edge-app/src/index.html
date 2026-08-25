@@ -98,7 +98,7 @@
       </div>
       <div class="flex items-center space-x-2">
         <span class="text-slate-400">活跃节点:</span>
-        <span id="active-nodes-count" class="text-cyan-400 font-bold">10 / 10 ONLINE</span>
+        <span id="active-nodes-count" class="text-cyan-400 font-bold">11 / 11 ONLINE</span>
       </div>
       <div class="flex items-center space-x-2">
         <span class="text-slate-400">同步时钟:</span>
@@ -137,10 +137,10 @@
       <div class="glass-card rounded-xl p-4 flex items-center justify-between relative overflow-hidden">
         <div class="space-y-1 z-10">
           <div class="text-xs text-slate-400 font-mono uppercase tracking-wider">生产在线节点</div>
-          <div class="text-2xl font-bold font-mono text-cyan-400" id="stat-online-nodes">10 <span class="text-xs font-normal text-slate-400">/ 10</span></div>
+          <div class="text-2xl font-bold font-mono text-cyan-400" id="stat-online-nodes">11 <span class="text-xs font-normal text-slate-400">/ 11</span></div>
           <div class="text-xs text-emerald-400 flex items-center space-x-1">
             <i class="fa-solid fa-circle-check text-[10px]"></i>
-            <span>东京 (5) · 美东 (3) · 新加坡 · 北京</span>
+            <span>东京 (5) · 美东 (3) · 台湾 · 新加坡 · 北京</span>
           </div>
         </div>
         <div class="w-12 h-12 rounded-xl bg-cyan-950/60 border border-cyan-800/40 flex items-center justify-center text-cyan-400 text-xl">
@@ -228,7 +228,7 @@
                 <span class="text-[10px] text-slate-500">Autonomous Agent</span>
               </div>
               <p class="text-slate-300 leading-relaxed text-[11px]" id="diag-summary-text">
-                全网 10 台生产虚拟机运行平稳，东京、美东、新加坡与北京网络时延与负载正常。
+                全网 11 台生产虚拟机运行平稳，东京、美东、台湾、新加坡与北京网络时延与负载正常。
               </p>
             </div>
 
@@ -254,6 +254,34 @@
         </div>
       </div>
 
+    </div>
+
+    <!-- REGIONAL CLUSTER CURTAIN (SUPABASE ACCORDION STYLE) -->
+    <div class="glass-card rounded-xl p-5 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-dark-border pb-3">
+        <div class="flex items-center space-x-2.5">
+          <div class="p-2 rounded-lg bg-cyan-950/80 border border-cyan-800/40 text-cyan-400">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
+          <div>
+            <h2 class="text-sm font-bold font-mono uppercase tracking-wider text-slate-200">全球多云区域风琴折叠帘 // MULTI-CLOUD REGIONAL CURTAIN</h2>
+            <p class="text-xs text-slate-400">点击或悬停任意大区卡片像窗帘一样展开算力大盘、节点矩阵与时序遥测</p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2 text-xs font-mono text-slate-400">
+          <span class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-cyan-400 font-semibold">
+            <i class="fa-solid fa-computer-mouse mr-1"></i>点击窗帘切换大区
+          </span>
+        </div>
+      </div>
+
+      <!-- Desktop & Mobile Curtain Accordion Container -->
+      <div id="region-curtain-container" class="flex flex-col lg:flex-row gap-3 min-h-[460px] transition-all duration-500 ease-out">
+        <!-- Dynamically rendered by renderRegionCurtain() -->
+        <div class="w-full text-center py-12 text-slate-500 font-mono text-xs">
+          <i class="fa-solid fa-spinner fa-spin mr-2"></i>正在拉取全球区域多云算力窗帘...
+        </div>
+      </div>
     </div>
 
     <!-- METRICS CHARTS ROW -->
@@ -288,7 +316,7 @@
           <i class="fa-solid fa-list-check text-cyan-400"></i>
           <h2 class="text-sm font-bold font-mono uppercase tracking-wider text-slate-200">全球节点实时遥测全景明细</h2>
         </div>
-        <span class="text-xs text-slate-400 font-mono">共纳管 10 台生产虚拟机</span>
+        <span class="text-xs text-slate-400 font-mono">共纳管 11 台生产虚拟机</span>
       </div>
 
       <div class="overflow-x-auto">
@@ -400,6 +428,273 @@
       }
     }
 
+    // Regional Cluster Definitions & Visual Styles
+    const REGIONS_CONFIG = [
+      {
+        id: 'ap-tokyo',
+        name: '日本东京集群',
+        nameEn: 'TOKYO CLUSTER',
+        flag: '🇯🇵',
+        regionCode: 'ap-tokyo',
+        provider: 'Oracle Cloud',
+        providerIcon: 'fa-solid fa-server',
+        roleTitle: '高可用业务网关与亚太边缘加速矩阵',
+        desc: '部署于 Oracle Cloud 日本东京核心机房，纳管 5 台生产虚拟机，支撑低时延探针与多活流量分发。',
+        bg: 'linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(49, 16, 66, 0.95) 100%)',
+        accentColor: '#f43f5e',
+        badgeBg: 'bg-rose-950/80 text-rose-300 border border-rose-800/60'
+      },
+      {
+        id: 'us-ashburn',
+        name: '美东阿什本中枢',
+        nameEn: 'ASHBURN HUB',
+        flag: '🇺🇸',
+        regionCode: 'us-ashburn',
+        provider: 'Oracle Cloud',
+        providerIcon: 'fa-solid fa-database',
+        roleTitle: '全球数据大脑与 15s 高频采集引擎',
+        desc: '驻扎 Oracle Cloud 美东中枢机（usa），统筹全球 11 节点 Prometheus 遥测爬取、API 鉴权代理与 HeatWave 数据库时序存储。',
+        bg: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(23, 37, 84, 0.95) 50%, rgba(30, 27, 75, 0.95) 100%)',
+        accentColor: '#38bdf8',
+        badgeBg: 'bg-cyan-950/80 text-cyan-300 border border-cyan-800/60'
+      },
+      {
+        id: 'asia-east1',
+        name: '台湾省彰化节点',
+        nameEn: 'TAIWAN GCP',
+        flag: '🇹🇼',
+        regionCode: 'asia-east1',
+        provider: 'Google Cloud',
+        providerIcon: 'fa-brands fa-google',
+        roleTitle: 'Google Cloud 亚太算力探针',
+        desc: '运行在 Google Cloud asia-east1 区域，监控 GCP 高性能跨洋网络连通性与算力资源波动。',
+        bg: 'linear-gradient(135deg, rgba(20, 42, 34, 0.95) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(28, 25, 23, 0.95) 100%)',
+        accentColor: '#10b981',
+        badgeBg: 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/60'
+      },
+      {
+        id: 'cn-beijing',
+        name: '中国北京骨干',
+        nameEn: 'BEIJING ALIYUN',
+        flag: '🇨🇳',
+        regionCode: 'cn-beijing',
+        provider: 'Alibaba Cloud',
+        providerIcon: 'fa-solid fa-cube',
+        roleTitle: '阿里云华北主干网接入点',
+        desc: '部署于阿里云北京数据中心，监测国内主干网络回源至 Cloudflare 边缘节点的网络延迟与系统利用率。',
+        bg: 'linear-gradient(135deg, rgba(45, 24, 8, 0.95) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(28, 25, 23, 0.95) 100%)',
+        accentColor: '#f97316',
+        badgeBg: 'bg-orange-950/80 text-orange-300 border border-orange-800/60'
+      },
+      {
+        id: 'ap-singapore',
+        name: '新加坡枢纽',
+        nameEn: 'SINGAPORE AWS',
+        flag: '🇸🇬',
+        regionCode: 'ap-singapore',
+        provider: 'AWS EC2',
+        providerIcon: 'fa-brands fa-aws',
+        roleTitle: 'AWS 东南亚边缘网关',
+        desc: '位于 AWS 新加坡核心数据中心，承担东南亚网络交换与多云算力热备。',
+        bg: 'linear-gradient(135deg, rgba(42, 31, 10, 0.95) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(24, 24, 27, 0.95) 100%)',
+        accentColor: '#eab308',
+        badgeBg: 'bg-amber-950/80 text-amber-300 border border-amber-800/60'
+      }
+    ];
+
+    let activeCurtainRegion = 'ap-tokyo';
+    let cachedLatestNodes = [];
+
+    function selectCurtainRegion(regionId) {
+      activeCurtainRegion = regionId;
+      renderRegionCurtain(cachedLatestNodes);
+    }
+
+    function renderRegionCurtain(nodes) {
+      const container = document.getElementById('region-curtain-container');
+      if (!container || !Array.isArray(nodes) || nodes.length === 0) return;
+
+      container.innerHTML = REGIONS_CONFIG.map(r => {
+        const regionNodes = nodes.filter(n => (n.region || '').toLowerCase() === r.regionCode.toLowerCase());
+        const onlineCount = regionNodes.filter(n => n.status === 'ONLINE').length;
+        const totalCount = regionNodes.length;
+        const isActive = (r.id === activeCurtainRegion);
+
+        // Calculate region averages
+        const cpus = regionNodes.map(n => n.cpu_usage_percent || 0);
+        const mems = regionNodes.map(n => n.mem_usage_percent || 0);
+        const lats = regionNodes.map(n => n.scrape_duration_ms || 0);
+
+        const avgCpu = cpus.length ? (cpus.reduce((a, b) => a + b, 0) / cpus.length).toFixed(1) : '0.0';
+        const avgMem = mems.length ? (mems.reduce((a, b) => a + b, 0) / mems.length).toFixed(1) : '0.0';
+        const avgLat = lats.length ? Math.round(lats.reduce((a, b) => a + b, 0) / lats.length) : '0';
+
+        if (isActive) {
+          // EXPANDED CURTAIN PANEL (拉开的窗帘)
+          return `
+            <div role="button" aria-expanded="true"
+                 class="flex-1 w-full min-w-0 rounded-2xl p-5 sm:p-6 transition-all duration-500 ease-out flex flex-col justify-between cursor-default relative overflow-hidden"
+                 style="background: ${r.bg}; border: 1px solid ${r.accentColor}70; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), 0 10px 30px -10px ${r.accentColor}40;">
+              
+              <!-- Top Header & Badges -->
+              <div>
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                  <div class="flex items-center space-x-3">
+                    <span class="text-3xl">${r.flag}</span>
+                    <div>
+                      <div class="flex items-center space-x-2">
+                        <h3 class="text-lg sm:text-xl font-bold font-mono text-white tracking-wide">${r.name}</h3>
+                        <span class="px-2 py-0.5 rounded text-[11px] font-mono font-semibold ${r.badgeBg}">
+                          <i class="${r.providerIcon} mr-1"></i>${r.provider}
+                        </span>
+                      </div>
+                      <p class="text-xs font-mono text-slate-400 mt-0.5">${r.roleTitle} · <span class="text-cyan-400">${r.regionCode}</span></p>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-center space-x-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold ${onlineCount === totalCount ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/60' : 'bg-amber-950 text-amber-300 border border-amber-800/60'}">
+                      <i class="fa-solid fa-circle-dot mr-1 text-[10px] ${onlineCount === totalCount ? 'text-emerald-400 animate-pulse' : 'text-amber-400'}"></i>
+                      ${onlineCount} / ${totalCount} 在线
+                    </span>
+                  </div>
+                </div>
+
+                <p class="text-xs text-slate-300 leading-relaxed max-w-3xl mb-5 font-sans bg-slate-900/40 p-3 rounded-lg border border-slate-800/60">
+                  ${r.desc}
+                </p>
+
+                <!-- Quick Regional KPI Ribbon -->
+                <div class="grid grid-cols-3 gap-3 mb-5 font-mono text-xs">
+                  <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
+                    <div>
+                      <div class="text-[10px] text-slate-400 uppercase">区域 CPU 均值</div>
+                      <div class="text-base font-bold text-rose-400 mt-0.5">${avgCpu}%</div>
+                    </div>
+                    <div class="w-8 h-8 rounded-lg bg-rose-950/60 border border-rose-800/40 flex items-center justify-center text-rose-400 text-sm">
+                      <i class="fa-solid fa-microchip"></i>
+                    </div>
+                  </div>
+
+                  <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
+                    <div>
+                      <div class="text-[10px] text-slate-400 uppercase">区域内存均值</div>
+                      <div class="text-base font-bold text-cyan-400 mt-0.5">${avgMem}%</div>
+                    </div>
+                    <div class="w-8 h-8 rounded-lg bg-cyan-950/60 border border-cyan-800/40 flex items-center justify-center text-cyan-400 text-sm">
+                      <i class="fa-solid fa-memory"></i>
+                    </div>
+                  </div>
+
+                  <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
+                    <div>
+                      <div class="text-[10px] text-slate-400 uppercase">中枢探测时延</div>
+                      <div class="text-base font-bold text-indigo-400 mt-0.5">${avgLat} ms</div>
+                    </div>
+                    <div class="w-8 h-8 rounded-lg bg-indigo-950/60 border border-indigo-800/40 flex items-center justify-center text-indigo-400 text-sm">
+                      <i class="fa-solid fa-bolt"></i>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sub-node Fleet Cards within Region -->
+                <div>
+                  <div class="text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span><i class="fa-solid fa-network-wired mr-1.5 text-cyan-400"></i>本区域活跃虚拟机矩阵 (${regionNodes.length} 台)</span>
+                    <span class="text-[10px] text-slate-500 font-normal">15s 时序增量同步中</span>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ${regionNodes.length >= 5 ? 'lg:grid-cols-5' : (regionNodes.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2')} gap-2.5">
+                    ${regionNodes.map(n => `
+                      <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800/90 hover:border-cyan-500/50 transition font-mono text-xs space-y-2 group">
+                        <div class="flex items-center justify-between">
+                          <div class="flex items-center space-x-1.5">
+                            <span class="w-2 h-2 rounded-full ${n.status === 'ONLINE' ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-rose-500'}"></span>
+                            <span class="font-bold text-white text-sm group-hover:text-cyan-400 transition">${n.node_name}</span>
+                          </div>
+                          <span class="text-[10px] text-slate-400 font-semibold ${n.scrape_duration_ms < 50 ? 'text-emerald-400' : 'text-cyan-400'}">
+                            ${n.scrape_duration_ms}ms
+                          </span>
+                        </div>
+                        
+                        <div class="text-[10px] text-slate-400 truncate">${n.host_ip}</div>
+
+                        <!-- Mini progress bars for CPU & Mem -->
+                        <div class="space-y-1 pt-1 border-t border-slate-800/60 text-[10px]">
+                          <div class="flex items-center justify-between text-slate-400">
+                            <span>CPU</span>
+                            <span class="text-rose-400 font-bold">${n.cpu_usage_percent || 0}%</span>
+                          </div>
+                          <div class="w-full bg-slate-950 rounded-full h-1 overflow-hidden">
+                            <div class="bg-rose-400 h-full rounded-full" style="width: ${n.cpu_usage_percent || 0}%"></div>
+                          </div>
+
+                          <div class="flex items-center justify-between text-slate-400 pt-0.5">
+                            <span>MEM</span>
+                            <span class="text-cyan-400 font-bold">${n.mem_usage_percent}%</span>
+                          </div>
+                          <div class="w-full bg-slate-950 rounded-full h-1 overflow-hidden">
+                            <div class="bg-cyan-400 h-full rounded-full" style="width: ${n.mem_usage_percent}%"></div>
+                          </div>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                <span>云提供商: <strong class="text-slate-200">${r.provider}</strong></span>
+                <span class="text-cyan-400 hover:underline cursor-pointer" onclick="document.getElementById('world-map-chart')?.scrollIntoView({behavior: 'smooth'})">
+                  <i class="fa-solid fa-location-crosshairs mr-1"></i>在拓扑雷达中定位
+                </span>
+              </div>
+
+            </div>
+          `;
+        } else {
+          // COLLAPSED CURTAIN PANEL (折叠合拢的窗帘)
+          return `
+            <div role="button" aria-expanded="false" onclick="selectCurtainRegion('${r.id}')"
+                 class="flex-none lg:w-[82px] rounded-2xl p-4 lg:py-6 lg:px-2 transition-all duration-500 ease-out flex flex-row lg:flex-col items-center justify-between cursor-pointer border border-slate-800/90 bg-slate-900/60 hover:bg-slate-800/70 hover:border-slate-700 hover:shadow-lg group relative overflow-hidden"
+                 style="box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);">
+              
+              <!-- Flag & Cloud Icon at Top -->
+              <div class="flex flex-row lg:flex-col items-center gap-2 lg:gap-3">
+                <span class="text-2xl group-hover:scale-110 transition-transform">${r.flag}</span>
+                <div class="w-8 h-8 rounded-lg bg-slate-950/80 border border-slate-800 flex items-center justify-center text-slate-400 group-hover:text-cyan-400 group-hover:border-cyan-500/40 transition">
+                  <i class="${r.providerIcon} text-xs"></i>
+                </div>
+              </div>
+
+              <!-- Center Vertical Region Code / Name for Desktop -->
+              <div class="hidden lg:block my-4">
+                <span class="font-mono font-bold text-xs tracking-widest text-slate-400 group-hover:text-white transition uppercase"
+                      style="writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: 0.18em;">
+                  ${r.nameEn}
+                </span>
+              </div>
+
+              <!-- Mobile horizontal text -->
+              <div class="block lg:hidden flex-1 px-3 text-left">
+                <div class="font-mono font-bold text-sm text-slate-200 group-hover:text-cyan-400 transition">${r.name}</div>
+                <div class="text-[11px] text-slate-400">${r.provider} · ${regionNodes.length} 台节点</div>
+              </div>
+
+              <!-- Bottom Node count badge -->
+              <div class="flex flex-col items-center gap-1">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${r.badgeBg} group-hover:scale-105 transition-transform">
+                  ${totalCount} 节点
+                </span>
+              </div>
+
+            </div>
+          `;
+        }
+      }).join('');
+    }
+
     // Fetch live data from backend proxy
     async function fetchData() {
       const icon = document.getElementById('refresh-icon');
@@ -410,6 +705,8 @@
         const latestJson = await latestRes.json();
         
         if (latestJson.status === 'success' && Array.isArray(latestJson.data)) {
+          cachedLatestNodes = latestJson.data;
+          try { renderRegionCurtain(latestJson.data); } catch(e) { console.error('renderRegionCurtain error:', e); }
           try { renderTable(latestJson.data); } catch(e) { console.error('renderTable error:', e); }
           try { renderKPIs(latestJson.data); } catch(e) { console.error('renderKPIs error:', e); }
           try { renderResourceChart(latestJson.data); } catch(e) { console.error('renderResourceChart error:', e); }
