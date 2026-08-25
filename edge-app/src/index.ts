@@ -25,7 +25,10 @@ app.get('/api/nodes/latest', async (c) => {
       headers: { 'User-Agent': 'Nexus-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
     })
     const data = await res.json()
-    return c.json(data, res.status as any)
+    return c.json(data, res.status as any, {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      'Pragma': 'no-cache'
+    })
   } catch (err: any) {
     return c.json({ status: 'error', secret: c.env.INTERNAL_API_SECRET, message: 'Backend gateway unreachable', error: err.message }, 502)
   }
@@ -39,7 +42,10 @@ app.get('/api/ai/diagnostics', async (c) => {
       headers: { 'User-Agent': 'Nexus-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
     })
     const data = await res.json()
-    return c.json(data, res.status as any)
+    return c.json(data, res.status as any, {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      'Pragma': 'no-cache'
+    })
   } catch (err: any) {
     return c.json({ status: 'error', secret: c.env.INTERNAL_API_SECRET, message: 'Diagnostics unreachable', error: err.message }, 502)
   }
@@ -56,7 +62,10 @@ app.get('/api/metrics/history', async (c) => {
       headers: { 'User-Agent': 'Nexus-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
     })
     const data = await res.json()
-    return c.json(data, res.status as any)
+    return c.json(data, res.status as any, {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      'Pragma': 'no-cache'
+    })
   } catch (err: any) {
     return c.json({ status: 'error', secret: c.env.INTERNAL_API_SECRET, message: 'History query failed', error: err.message }, 502)
   }
