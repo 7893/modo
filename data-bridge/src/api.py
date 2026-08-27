@@ -331,6 +331,8 @@ def get_ai_diagnostics():
         for r in rows:
             if r["status"] != "ONLINE":
                 warnings.append(f"HeatWave ML 异常检测: 节点 {r['node_name']} 连接离线 ({r['status']})，触发重连判定。")
+            elif r["cpu_usage_percent"] > 80.0:
+                warnings.append(f"HeatWave ML 算力预测: 节点 {r['node_name']} CPU 负载激增 ({r['cpu_usage_percent']}%)，存在请求排队与算力降级风险。")
             elif r["mem_usage_percent"] > 85.0:
                 warnings.append(f"HeatWave ML 容量预测: 节点 {r['node_name']} 内存利用率突增 ({r['mem_usage_percent']}%)，预测 2 小时后可能溢出。")
             elif r["disk_usage_percent"] > 85.0:
