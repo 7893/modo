@@ -31,6 +31,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Setup config files
+        run: |
+          cp config/nodes.json.example config/nodes.json
+
       - name: Run Pytest Suite
         run: |
           pytest -v tests/
