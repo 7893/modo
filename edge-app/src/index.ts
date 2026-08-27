@@ -19,7 +19,7 @@ app.use('*', cors({
 
 // Proxy API: Nodes Latest Telemetry
 app.get('/api/nodes/latest', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-nexus.8n8m.cfd'
+  const backend = c.env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'
   try {
     const res = await fetch(`${backend}/api/metrics/latest`, {
       headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
@@ -36,7 +36,7 @@ app.get('/api/nodes/latest', async (c) => {
 
 // Proxy API: AI Diagnostics
 app.get('/api/ai/diagnostics', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-nexus.8n8m.cfd'
+  const backend = c.env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'
   try {
     const res = await fetch(`${backend}/api/ai/diagnostics`, {
       headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
@@ -53,7 +53,7 @@ app.get('/api/ai/diagnostics', async (c) => {
 
 // Proxy API: Metrics History
 app.get('/api/metrics/history', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-nexus.8n8m.cfd'
+  const backend = c.env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'
   const url = new URL(c.req.url)
   const node = url.searchParams.get('node') || ''
   const hours = url.searchParams.get('hours') || '24'

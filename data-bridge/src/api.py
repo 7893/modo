@@ -184,7 +184,7 @@ def health_check():
         "node": "usa-ashburn",
         "database_status": "connected" if db_ok else "error",
         "timestamp": datetime.now().isoformat(),
-        "tunnel_endpoint": "api-nexus.8n8m.cfd"
+        "tunnel_endpoint": "api-modo.8n8m.cfd"
     }
 
 
