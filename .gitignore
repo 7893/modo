@@ -8,3 +8,4 @@ dist/
 *.log
 logs/*.log
 .pytest_cache/
+data-bridge/config/nodes.json

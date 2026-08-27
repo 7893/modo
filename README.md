@@ -16,7 +16,7 @@
 | :--- | :--- | :--- | :---: |
 | 🌐 **MODO Command Dashboard** | [`https://modo.53.workers.dev`](https://modo.53.workers.dev) | Edge Worker UI + ECharts 5 + Supabase Auth | 🟢 **ONLINE** |
 | 🚇 **MODO Private API Gateway** | `https://api-modo.8n8m.cfd` | Zero-Trust Cloudflare Tunnel ➡️ FastAPI Bridge | 🟢 **ACTIVE** |
-| 🗄️ **Managed MySQL Data Store** | `modo_db` (`<REDACTED_DB_IP>:3306` via NLB) | MySQL HeatWave Cloud Database System | 🟢 **ACTIVE** |
+| 🗄️ **Managed MySQL Data Store** | `modo_db` (`<INTERNAL_DB_IP>:3306` via NLB) | MySQL HeatWave Cloud Database System | 🟢 **ACTIVE** |
 
 ---
 
@@ -31,7 +31,7 @@
                         │        https://modo.53.workers.dev      │
                         │                                         │
                         │  • Hono.js Edge Application             │
-                        │  • ECharts 5 Supabase White Theme       │
+                        │  • ECharts 5 Supabase Dark Theme       │
                         │  • Real-time Waveform Charts            │
                         │  • Supabase Auth Security Guard         │
                         └────────────────────┬────────────────────┘
@@ -46,7 +46,7 @@
                         ┌─────────────────────────────────────────┐
                         │       usa (US Ashburn Ingestion Hub)    │
                         │                                         │
-                        │  • systemd: ../deploy/modo-api.service (FastAPI)  │
+                        │  • systemd: modo-api.service (FastAPI)  │
                         │  • systemd: modo-ingest.service (60s)   │
                         └──────────────┬──────────────────┬───────┘
                                        │                  │
@@ -88,13 +88,13 @@ modo/
 │   ├── api.py                     # FastAPI REST server
 │   ├── ingest.py                  # Concurrent multi-threaded Prometheus scraper
 │   ├── db_setup.py                # MySQL schema initializer
-├── deploy/
-│   ├── modo-api.service          # systemd unit for API gateway
-│   └── modo-ingest.service       # systemd unit for ingestion daemon
 │   ├── requirements.txt           # Python dependencies
 │   └── tests/                     # Automated pytest unit test suite
 │       ├── test_parser.py         # Metrics parsing algorithm tests
 │       └── test_api.py            # API endpoint integration tests
+├── deploy/                        # Deployment configuration
+│   ├── modo-api.service           # systemd unit for API gateway
+│   └── modo-ingest.service        # systemd unit for ingestion daemon
 └── edge-app/                      # Edge Application (Cloudflare Workers)
     ├── src/
     │   └── index.ts               # Hono app & Glassmorphic Dashboard SPA
