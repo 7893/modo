@@ -1,5 +1,5 @@
 {
-  "name": "nexus-edge-app",
+  "name": "modo-edge-app",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
