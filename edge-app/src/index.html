@@ -863,7 +863,7 @@
             <!-- Right: Hourly Trend Chart -->
             <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between font-mono overflow-hidden shadow-sm">
               <div class="text-xs font-bold text-amber-400 uppercase flex items-center justify-between mb-2 shrink-0">
-                <span><i class="fa-solid fa-chart-line mr-1.5 text-amber-500"></i>24H CPU 趋势</span>
+                <span><i class="fa-solid fa-chart-line mr-1.5 text-amber-500"></i>24H 多维趋势</span>
                 <span class="text-[10px] text-slate-500">HeatWave OLAP</span>
               </div>
               <div id="hourly-trend-chart" class="flex-1 w-full min-h-[180px]"></div>
@@ -1268,50 +1268,109 @@
         hourlyTrendChart = echarts.init(chartEl);
       }
 
-      // Group by hour and calculate average CPU across all nodes
+      // Group by hour and calculate averages across all nodes
       const hourMap = {};
       hourlyData.forEach(item => {
         const hour = item.hour;
         if (!hourMap[hour]) {
-          hourMap[hour] = { sum: 0, count: 0 };
+          hourMap[hour] = { cpuSum: 0, memSum: 0, latSum: 0, count: 0 };
         }
-        hourMap[hour].sum += parseFloat(item.avg_cpu) || 0;
+        hourMap[hour].cpuSum += parseFloat(item.avg_cpu) || 0;
+        hourMap[hour].memSum += parseFloat(item.avg_mem) || 0;
+        hourMap[hour].latSum += parseFloat(item.peak_latency) || 0;
         hourMap[hour].count += 1;
       });
 
       const hours = Object.keys(hourMap).sort().slice(-24);
-      const avgCpus = hours.map(h => (hourMap[h].sum / hourMap[h].count).toFixed(2));
-      const labels = hours.map(h => h.split(' ')[1] || h.slice(11, 16));
+      const avgCpus = hours.map(h => (hourMap[h].cpuSum / hourMap[h].count).toFixed(1));
+      const avgMems = hours.map(h => (hourMap[h].memSum / hourMap[h].count).toFixed(1));
+      const avgLats = hours.map(h => Math.round(hourMap[h].latSum / hourMap[h].count));
+      const labels = hours.map(h => h.split(' ')[1]?.slice(0,5) || h.slice(11, 16));
 
       hourlyTrendChart.setOption({
-        tooltip: { trigger: 'axis', formatter: '{b}<br/>CPU: {c}%' },
-        grid: { top: 20, bottom: 25, left: 40, right: 15 },
+        tooltip: { 
+          trigger: 'axis',
+          formatter: function(params) {
+            let tip = params[0].axisValue + '<br/>';
+            params.forEach(p => {
+              const unit = p.seriesName === 'Latency' ? 'ms' : '%';
+              tip += `${p.marker} ${p.seriesName}: ${p.value}${unit}<br/>`;
+            });
+            return tip;
+          }
+        },
+        legend: {
+          data: ['CPU', 'Memory', 'Latency'],
+          textStyle: { color: '#94A3B8', fontSize: 10 },
+          top: 0,
+          right: 5,
+          itemWidth: 12,
+          itemHeight: 8
+        },
+        grid: { top: 28, bottom: 22, left: 35, right: 45 },
         xAxis: { 
           type: 'category', 
           data: labels, 
           axisLine: { lineStyle: { color: '#334155' } }, 
-          axisLabel: { color: '#94A3B8', fontSize: 10 } 
+          axisLabel: { color: '#94A3B8', fontSize: 9 },
+          boundaryGap: false
         },
-        yAxis: { 
-          type: 'value', 
-          max: 100,
-          splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.06)' } }, 
-          axisLabel: { color: '#94A3B8', formatter: '{value}%', fontSize: 10 } 
-        },
-        series: [{
-          name: 'CPU',
-          type: 'line',
-          smooth: true,
-          data: avgCpus,
-          symbolSize: 4,
-          itemStyle: { color: '#F59E0B' },
-          areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: 'rgba(245, 158, 11, 0.3)' },
-              { offset: 1, color: 'rgba(245, 158, 11, 0.02)' }
-            ])
+        yAxis: [
+          { 
+            type: 'value', 
+            max: 100,
+            splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.06)' } }, 
+            axisLabel: { color: '#94A3B8', formatter: '{value}%', fontSize: 9 }
+          },
+          {
+            type: 'value',
+            position: 'right',
+            splitLine: { show: false },
+            axisLabel: { color: '#94A3B8', formatter: '{value}ms', fontSize: 9 }
           }
-        }]
+        ],
+        series: [
+          {
+            name: 'CPU',
+            type: 'line',
+            smooth: true,
+            data: avgCpus,
+            symbol: 'none',
+            itemStyle: { color: '#F59E0B' },
+            lineStyle: { width: 2 },
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(245, 158, 11, 0.25)' },
+                { offset: 1, color: 'rgba(245, 158, 11, 0.02)' }
+              ])
+            }
+          },
+          {
+            name: 'Memory',
+            type: 'line',
+            smooth: true,
+            data: avgMems,
+            symbol: 'none',
+            itemStyle: { color: '#10B981' },
+            lineStyle: { width: 2 },
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(16, 185, 129, 0.2)' },
+                { offset: 1, color: 'rgba(16, 185, 129, 0.02)' }
+              ])
+            }
+          },
+          {
+            name: 'Latency',
+            type: 'line',
+            smooth: true,
+            yAxisIndex: 1,
+            data: avgLats,
+            symbol: 'none',
+            itemStyle: { color: '#8B5CF6' },
+            lineStyle: { width: 2, type: 'dashed' }
+          }
+        ]
       });
     }
 
