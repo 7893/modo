@@ -1034,6 +1034,16 @@
           latencyChart?.resize();
           mapChart?.resize();
         });
+        
+        // Bulletproof resize observer for accordion panels
+        const observer = new ResizeObserver(() => {
+          resourceChart?.resize();
+          latencyChart?.resize();
+          mapChart?.resize();
+        });
+        if (mapEl) observer.observe(mapEl);
+        if (resEl) observer.observe(resEl);
+        if (latEl) observer.observe(latEl);
       } catch (e) {
         console.warn('Chart init error:', e);
       }
