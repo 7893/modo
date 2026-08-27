@@ -784,7 +784,7 @@
 
       </div>
 
-      <!-- ================= 🪟 CURTAIN 6: RADIANT AMBER HONEY (AI ENGINE) ================= -->
+      <!-- ================= 🪟 CURTAIN 6: RADIANT AMBER HONEY (HEATWAVE AUTOML) ================= -->
       <div id="panel-ai" onclick="handleCurtainClick('ai')"
            class="curtain-panel curtain-collapsed p-5 lg:p-6 flex flex-col justify-between overflow-hidden relative group"
            style="background: linear-gradient(135deg, rgba(120, 53, 15, 0.35) 0%, rgba(13, 19, 33, 0.9) 45%, rgba(6, 10, 18, 0.97) 100%); border: 1px solid rgba(245, 158, 11, 0.3);">
@@ -798,10 +798,10 @@
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white">AI 智能运维中枢与异常诊断</h2>
-                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-950/80 text-amber-300 border border-amber-800 font-mono font-bold uppercase">06 · Autonomous AI</span>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white">MySQL HeatWave AutoML 库内预测与诊断</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-950/80 text-amber-300 border border-amber-800 font-mono font-bold uppercase">06 · HeatWave ML</span>
                 </div>
-                <p class="text-xs text-slate-400 mt-0.5">AutoML Agent 自动化集群巡检 · 异常启发式规则引擎 · 时序存储健康评估</p>
+                <p class="text-xs text-slate-400 mt-0.5">MySQL HeatWave AutoML 自动化建模 · 时序数据库内原生异常预测 · 无需数据移出</p>
               </div>
             </div>
             <span id="ai-score-pill" class="px-4 py-1.5 rounded-full text-xs font-mono font-extrabold bg-slate-900/90 text-amber-300 border border-amber-800 shadow-sm">
@@ -814,13 +814,13 @@
             <!-- Left: Heuristics & Diagnostics List -->
             <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between overflow-hidden shadow-sm">
               <div class="text-xs font-mono font-bold text-amber-400 flex items-center justify-between mb-2 shrink-0">
-                <span><i class="fa-solid fa-shield-heart mr-1.5 text-amber-500"></i>智能全网实时巡检日志</span>
-                <span class="text-[10px] text-slate-500">AutoML Agent 持续监听</span>
+                <span><i class="fa-solid fa-shield-heart mr-1.5 text-amber-500"></i>MySQL HeatWave AutoML 库内原生预测</span>
+                <span class="text-[10px] text-slate-500">In-Database Machine Learning</span>
               </div>
               <div class="flex-1 overflow-y-auto space-y-2 pr-1" id="ai-diagnostics-list">
                 <div class="p-3 rounded-xl bg-slate-900/70 border border-amber-500/20 text-xs space-y-1">
                   <p class="text-slate-200 leading-relaxed text-[11px]" id="diag-summary-text">
-                    全网 11 台生产虚拟机运行正常，东京、美东、台湾、新加坡与北京网络时延与负载均在基线阈值内。
+                    初始化预测模型加载中... (Waiting for HeatWave ML Diagnostics)
                   </p>
                 </div>
               </div>
@@ -1146,8 +1146,8 @@
         list.innerHTML = diag.diagnostics.map(item => `
           <div class="p-3 rounded-xl bg-slate-900/70 border border-amber-500/20 text-xs space-y-1 shadow-xs">
             <div class="flex items-center justify-between text-amber-400 font-mono font-semibold">
-              <span><i class="fa-solid fa-shield-heart mr-1.5 text-amber-500"></i>智能运维巡检</span>
-              <span class="text-[10px] text-slate-500">AutoML Agent</span>
+              <span><i class="fa-solid fa-shield-heart mr-1.5 text-amber-500"></i>HeatWave AutoML 预测引擎</span>
+              <span class="text-[10px] text-slate-500">HeatWave ML 推理引擎</span>
             </div>
             <p class="text-slate-200 leading-relaxed text-[11px]">${item}</p>
           </div>
