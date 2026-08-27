@@ -810,12 +810,46 @@
           </div>
 
           <!-- AI Body Grid (Full Height Extended Space) -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 flex-1 overflow-hidden min-h-0">
-            <!-- Left: Heuristics & Diagnostics List -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-3.5 flex-1 overflow-hidden min-h-0">
+            <!-- Left: HeatWave Status Cards -->
             <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between overflow-hidden shadow-sm">
               <div class="text-xs font-mono font-bold text-amber-400 flex items-center justify-between mb-2 shrink-0">
-                <span><i class="fa-solid fa-shield-heart mr-1.5 text-amber-500"></i>MySQL HeatWave AutoML 库内原生预测</span>
-                <span class="text-[10px] text-slate-500">In-Database Machine Learning</span>
+                <span><i class="fa-solid fa-database mr-1.5 text-amber-500"></i>HeatWave 集群状态</span>
+                <span id="hw-cluster-status" class="text-[10px] text-emerald-300 px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-800 font-bold">ONLINE</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 flex-1">
+                <div class="p-3 rounded-xl bg-slate-900/70 border border-amber-500/20 flex flex-col justify-between items-center text-center">
+                  <div class="text-slate-400 text-[10px] uppercase font-semibold">内存使用</div>
+                  <div id="hw-memory-used" class="text-white font-extrabold text-lg my-0.5">-- MB</div>
+                  <div id="hw-memory-pct" class="text-[10px] text-amber-400">--%</div>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900/70 border border-amber-500/20 flex flex-col justify-between items-center text-center">
+                  <div class="text-slate-400 text-[10px] uppercase font-semibold">查询卸载</div>
+                  <div id="hw-queries-offloaded" class="text-white font-extrabold text-lg my-0.5">--</div>
+                  <div id="hw-offload-rate" class="text-[10px] text-emerald-400">--%</div>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900/70 border border-amber-500/20 flex flex-col justify-between items-center text-center">
+                  <div class="text-slate-400 text-[10px] uppercase font-semibold">已加载表</div>
+                  <div id="hw-tables-loaded" class="text-white font-extrabold text-lg my-0.5">--</div>
+                  <div class="text-[10px] text-slate-400">/ 10 张</div>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900/70 border border-amber-500/20 flex flex-col justify-between items-center text-center">
+                  <div class="text-slate-400 text-[10px] uppercase font-semibold">总记录数</div>
+                  <div id="hw-total-records" class="text-white font-extrabold text-lg my-0.5">--</div>
+                  <div class="text-[10px] text-slate-400">实时同步</div>
+                </div>
+              </div>
+              <div class="mt-2 p-2 rounded-lg bg-slate-900/50 border border-slate-800 text-[10px] text-slate-400 flex items-center justify-between">
+                <span><i class="fa-solid fa-bolt text-amber-500 mr-1"></i>ML 引擎: <span id="hw-ml-status" class="text-emerald-400">ON</span></span>
+                <span>同步: <span id="hw-cp-status" class="text-emerald-400">ON</span></span>
+              </div>
+            </div>
+
+            <!-- Middle: Anomaly Detection Results -->
+            <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between overflow-hidden shadow-sm">
+              <div class="text-xs font-mono font-bold text-amber-400 flex items-center justify-between mb-2 shrink-0">
+                <span><i class="fa-solid fa-shield-heart mr-1.5 text-amber-500"></i>ML 异常检测</span>
+                <span id="anomaly-count-badge" class="text-[10px] text-slate-300 px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 font-bold">0 告警</span>
               </div>
               <div class="flex-1 overflow-y-auto space-y-2 pr-1" id="ai-diagnostics-list">
                 <div class="p-3 rounded-xl bg-slate-900/70 border border-amber-500/20 text-xs space-y-1">
@@ -826,34 +860,13 @@
               </div>
             </div>
 
-            <!-- Right: System Core Indicators -->
+            <!-- Right: Hourly Trend Chart -->
             <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between font-mono overflow-hidden shadow-sm">
               <div class="text-xs font-bold text-amber-400 uppercase flex items-center justify-between mb-2 shrink-0">
-                <span><i class="fa-solid fa-sliders mr-1.5 text-amber-500"></i>中枢运行核心指标</span>
-                <span class="text-[10px] text-emerald-300 px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-800 font-bold">RUNNING</span>
+                <span><i class="fa-solid fa-chart-line mr-1.5 text-amber-500"></i>24H CPU 趋势</span>
+                <span class="text-[10px] text-slate-500">HeatWave OLAP</span>
               </div>
-              <div class="grid grid-cols-2 gap-2.5 flex-1">
-                <div class="p-3.5 rounded-xl bg-slate-900/70 border border-amber-500/20 flex flex-col justify-between items-center text-center">
-                  <div class="text-slate-400 text-xs uppercase font-semibold">遥测入库周期</div>
-                  <div class="text-white font-extrabold text-lg my-0.5">15 秒 / 批次</div>
-                  <div class="text-[10px] text-slate-400">高频瞬时指标同步</div>
-                </div>
-                <div class="p-3.5 rounded-xl bg-slate-900/70 border border-amber-500/20 flex flex-col justify-between items-center text-center">
-                  <div class="text-slate-400 text-xs uppercase font-semibold">安全隧道通道</div>
-                  <div class="text-sky-400 font-extrabold text-lg my-0.5">Cloudflare QUIC</div>
-                  <div class="text-[10px] text-slate-400">加密穿透网关</div>
-                </div>
-                <div class="p-3.5 rounded-xl bg-slate-900/70 border border-amber-500/20 flex flex-col justify-between items-center text-center">
-                  <div class="text-slate-400 text-xs uppercase font-semibold">API 访问鉴权</div>
-                  <div class="text-emerald-400 font-extrabold text-lg my-0.5">Active (Secret)</div>
-                  <div class="text-[10px] text-slate-400">全流量防爬拦截</div>
-                </div>
-                <div class="p-3.5 rounded-xl bg-slate-900/70 border border-amber-500/20 flex flex-col justify-between items-center text-center">
-                  <div class="text-slate-400 text-xs uppercase font-semibold">底层时序数据库</div>
-                  <div class="text-amber-400 font-extrabold text-lg my-0.5">MySQL HeatWave</div>
-                  <div class="text-[10px] text-slate-400">自适应索引检索</div>
-                </div>
-              </div>
+              <div id="hourly-trend-chart" class="flex-1 w-full min-h-[180px]"></div>
             </div>
           </div>
 
@@ -1040,10 +1053,13 @@
           resourceChart?.resize();
           latencyChart?.resize();
           mapChart?.resize();
+          hourlyTrendChart?.resize();
         });
         if (mapEl) observer.observe(mapEl);
         if (resEl) observer.observe(resEl);
         if (latEl) observer.observe(latEl);
+        const trendEl = document.getElementById('hourly-trend-chart');
+        if (trendEl) observer.observe(trendEl);
       } catch (e) {
         console.warn('Chart init error:', e);
       }
@@ -1079,7 +1095,13 @@
         }
       } catch (err) {
         console.error('Failed to fetch diagnostics:', err);
-      } finally {
+      }
+
+      // Fetch HeatWave status and hourly trends
+      try { fetchHeatWaveStatus(); } catch(e) { console.error('fetchHeatWaveStatus error:', e); }
+      try { fetchHourlyTrend(); } catch(e) { console.error('fetchHourlyTrend error:', e); }
+
+      finally {
         setTimeout(() => icon?.classList.remove('fa-spin'), 600);
       }
     }
@@ -1141,18 +1163,156 @@
           : 'px-2.5 py-0.5 rounded-full bg-amber-950/60 text-amber-300 border border-amber-800 font-semibold text-[11px]';
       }
 
+      // Update anomaly count badge
+      const anomalyBadge = document.getElementById('anomaly-count-badge');
+      if (anomalyBadge) {
+        const count = diag.anomalies_count || 0;
+        anomalyBadge.innerText = `${count} 告警`;
+        anomalyBadge.className = count > 0 
+          ? 'text-[10px] text-amber-300 px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-800 font-bold'
+          : 'text-[10px] text-slate-300 px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 font-bold';
+      }
+
+      // Update HeatWave stats from diagnostics
+      if (diag.heatwave) {
+        const hwQueriesEl = document.getElementById('hw-queries-offloaded');
+        const hwRecordsEl = document.getElementById('hw-total-records');
+        if (hwQueriesEl) hwQueriesEl.innerText = diag.heatwave.queries_offloaded || '--';
+        if (hwRecordsEl) hwRecordsEl.innerText = (diag.heatwave.total_records || 0).toLocaleString();
+      }
+
       const list = document.getElementById('ai-diagnostics-list');
       if (list && diag.diagnostics && diag.diagnostics.length > 0) {
-        list.innerHTML = diag.diagnostics.map(item => `
-          <div class="p-3 rounded-xl bg-slate-900/70 border border-amber-500/20 text-xs space-y-1 shadow-xs">
-            <div class="flex items-center justify-between text-amber-400 font-mono font-semibold">
-              <span><i class="fa-solid fa-shield-heart mr-1.5 text-amber-500"></i>HeatWave AutoML 预测引擎</span>
-              <span class="text-[10px] text-slate-500">HeatWave ML 推理引擎</span>
+        list.innerHTML = diag.diagnostics.map((item, idx) => {
+          const isHeatWave = item.includes('HeatWave');
+          const isAlert = item.includes('告警') || item.includes('检测');
+          const iconClass = isAlert ? 'fa-triangle-exclamation text-amber-500' : 'fa-circle-check text-emerald-500';
+          const borderClass = isAlert ? 'border-amber-500/30' : 'border-emerald-500/20';
+          return `
+            <div class="p-2.5 rounded-lg bg-slate-900/70 border ${borderClass} text-[11px] shadow-xs">
+              <p class="text-slate-200 leading-relaxed"><i class="fa-solid ${iconClass} mr-1.5"></i>${item}</p>
             </div>
-            <p class="text-slate-200 leading-relaxed text-[11px]">${item}</p>
-          </div>
-        `).join('');
+          `;
+        }).join('');
       }
+    }
+
+    // Fetch HeatWave cluster status
+    async function fetchHeatWaveStatus() {
+      try {
+        const res = await fetch(`/api/analytics/heatwave-status?_t=${Date.now()}`);
+        const data = await res.json();
+        if (data.status === 'success') {
+          renderHeatWaveStatus(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch HeatWave status:', err);
+      }
+    }
+
+    function renderHeatWaveStatus(data) {
+      // Cluster status
+      const statusEl = document.getElementById('hw-cluster-status');
+      if (statusEl) {
+        const isOnline = data.cluster?.service === 'ONLINE';
+        statusEl.innerText = isOnline ? 'ONLINE' : 'OFFLINE';
+        statusEl.className = isOnline 
+          ? 'text-[10px] text-emerald-300 px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-800 font-bold'
+          : 'text-[10px] text-rose-300 px-2 py-0.5 rounded-full bg-rose-950/80 border border-rose-800 font-bold';
+      }
+
+      // Memory
+      const memUsedEl = document.getElementById('hw-memory-used');
+      const memPctEl = document.getElementById('hw-memory-pct');
+      if (memUsedEl) memUsedEl.innerText = `${data.memory?.used_mb || 0} MB`;
+      if (memPctEl) memPctEl.innerText = `${data.memory?.usage_percent || 0}%`;
+
+      // Queries
+      const queriesEl = document.getElementById('hw-queries-offloaded');
+      const offloadRateEl = document.getElementById('hw-offload-rate');
+      if (queriesEl) queriesEl.innerText = data.performance?.queries_offloaded || 0;
+      if (offloadRateEl) offloadRateEl.innerText = `${data.performance?.offload_rate_percent || 0}%`;
+
+      // Tables & Records
+      const tablesEl = document.getElementById('hw-tables-loaded');
+      const recordsEl = document.getElementById('hw-total-records');
+      if (tablesEl) tablesEl.innerText = data.data?.tables_loaded || 0;
+      if (recordsEl) recordsEl.innerText = (data.data?.total_records || 0).toLocaleString();
+
+      // ML & CP status
+      const mlEl = document.getElementById('hw-ml-status');
+      const cpEl = document.getElementById('hw-cp-status');
+      if (mlEl) mlEl.innerText = data.cluster?.ml_status || 'OFF';
+      if (cpEl) cpEl.innerText = data.cluster?.change_propagation || 'OFF';
+    }
+
+    // Fetch hourly analytics for trend chart
+    let hourlyTrendChart = null;
+    async function fetchHourlyTrend() {
+      try {
+        const res = await fetch(`/api/analytics/hourly?hours=24&_t=${Date.now()}`);
+        const data = await res.json();
+        if (data.status === 'success' && data.data) {
+          renderHourlyTrendChart(data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch hourly trend:', err);
+      }
+    }
+
+    function renderHourlyTrendChart(hourlyData) {
+      const chartEl = document.getElementById('hourly-trend-chart');
+      if (!chartEl) return;
+
+      if (!hourlyTrendChart) {
+        hourlyTrendChart = echarts.init(chartEl);
+      }
+
+      // Group by hour and calculate average CPU across all nodes
+      const hourMap = {};
+      hourlyData.forEach(item => {
+        const hour = item.hour;
+        if (!hourMap[hour]) {
+          hourMap[hour] = { sum: 0, count: 0 };
+        }
+        hourMap[hour].sum += parseFloat(item.avg_cpu) || 0;
+        hourMap[hour].count += 1;
+      });
+
+      const hours = Object.keys(hourMap).sort().slice(-24);
+      const avgCpus = hours.map(h => (hourMap[h].sum / hourMap[h].count).toFixed(2));
+      const labels = hours.map(h => h.split(' ')[1] || h.slice(11, 16));
+
+      hourlyTrendChart.setOption({
+        tooltip: { trigger: 'axis', formatter: '{b}<br/>CPU: {c}%' },
+        grid: { top: 20, bottom: 25, left: 40, right: 15 },
+        xAxis: { 
+          type: 'category', 
+          data: labels, 
+          axisLine: { lineStyle: { color: '#334155' } }, 
+          axisLabel: { color: '#94A3B8', fontSize: 10 } 
+        },
+        yAxis: { 
+          type: 'value', 
+          max: 100,
+          splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.06)' } }, 
+          axisLabel: { color: '#94A3B8', formatter: '{value}%', fontSize: 10 } 
+        },
+        series: [{
+          name: 'CPU',
+          type: 'line',
+          smooth: true,
+          data: avgCpus,
+          symbolSize: 4,
+          itemStyle: { color: '#F59E0B' },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(245, 158, 11, 0.3)' },
+              { offset: 1, color: 'rgba(245, 158, 11, 0.02)' }
+            ])
+          }
+        }]
+      });
     }
 
     function renderTable(nodes) {

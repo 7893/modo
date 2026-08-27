@@ -201,22 +201,36 @@ def get_nodes_summary():
 def get_latest_metrics():
     """
     Returns the latest telemetry snapshot for every registered active node.
+    Uses HeatWave-optimized view v_node_latest_status for acceleration.
     Used for dashboard top cards, world map status, and fleet overview.
     """
     active_names = [n["name"] for n in TARGET_NODES]
     node_map = {n["name"]: n for n in TARGET_NODES}
 
+    # Use HeatWave-optimized view instead of subquery
     format_strings = ','.join(['%s'] * len(active_names))
     query = f"""
-    SELECT t.*
-    FROM vm_telemetry t
-    INNER JOIN (
-        SELECT node_name, MAX(id) AS max_id
-        FROM vm_telemetry
-        WHERE node_name IN ({format_strings})
-        GROUP BY node_name
-    ) latest ON t.id = latest.max_id
-    ORDER BY t.node_name ASC;
+    SELECT 
+        v.node_name,
+        v.host_ip,
+        v.region,
+        v.cpu_usage_percent,
+        v.mem_usage_percent,
+        v.disk_usage_percent,
+        v.latency_ms as scrape_duration_ms,
+        v.status,
+        v.recorded_at,
+        v.health_score,
+        v.cpu_score,
+        v.mem_score,
+        t.id,
+        t.net_in_bytes_sec,
+        t.net_out_bytes_sec
+    FROM v_node_latest_status v
+    LEFT JOIN vm_telemetry t ON v.node_name = t.node_name 
+        AND v.recorded_at = t.recorded_at
+    WHERE v.node_name IN ({format_strings})
+    ORDER BY v.node_name ASC;
     """
     try:
         with get_db_connection() as conn:
@@ -230,7 +244,7 @@ def get_latest_metrics():
             r["provider"] = meta.get("provider", "Cloud")
             r["lat"] = meta.get("lat", 0.0)
             r["lng"] = meta.get("lng", 0.0)
-            if isinstance(r["recorded_at"], datetime):
+            if isinstance(r.get("recorded_at"), datetime):
                 r["recorded_at"] = r["recorded_at"].isoformat()
             enriched.append(r)
 
@@ -238,6 +252,7 @@ def get_latest_metrics():
             "status": "success",
             "count": len(enriched),
             "data": enriched,
+            "engine": "HeatWave",
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
@@ -253,6 +268,7 @@ def get_metrics_history(
 ):
     """
     Returns time-series telemetry data for plotting ECharts performance waveforms.
+    Uses HeatWave acceleration for large scans.
     """
     params = [hours]
     where_clauses = ["recorded_at >= NOW() - INTERVAL %s HOUR"]
@@ -288,6 +304,7 @@ def get_metrics_history(
             "hours": hours,
             "count": len(rows),
             "data": rows,
+            "engine": "HeatWave",
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
@@ -295,105 +312,328 @@ def get_metrics_history(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/api/analytics/hourly")
+def get_hourly_analytics(
+    node: Optional[str] = Query(None, description="Filter by node name"),
+    hours: int = Query(48, ge=1, le=168, description="History window in hours")
+):
+    """
+    Returns hourly aggregated analytics from HeatWave v_realtime_analytics view.
+    Provides avg CPU, memory, volatility metrics for trend analysis.
+    """
+    params = []
+    where_clause = "WHERE hour >= DATE_FORMAT(NOW() - INTERVAL %s HOUR, '%%Y-%%m-%%d %%H:00:00')"
+    params.append(hours)
+    
+    if node:
+        where_clause += " AND node_name = %s"
+        params.append(node)
+
+    query = f"""
+    SELECT node_name, hour, samples, avg_cpu, avg_mem, 
+           cpu_volatility, peak_latency
+    FROM v_realtime_analytics
+    {where_clause}
+    ORDER BY hour DESC, node_name ASC
+    LIMIT 500;
+    """
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, tuple(params))
+                rows = cur.fetchall()
+
+        for r in rows:
+            if isinstance(r.get("hour"), datetime):
+                r["hour"] = r["hour"].strftime("%Y-%m-%d %H:00:00")
+
+        return {
+            "status": "success",
+            "node": node or "all",
+            "hours": hours,
+            "count": len(rows),
+            "data": rows,
+            "engine": "HeatWave OLAP",
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error fetching hourly analytics: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/analytics/fleet")
+def get_fleet_health_report():
+    """
+    Returns comprehensive fleet health report from HeatWave v_fleet_health_report view.
+    Includes health scores, trends, and hour-over-hour comparisons.
+    """
+    query = """
+    SELECT node_name, hour_bucket, cpu_avg, mem_avg, latency_avg,
+           cpu_trend_1h, cpu_trend_24h, health_index
+    FROM v_fleet_health_report
+    ORDER BY hour_bucket DESC, node_name ASC
+    LIMIT 200;
+    """
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query)
+                rows = cur.fetchall()
+
+        for r in rows:
+            if isinstance(r.get("hour_bucket"), datetime):
+                r["hour_bucket"] = r["hour_bucket"].isoformat()
+
+        return {
+            "status": "success",
+            "count": len(rows),
+            "data": rows,
+            "engine": "HeatWave OLAP",
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error fetching fleet health report: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/analytics/anomalies")
+def get_anomaly_dashboard():
+    """
+    Returns anomaly detection summary from HeatWave v_anomaly_dashboard view.
+    Shows anomaly types, severity distribution, and open issues.
+    """
+    query = """
+    SELECT anomaly_type, severity, count, open_count, 
+           avg_confidence, latest
+    FROM v_anomaly_dashboard
+    ORDER BY open_count DESC, count DESC;
+    """
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query)
+                rows = cur.fetchall()
+
+        for r in rows:
+            if isinstance(r.get("latest"), datetime):
+                r["latest"] = r["latest"].isoformat()
+
+        return {
+            "status": "success",
+            "count": len(rows),
+            "data": rows,
+            "engine": "HeatWave ML",
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error fetching anomaly dashboard: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/analytics/heatwave-status")
+def get_heatwave_status():
+    """
+    Returns HeatWave cluster status and performance metrics.
+    Shows memory usage, query offload stats, and acceleration ratios.
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # Get HeatWave status variables
+                status_vars = {}
+                key_vars = [
+                    'rapid_cluster_status', 'rapid_service_status', 
+                    'rapid_heap_usage', 'rapid_query_offload_count',
+                    'rapid_query_nonoffload_count', 'rapid_change_propagation_status',
+                    'rapid_ml_status'
+                ]
+                for var in key_vars:
+                    cur.execute(
+                        "SELECT VARIABLE_VALUE FROM performance_schema.global_status WHERE VARIABLE_NAME = %s",
+                        (var,)
+                    )
+                    row = cur.fetchone()
+                    status_vars[var] = row['VARIABLE_VALUE'] if row else None
+                
+                # Get loaded tables count
+                cur.execute("SELECT COUNT(*) as cnt FROM performance_schema.rpd_tables")
+                tables_loaded = cur.fetchone()['cnt']
+                
+                # Get total records
+                cur.execute("SELECT COUNT(*) as cnt FROM vm_telemetry")
+                total_records = cur.fetchone()['cnt']
+
+        heap_bytes = int(status_vars.get('rapid_heap_usage', 0) or 0)
+        offload = int(status_vars.get('rapid_query_offload_count', 0) or 0)
+        non_offload = int(status_vars.get('rapid_query_nonoffload_count', 0) or 0)
+        total_queries = offload + non_offload
+        offload_rate = (offload / total_queries * 100) if total_queries > 0 else 0
+
+        return {
+            "status": "success",
+            "cluster": {
+                "status": status_vars.get('rapid_cluster_status', 'N/A'),
+                "service": status_vars.get('rapid_service_status', 'N/A'),
+                "ml_status": status_vars.get('rapid_ml_status', 'N/A'),
+                "change_propagation": status_vars.get('rapid_change_propagation_status', 'N/A')
+            },
+            "memory": {
+                "used_mb": round(heap_bytes / 1024 / 1024, 1),
+                "total_mb": 5120,
+                "usage_percent": round(heap_bytes / 1024 / 1024 / 51.2, 1)
+            },
+            "performance": {
+                "queries_offloaded": offload,
+                "queries_not_offloaded": non_offload,
+                "offload_rate_percent": round(offload_rate, 1)
+            },
+            "data": {
+                "tables_loaded": tables_loaded,
+                "total_records": total_records
+            },
+            "engine": "HeatWave",
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error fetching HeatWave status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/ai/diagnostics")
 def get_ai_diagnostics():
     """
-    Automated health heuristics & anomaly detection summary with HTAP + Autopilot.
+    Automated health heuristics & anomaly detection summary with HeatWave HTAP + ML.
+    Uses v_node_latest_status view and anomaly_detection table for insights.
     """
     active_names = [n["name"] for n in TARGET_NODES]
     format_strings = ','.join(['%s'] * len(active_names))
 
+    # Use HeatWave view for latest status with health scores
     query_latest = f"""
-    SELECT t.node_name, t.status, t.cpu_usage_percent, t.mem_usage_percent,
-           t.disk_usage_percent, t.scrape_duration_ms, t.recorded_at
-    FROM vm_telemetry t
-    INNER JOIN (
-        SELECT node_name, MAX(id) AS max_id
-        FROM vm_telemetry
-        WHERE node_name IN ({format_strings})
-        GROUP BY node_name
-    ) latest ON t.id = latest.max_id;
+    SELECT node_name, status, cpu_usage_percent, mem_usage_percent,
+           disk_usage_percent, latency_ms as scrape_duration_ms, 
+           recorded_at, health_score
+    FROM v_node_latest_status
+    WHERE node_name IN ({format_strings});
     """
     
+    # HeatWave OLAP analytics query
     query_htap = """
     SELECT 
         COUNT(*) as sample_count,
-        MAX(scrape_duration_ms) as peak_latency
+        MAX(scrape_duration_ms) as peak_latency,
+        AVG(cpu_usage_percent) as avg_cpu,
+        STDDEV(cpu_usage_percent) as cpu_volatility
     FROM vm_telemetry
+    WHERE recorded_at >= NOW() - INTERVAL 1 HOUR
+    """
+    
+    # Get recent anomalies from ML detection
+    query_anomalies = """
+    SELECT node_name, anomaly_type, severity, description, confidence
+    FROM anomaly_detection
+    WHERE status = 'OPEN' AND detected_at >= NOW() - INTERVAL 24 HOUR
+    ORDER BY severity DESC, confidence DESC
+    LIMIT 10
     """
 
     try:
         import time
         with get_db_connection() as conn:
             with conn.cursor() as cur:
-                # 1. Fetch latest data
+                # 1. Fetch latest data from HeatWave view
                 cur.execute(query_latest, tuple(active_names))
                 rows = cur.fetchall()
                 
-                # 2. Run HTAP Complex Analytics Query
+                # 2. Run HeatWave OLAP analytics
                 htap_start = time.time()
                 cur.execute(query_htap)
                 htap_res = cur.fetchone()
-                htap_end = time.time()
-                htap_duration = htap_end - htap_start
-                total_rows = htap_res['sample_count'] if htap_res else 0
+                htap_duration = time.time() - htap_start
+                total_samples = htap_res['sample_count'] if htap_res else 0
+                avg_cpu = htap_res['avg_cpu'] if htap_res else 0
+                cpu_vol = htap_res['cpu_volatility'] if htap_res else 0
                 
-                # 3. Call Autopilot Advisor
-                advisor_msg = "HeatWave Autopilot (Advisor): 库内引擎在线守护中，暂无最新诊断。"
-                try:
-                    # Execute HeatWave advisor with a valid parameter format for JSON
-                    cur.execute("CALL sys.heatwave_advisor(JSON_OBJECT('auto_dp', 'true'))")
-                    advisor_output = cur.fetchall()
-                    version = "4.54"
-                    for row in advisor_output:
-                        if 'Version:' in str(row.values()):
-                            version = str(list(row.values())[0]).split()[-1]
-                    advisor_msg = f"HeatWave Autopilot (Advisor): 库内引擎 V{version} 在线守护，已动态扫描全网节点状态，当前内存与查表计划在最优状态。"
-                except Exception as e:
-                    # If it errors due to plugin state, fallback to a smart message
-                    if "ADVISOR" in str(e):
-                        advisor_msg = f"HeatWave Autopilot (Advisor): 库内引擎 V4.54 在线守护，已实时监控 11 个计算节点，当前未发现索引劣化或内存瓶颈。"
-                    else:
-                        advisor_msg = f"HeatWave Autopilot (Advisor): 引擎状态正常，持续巡检中..."
+                # 3. Get ML-detected anomalies
+                cur.execute(query_anomalies)
+                anomalies = cur.fetchall()
+                
+                # 4. Get total record count for display
+                cur.execute("SELECT COUNT(*) as cnt FROM vm_telemetry")
+                total_records = cur.fetchone()['cnt']
+                
+                # 5. Get HeatWave offload stats
+                cur.execute("SELECT VARIABLE_VALUE FROM performance_schema.global_status WHERE VARIABLE_NAME = 'rapid_query_offload_count'")
+                offload_row = cur.fetchone()
+                offload_count = int(offload_row['VARIABLE_VALUE']) if offload_row else 0
 
         total = len(rows)
         online = sum(1 for r in rows if r["status"] == "ONLINE")
         warnings = []
         
-        # MySQL HeatWave HTAP & Autopilot outputs
-        warnings.append(f"HeatWave HTAP: 单节点 OLAP 内存加速生效，仅耗时 {htap_duration:.3f} 秒即完成全量 {total_rows:,} 条历史遥测数据的多维分析，彻底消灭 ETL。")
-        warnings.append(advisor_msg)
-        warnings.append("HeatWave ML: 库内时序预测模型 (AutoML) 训练就绪，持续侦测异常中...")
+        # HeatWave HTAP & ML status messages
+        warnings.append(
+            f"HeatWave HTAP: 内存加速引擎已处理 {offload_count} 次 OLAP 查询，"
+            f"本次分析 {total_samples:,} 条样本仅耗时 {htap_duration*1000:.0f}ms，无需 ETL。"
+        )
+        warnings.append(
+            f"HeatWave ML: 实时监测 {total_records:,} 条遥测记录，"
+            f"当前 CPU 均值 {avg_cpu:.1f}%，波动率 {cpu_vol:.2f}。"
+        )
+        
+        # Add ML-detected anomalies
+        if anomalies:
+            for a in anomalies:
+                sev_icon = "🔴" if a['severity'] == 'HIGH' else "🟡" if a['severity'] == 'MEDIUM' else "🟢"
+                conf = float(a['confidence']) if a['confidence'] else 0
+                warnings.append(
+                    f"HeatWave ML 检测 {sev_icon}: [{a['anomaly_type']}] {a['node_name']} - "
+                    f"{a['description']} (置信度: {conf*100:.0f}%)"
+                )
+        else:
+            warnings.append("HeatWave ML: 异常检测引擎运行中，当前无高危告警。")
 
+        # Real-time threshold checks
         for r in rows:
             if r["status"] != "ONLINE":
-                warnings.append(f"HeatWave ML 异常检测: 节点 {r['node_name']} 连接离线 ({r['status']})，触发重连判定。")
-            elif r["cpu_usage_percent"] > 80.0:
-                warnings.append(f"HeatWave ML 算力预测: 节点 {r['node_name']} CPU 负载激增 ({r['cpu_usage_percent']}%)，存在请求排队风险。")
-            elif r["mem_usage_percent"] > 85.0:
-                warnings.append(f"HeatWave ML 容量预测: 节点 {r['node_name']} 内存利用率突增 ({r['mem_usage_percent']}%)，预测 2 小时后可能溢出。")
-            elif r["disk_usage_percent"] > 85.0:
-                warnings.append(f"HeatWave ML 容量预测: 节点 {r['node_name']} 磁盘容量达到临界值 ({r['disk_usage_percent']}%)。")
-            elif r["scrape_duration_ms"] > 800:
-                warnings.append(f"HeatWave ML 路由推断: 节点 {r['node_name']} 网络时延异常波动 ({r['scrape_duration_ms']}ms)，疑似跨域拥塞。")
+                warnings.append(f"实时告警: 节点 {r['node_name']} 状态异常 ({r['status']})，需要人工介入。")
+            elif r.get("cpu_usage_percent", 0) > 80.0:
+                warnings.append(f"实时告警: 节点 {r['node_name']} CPU 负载过高 ({r['cpu_usage_percent']:.1f}%)。")
+            elif r.get("mem_usage_percent", 0) > 85.0:
+                warnings.append(f"实时告警: 节点 {r['node_name']} 内存压力 ({r['mem_usage_percent']:.1f}%)。")
+            elif r.get("scrape_duration_ms", 0) > 800:
+                warnings.append(f"实时告警: 节点 {r['node_name']} 网络延迟异常 ({r['scrape_duration_ms']}ms)。")
 
-        health_score = round((online / max(total, 1)) * 100, 1)
-        if len(warnings) > 3:  # Account for the 3 default HTAP/ML messages
-            health_score = max(0, health_score - (len(warnings)-3) * 5)
+        # Calculate health score
+        base_score = (online / max(total, 1)) * 100
+        anomaly_penalty = len(anomalies) * 3
+        warning_penalty = max(0, len(warnings) - 3) * 2
+        health_score = max(0, min(100, base_score - anomaly_penalty - warning_penalty))
 
-        from datetime import datetime
+        # Get average health score from nodes
+        avg_node_health = sum(float(r.get('health_score', 100) or 100) for r in rows) / max(len(rows), 1)
+        health_score = round((health_score + avg_node_health) / 2, 1)
+
         return {
             "fleet_health_score": health_score,
             "total_nodes": total,
             "online_nodes": online,
-            "status": "HEALTHY" if health_score >= 80 else "WARNING",
-            "anomalies_count": len(warnings) - 3,
+            "status": "HEALTHY" if health_score >= 80 else "WARNING" if health_score >= 60 else "CRITICAL",
+            "anomalies_count": len(anomalies),
             "diagnostics": warnings,
+            "heatwave": {
+                "queries_offloaded": offload_count,
+                "total_records": total_records,
+                "analysis_time_ms": round(htap_duration * 1000, 1)
+            },
             "evaluated_at": datetime.utcnow().isoformat()
         }
     except Exception as e:
         import traceback
-        from fastapi import HTTPException
+        logger.error(f"Error in AI diagnostics: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
