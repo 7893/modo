@@ -1,4 +1,4 @@
-# 🌐 MODO (墨斗) // 全球多云分布式数据底座与智能中枢
+# 🌐 MODO (墨斗) // 多云分布式数据底座与智能中枢
 
 [![CI](https://github.com/7893/nexus/actions/workflows/ci.yml/badge.svg)](https://github.com/7893/nexus/actions/workflows/ci.yml)
 [![Deploy to Cloudflare Workers](https://github.com/7893/nexus/actions/workflows/deploy.yml/badge.svg)](https://github.com/7893/nexus/actions/workflows/deploy.yml)
@@ -14,7 +14,7 @@
 
 | Service | Access URL | Architecture Role | Status |
 | :--- | :--- | :--- | :---: |
-| 🌐 **MODO Command Dashboard** | [`https://modo.53.workers.dev`](https://modo.53.workers.dev) | Global Edge Worker UI + ECharts 5 + Supabase Auth | 🟢 **ONLINE** |
+| 🌐 **MODO Command Dashboard** | [`https://modo.53.workers.dev`](https://modo.53.workers.dev) | Edge Worker UI + ECharts 5 + Supabase Auth | 🟢 **ONLINE** |
 | 🚇 **MODO Private API Gateway** | `https://api-modo.8n8m.cfd` | Zero-Trust Cloudflare Tunnel ➡️ FastAPI Bridge | 🟢 **ACTIVE** |
 | 🗄️ **Managed MySQL Data Store** | `modo_db` (`<REDACTED_DB_IP>:3306` via NLB) | MySQL HeatWave Cloud Database System | 🟢 **ACTIVE** |
 
@@ -23,12 +23,12 @@
 ## 🗺️ System Architecture
 
 ```text
-                               【Global Users & Operations】
+                               【Operations & Management】
                                              │  (HTTPS / TLS 1.3)
                                              ▼
                         ┌─────────────────────────────────────────┐
                         │      Cloudflare Edge Network (CDN)      │
-                        │       https://nexus.53.workers.dev      │
+                        │        https://modo.53.workers.dev      │
                         │                                         │
                         │  • Hono.js Edge Application             │
                         │  • ECharts 5 Supabase White Theme       │
@@ -39,7 +39,7 @@
                                              ▼
                         ┌─────────────────────────────────────────┐
                         │     Cloudflare Tunnel (QUIC Protocol)   │
-                        │          api-nexus.8n8m.cfd             │
+                        │          api-modo.8n8m.cfd              │
                         └────────────────────┬────────────────────┘
                                              │  (Zero-Trust Private Ingress)
                                              ▼
@@ -53,11 +53,11 @@
                 (Prometheus Scrape)   │                  │ (Private Subnet TCP 3306)
                                        ▼                  ▼
              ┌────────────────────────────────────┐   ┌───────────────────────────┐
-             │     10 Global Cloud VM Fleet       │   │    Oracle Cloud MySQL     │
-             │                                    │   │   HeatWave 26.7 Cloud     │
+             │      11 Multi-Cloud VM Fleet       │   │    Cloud MySQL HeatWave   │
+             │                                    │   │     Enterprise System     │
              │ • Tokyo (jpa, jpb, jpc, jpd, jpe)  │   │        (modo_db)          │
              │ • Ashburn (usa, usb, usc)          │   │                           │
-             │ • Singapore (sga)                  │   │ • vm_telemetry (timeseries)
+             │ • Singapore (sga), Taiwan (gcp)    │   │ • vm_telemetry (timeseries)
              │ • Beijing (cna)                    │   │ • High-performance index │
              └────────────────────────────────────┘   └───────────────────────────┘
 ```
@@ -66,7 +66,7 @@
 
 ## 🚀 Key Features
 
-* 🌐 **Global Multi-Cloud Topology Map**: Dynamic geographical visualization rendered with ECharts 5, mapping nodes across Tokyo, Ashburn, Singapore, and Beijing with real-time ping latency and health beacons.
+* 🌐 **Multi-Cloud Topology Map**: Dynamic geographical visualization rendered with ECharts 5, mapping nodes across Tokyo, Ashburn, Singapore, Taiwan, and Beijing with real-time ping latency and health beacons.
 * 📈 **Time-Series Telemetry Waveforms**: Live streaming CPU, memory utilization, disk space, and network I/O throughput stored in MySQL HeatWave.
 * 🤖 **AI Autonomous Diagnostics**: Real-time anomaly detection heuristics, fleet health scoring (`0~100%`), and remediation recommendations.
 * 🚇 **Zero-Trust Network Bridge**: Zero public database ports. Cloudflare Tunnel connects Cloudflare Workers directly to private internal subnet instances.

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MODO · 墨斗 // 全球多云分布式数据底座与智能中枢</title>
+  <title>MODO · 墨斗 // 多云分布式数据底座与智能中枢</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
   
   <!-- Tailwind CSS & FontAwesome -->
@@ -213,7 +213,7 @@
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-slate-900">全球多云算力集群基础设施总览</h2>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-slate-900">多云集群基础设施总览</h2>
                   <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-100/80 text-emerald-800 border border-emerald-300 font-mono font-bold uppercase">01 · Fleet Overview</span>
                 </div>
                 <p class="text-xs text-slate-600 mt-0.5">纳管 11 台生产虚拟机 · 15s 高频时序遥测入库 · 跨 5 大多云区域 QUIC 骨干互联</p>
@@ -241,7 +241,7 @@
 
             <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between shadow-sm">
               <div class="flex items-center justify-between text-slate-600 text-xs font-sans font-semibold">
-                <span>全球平均网络时延</span>
+                <span>跨区域平均网络时延</span>
                 <i class="fa-solid fa-bolt text-teal-600"></i>
               </div>
               <div class="text-3xl font-extrabold text-slate-900 my-0.5" id="stat-avg-latency">-- <span class="text-sm font-normal text-slate-400">ms</span></div>
@@ -283,7 +283,7 @@
               <div class="flex items-center justify-between mb-2 shrink-0">
                 <span class="text-xs font-bold text-slate-800 flex items-center gap-2">
                   <i class="fa-solid fa-earth-asia text-emerald-600"></i>
-                  <span>全球 5 大多云区域矩阵速览</span>
+                  <span>5 大多云区域矩阵速览</span>
                 </span>
                 <span class="text-[11px] font-mono text-slate-500">11 台生产主机</span>
               </div>
@@ -473,7 +473,7 @@
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-slate-900">全球多云拓扑与节点雷达</h2>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-slate-900">多云网络拓扑与节点雷达</h2>
                   <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-300 font-mono font-bold uppercase">02 · Topology Radar</span>
                 </div>
                 <p class="text-xs text-slate-600 mt-0.5">11 节点地理测距分布 · 5 节点区域星团离散投影 · 实时探测时延</p>
@@ -525,7 +525,7 @@
           </div>
           <div class="w-full flex justify-center shrink-0">
             <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/90 text-blue-800 border border-blue-300 text-center whitespace-nowrap shadow-xs">
-              全球雷达
+              网络雷达
             </span>
           </div>
         </div>
@@ -628,10 +628,10 @@
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-slate-900">全球网络端到端延迟分布</h2>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-slate-900">节点端到端网络延迟分布</h2>
                   <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-300 font-mono font-bold uppercase">04 · Latency Spectrum</span>
                 </div>
-                <p class="text-xs text-slate-600 mt-0.5">美东数据中枢至全球 11 节点 Prometheus 探测延迟阶梯分析</p>
+                <p class="text-xs text-slate-600 mt-0.5">美东数据中枢至 11 节点 Prometheus 探测延迟阶梯分析</p>
               </div>
             </div>
             <span class="px-3 py-1 rounded-full bg-white/90 border border-purple-200 text-xs font-mono text-purple-700 font-bold shadow-sm">
@@ -710,7 +710,7 @@
               </div>
               <div>
                 <div class="flex items-center gap-2">
-                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-slate-900">全球生产节点实时遥测清单</h2>
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-slate-900">生产节点实时遥测清单</h2>
                   <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-800 border border-slate-300 font-mono font-bold uppercase">05 · Asset Inventory</span>
                 </div>
                 <p class="text-xs text-slate-600 mt-0.5">11 台生产主机实时运行状态 · 资源指标瞬时差分计算</p>
@@ -1305,7 +1305,7 @@
         },
         series: [
           {
-            name: '全球节点',
+            name: '集群节点',
             type: 'effectScatter',
             coordinateSystem: 'cartesian2d',
             data: scatterData,
