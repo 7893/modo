@@ -113,7 +113,7 @@ app.add_middleware(
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_headers=["Content-Type", "Authorization", "X-Internal-Secret"],
 )
 
 # Database connection pool (lazy initialization)
@@ -363,7 +363,7 @@ INTERNAL_API_SECRET = os.getenv("INTERNAL_API_SECRET")
 
 @app.middleware("http")
 async def verify_internal_secret(request: Request, call_next):
-    if request.url.path.startswith("/api/"):
+    if request.url.path.startswith("/api/") and request.method != "OPTIONS":
         secret = request.headers.get("X-Internal-Secret")
         # Bypass auth for unit tests if not running in production
         if not INTERNAL_API_SECRET and "pytest" in sys.modules:
