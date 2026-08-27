@@ -9,3 +9,4 @@ dist/
 logs/*.log
 .pytest_cache/
 data-bridge/config/nodes.json
+worker-configuration.d.ts
