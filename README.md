@@ -1,12 +1,12 @@
-# 🌐 MODO (墨斗) // 甲骨文 Always Free 多云数据底座与智能中枢
+# 🌐 MODO (墨斗) // 全球多云分布式数据底座与智能中枢
 
 [![CI](https://github.com/7893/nexus/actions/workflows/ci.yml/badge.svg)](https://github.com/7893/nexus/actions/workflows/ci.yml)
 [![Deploy to Cloudflare Workers](https://github.com/7893/nexus/actions/workflows/deploy.yml/badge.svg)](https://github.com/7893/nexus/actions/workflows/deploy.yml)
 [![Production Dashboard](https://img.shields.io/badge/Live%20Demo-modo-06b6d4?style=flat-square&logo=cloudflare)](https://service.example.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg?style=flat-square)](LICENSE)
 
-> **MODO（墨斗）—— 专为多云业务打造的永久免费 MySQL 数据底座与全景遥测平台。**  
-> Powered by **Cloudflare Workers (Hono)**, **OCI Always Free MySQL HeatWave 26.7 Cloud (`modo_db`)**, **OCI Network Load Balancer (NLB)**, and **FastAPI**.
+> **MODO（墨斗）—— 专为多云分布式业务打造的高可用数据底座与全景遥测中枢。**  
+> Powered by **Cloudflare Workers (Hono)**, **MySQL HeatWave Engine (`modo_db`)**, **Network Load Balancer (NLB)**, and **FastAPI**.
 
 ---
 
@@ -16,7 +16,7 @@
 | :--- | :--- | :--- | :---: |
 | 🌐 **MODO Command Dashboard** | [`https://service.example.com`](https://service.example.com) | Global Edge Worker UI + ECharts 5 + Supabase Auth | 🟢 **ONLINE** |
 | 🚇 **MODO Private API Gateway** | `https://tunnel.example.com` | Zero-Trust Cloudflare Tunnel ➡️ FastAPI Bridge | 🟢 **ACTIVE** |
-| 🗄️ **Always Free MySQL Data Store** | `modo_db` (`<REDACTED_DB_IP>:3306` via NLB) | Oracle Cloud MySQL HeatWave DB System | 🟢 **ACTIVE** |
+| 🗄️ **Managed MySQL Data Store** | `modo_db` (`<REDACTED_DB_IP>:3306` via NLB) | MySQL HeatWave Cloud Database System | 🟢 **ACTIVE** |
 
 ---
 
