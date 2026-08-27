@@ -1,5 +1,5 @@
 [Unit]
-Description=Nexus Data Bridge API Gateway
+Description=MODO Data Bridge API Gateway
 After=network.target
 
 [Service]

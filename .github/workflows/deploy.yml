@@ -58,5 +58,5 @@ jobs:
             cd /home/ubuntu/nexus
             git fetch origin main
             git reset --hard origin/main
-            sudo systemctl restart nexus-api.service
-            sudo systemctl restart nexus-ingest.service
+            sudo systemctl restart modo-api.service || sudo systemctl restart nexus-api.service
+            sudo systemctl restart modo-ingest.service || sudo systemctl restart nexus-ingest.service

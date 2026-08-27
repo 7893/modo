@@ -22,7 +22,7 @@ app.get('/api/nodes/latest', async (c) => {
   const backend = c.env.API_BACKEND_URL || 'https://api-nexus.8n8m.cfd'
   try {
     const res = await fetch(`${backend}/api/metrics/latest`, {
-      headers: { 'User-Agent': 'Nexus-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
+      headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
     })
     const data = await res.json()
     return c.json(data, res.status as any, {
@@ -39,7 +39,7 @@ app.get('/api/ai/diagnostics', async (c) => {
   const backend = c.env.API_BACKEND_URL || 'https://api-nexus.8n8m.cfd'
   try {
     const res = await fetch(`${backend}/api/ai/diagnostics`, {
-      headers: { 'User-Agent': 'Nexus-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
+      headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
     })
     const data = await res.json()
     return c.json(data, res.status as any, {
@@ -59,7 +59,7 @@ app.get('/api/metrics/history', async (c) => {
   const hours = url.searchParams.get('hours') || '24'
   try {
     const res = await fetch(`${backend}/api/metrics/history?node=${node}&hours=${hours}`, {
-      headers: { 'User-Agent': 'Nexus-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
+      headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
     })
     const data = await res.json()
     return c.json(data, res.status as any, {

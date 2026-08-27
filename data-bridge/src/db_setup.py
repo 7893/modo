@@ -1,6 +1,6 @@
 """
-Nexus Data Bridge - Database Setup
-Initializes the nexus_db database and vm_telemetry table on MySQL HeatWave.
+MODO Data Bridge - Database Setup
+Initializes the modo_db database and vm_telemetry table on MySQL HeatWave.
 """
 import os
 import re
@@ -27,7 +27,7 @@ def get_db_config():
     port = int(os.getenv("MYSQL_PORT", "3306"))
     user = os.getenv("MYSQL_USER")
     password = os.getenv("MYSQL_PASSWORD")
-    database = os.getenv("MYSQL_DATABASE", "nexus_db")
+    database = os.getenv("MYSQL_DATABASE", "modo_db")
     
     if not all([host, user, password]):
         raise RuntimeError("Missing required environment variables: MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD")

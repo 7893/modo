@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "nexus",
+  "name": "modo",
   "main": "src/index.ts",
   "compatibility_date": "2026-08-20",
   "account_id": "REDACTED_ACCOUNT_ID",

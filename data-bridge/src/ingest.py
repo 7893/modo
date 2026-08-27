@@ -1,7 +1,7 @@
 """
-Nexus Data Bridge - Telemetry Ingestion Service
+MODO Data Bridge - Telemetry Ingestion Service
 Scrapes node_exporter metrics (port 9100) from all configured global VMs
-and ingests parsed metrics into MySQL HeatWave.
+and ingests parsed metrics into MySQL HeatWave modo_db.
 """
 import os
 import json
@@ -67,7 +67,7 @@ def get_db_pool() -> PooledDB:
         port = int(os.getenv("MYSQL_PORT", "3306"))
         user = os.getenv("MYSQL_USER")
         password = os.getenv("MYSQL_PASSWORD")
-        database = os.getenv("MYSQL_DATABASE", "nexus_db")
+        database = os.getenv("MYSQL_DATABASE", "modo_db")
         
         if not all([host, user, password]):
             raise RuntimeError("Missing required environment variables: MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD")

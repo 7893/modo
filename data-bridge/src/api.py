@@ -1,10 +1,10 @@
-import sys
 """
-Nexus Data Bridge - FastAPI Gateway
+MODO Data Bridge - FastAPI Gateway
 Provides REST endpoints for Cloudflare Workers & Frontend UI
-to query telemetry data, node health, and AutoML insights.
+to query telemetry data, node health, and database metrics.
 """
 import os
+import sys
 import json
 import logging
 import time
@@ -39,6 +39,7 @@ RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", "60"))  # window in secon
 # Allowed CORS origins
 ALLOWED_ORIGINS = [
     "https://nexus.53.workers.dev",
+    "https://modo.53.workers.dev",
     "http://localhost:8787",  # wrangler dev
 ]
 
@@ -62,7 +63,7 @@ def load_target_nodes() -> list:
 TARGET_NODES = load_target_nodes()
 
 app = FastAPI(
-    title="Nexus Data Bridge API",
+    title="MODO Core API Gateway",
     description="Internal API for Cloudflare Tunnel & Worker integration",
     version="1.0.0"
 )
@@ -128,7 +129,7 @@ def get_db_pool() -> PooledDB:
         port = int(os.getenv("MYSQL_PORT", "3306"))
         user = os.getenv("MYSQL_USER")
         password = os.getenv("MYSQL_PASSWORD")
-        database = os.getenv("MYSQL_DATABASE", "nexus_db")
+        database = os.getenv("MYSQL_DATABASE", "modo_db")
         
         if not all([host, user, password]):
             raise RuntimeError("Missing required environment variables: MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD")
@@ -179,7 +180,7 @@ def health_check():
 
     return {
         "status": "online",
-        "service": "Nexus Data Bridge Gateway",
+        "service": "MODO Data Bridge Gateway",
         "node": "usa-ashburn",
         "database_status": "connected" if db_ok else "error",
         "timestamp": datetime.now().isoformat(),

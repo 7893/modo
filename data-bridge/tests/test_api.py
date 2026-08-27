@@ -17,7 +17,7 @@ def test_health_endpoint():
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "online"
-    assert data["service"] == "Nexus Data Bridge Gateway"
+    assert data["service"] == "MODO Data Bridge Gateway"
     assert "node" in data
     assert "timestamp" in data
 
