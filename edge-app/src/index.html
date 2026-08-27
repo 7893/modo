@@ -1021,13 +1021,13 @@
       if (typeof echarts === 'undefined') return;
       try {
         const mapEl = document.getElementById('world-map-chart');
-        if (mapEl) mapChart = echarts.init(mapEl);
+        if (mapEl) mapChart = echarts.init(mapEl, 'dark');
 
         const resEl = document.getElementById('resource-bar-chart');
-        if (resEl) resourceChart = echarts.init(resEl);
+        if (resEl) resourceChart = echarts.init(resEl, 'dark');
 
         const latEl = document.getElementById('latency-chart');
-        if (latEl) latencyChart = echarts.init(latEl);
+        if (latEl) latencyChart = echarts.init(latEl, 'dark');
 
         window.addEventListener('resize', () => {
           resourceChart?.resize();
