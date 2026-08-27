@@ -8,7 +8,7 @@
   "vars": {
     "API_BACKEND_URL": "https://api-modo.8n8m.cfd",
     "SUPABASE_URL": "https://qkpwuxaylvzycapkojvq.supabase.co",
-    "INTERNAL_API_SECRET": "Nexus-Edge-Token-2026!",
+    "INTERNAL_API_SECRET": "REDACTED_SECRET",
     "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrcHd1eGF5bHZ6eWNhcGtvanZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTI1NTksImV4cCI6MjA4ODk4ODU1OX0.iasxckoGYjRiLtaZcrmpwNW8QDuqh-BMGNy3rbmK4mQ"
   },
   "rules": [

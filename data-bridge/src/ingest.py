@@ -270,7 +270,7 @@ def run_pipeline():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Nexus Telemetry Ingestion Service")
+    parser = argparse.ArgumentParser(description="MODO Telemetry Ingestion Service")
     parser.add_argument("--once", action="store_true", help="Run once and exit")
     args = parser.parse_args()
     

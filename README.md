@@ -1,7 +1,7 @@
 # 🌐 MODO (墨斗) // 多云分布式数据底座与智能中枢
 
-[![CI](https://github.com/7893/nexus/actions/workflows/ci.yml/badge.svg)](https://github.com/7893/nexus/actions/workflows/ci.yml)
-[![Deploy to Cloudflare Workers](https://github.com/7893/nexus/actions/workflows/deploy.yml/badge.svg)](https://github.com/7893/nexus/actions/workflows/deploy.yml)
+[![CI](https://github.com/7893/modo/actions/workflows/ci.yml/badge.svg)](https://github.com/7893/modo/actions/workflows/ci.yml)
+[![Deploy to Cloudflare Workers](https://github.com/7893/modo/actions/workflows/deploy.yml/badge.svg)](https://github.com/7893/modo/actions/workflows/deploy.yml)
 [![Production Dashboard](https://img.shields.io/badge/Live%20Demo-modo-06b6d4?style=flat-square&logo=cloudflare)](https://modo.53.workers.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg?style=flat-square)](LICENSE)
 
@@ -46,7 +46,7 @@
                         ┌─────────────────────────────────────────┐
                         │       usa (US Ashburn Ingestion Hub)    │
                         │                                         │
-                        │  • systemd: modo-api.service (FastAPI)  │
+                        │  • systemd: ../deploy/modo-api.service (FastAPI)  │
                         │  • systemd: modo-ingest.service (60s)   │
                         └──────────────┬──────────────────┬───────┘
                                        │                  │
@@ -79,7 +79,7 @@
 ## 📂 Monorepo Structure
 
 ```text
-nexus/
+modo/
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml                 # Pytest & TypeScript verification
@@ -88,8 +88,9 @@ nexus/
 │   ├── api.py                     # FastAPI REST server
 │   ├── ingest.py                  # Concurrent multi-threaded Prometheus scraper
 │   ├── db_setup.py                # MySQL schema initializer
-│   ├── nexus-api.service          # systemd unit for API gateway
-│   ├── nexus-ingest.service       # systemd unit for ingestion daemon
+├── deploy/
+│   ├── modo-api.service          # systemd unit for API gateway
+│   └── modo-ingest.service       # systemd unit for ingestion daemon
 │   ├── requirements.txt           # Python dependencies
 │   └── tests/                     # Automated pytest unit test suite
 │       ├── test_parser.py         # Metrics parsing algorithm tests
