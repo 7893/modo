@@ -38,7 +38,6 @@ RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", "60"))  # window in secon
 
 # Allowed CORS origins
 ALLOWED_ORIGINS = [
-    "https://nexus.53.workers.dev",
     "https://modo.53.workers.dev",
     "http://localhost:8787",  # wrangler dev
 ]

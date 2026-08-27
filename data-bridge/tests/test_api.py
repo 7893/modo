@@ -40,9 +40,9 @@ def test_nodes_summary_endpoint():
 
 def test_cors_headers():
     """Verify CORS headers are present for cross-origin Worker requests."""
-    response = client.get("/health", headers={"Origin": "https://nexus.53.workers.dev"})
+    response = client.get("/health", headers={"Origin": "https://modo.53.workers.dev"})
     assert response.status_code == 200
-    assert response.headers.get("access-control-allow-origin") == "https://nexus.53.workers.dev"
+    assert response.headers.get("access-control-allow-origin") == "https://modo.53.workers.dev"
 
 
 def test_rate_limit():
