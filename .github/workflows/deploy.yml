@@ -55,7 +55,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
-            cd /home/ubuntu/nexus
+            cd /home/ubuntu/modo
             git fetch origin main
             git reset --hard origin/main
             sudo systemctl restart modo-api.service || sudo systemctl restart nexus-api.service
