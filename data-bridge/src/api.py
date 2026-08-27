@@ -39,7 +39,6 @@ RATE_LIMIT_WINDOW = int(os.getenv("RATE_LIMIT_WINDOW", "60"))  # window in secon
 # Allowed CORS origins
 ALLOWED_ORIGINS = [
     "https://service.example.com",
-    "https://service.example.com",
     "http://localhost:8787",  # wrangler dev
 ]
 
