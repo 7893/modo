@@ -1157,10 +1157,13 @@
 
       if (pill) pill.innerText = `HEALTH: ${score}%`;
       if (badge) {
-        badge.innerText = `${score}% ${diag.status || 'HEALTHY'}`;
-        badge.className = score >= 80 
+        const status = diag.status || 'HEALTHY';
+        badge.innerText = `${score}% ${status}`;
+        badge.className = status === 'HEALTHY'
           ? 'px-2.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-800 font-semibold text-[11px]'
-          : 'px-2.5 py-0.5 rounded-full bg-amber-950/60 text-amber-300 border border-amber-800 font-semibold text-[11px]';
+          : status === 'WARNING'
+          ? 'px-2.5 py-0.5 rounded-full bg-amber-950/60 text-amber-300 border border-amber-800 font-semibold text-[11px]'
+          : 'px-2.5 py-0.5 rounded-full bg-rose-950/60 text-rose-300 border border-rose-800 font-semibold text-[11px]';
       }
 
       // Update anomaly count badge
