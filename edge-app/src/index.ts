@@ -159,4 +159,22 @@ app.get('/', (c) => {
   })
 })
 
-export default app
+
+export default {
+  fetch: app.fetch,
+  async scheduled(event: any, env: Bindings, ctx: any) {
+    const url = `${env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'}/api/maintenance/prune`;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'X-Internal-Secret': env.INTERNAL_API_SECRET || '' }
+      });
+      console.log(`[Cron] Triggered at ${event.cron}. Status: ${res.status}`);
+      const data = await res.text();
+      console.log(`[Cron] Output: ${data}`);
+    } catch (e) {
+      console.error(`[Cron] Error: ${e}`);
+    }
+  }
+}
+
