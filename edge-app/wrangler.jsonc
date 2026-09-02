@@ -10,8 +10,15 @@
   "rules": [
     {
       "type": "Text",
-      "globs": ["**/*.html"],
+      "globs": [
+        "**/*.html"
+      ],
       "fallthrough": true
     }
-  ]
+  ],
+  "triggers": {
+    "crons": [
+      "0 3 * * *"
+    ]
+  }
 }
