@@ -607,21 +607,35 @@ def get_ai_diagnostics():
             elif r.get("scrape_duration_ms", 0) > 800:
                 warnings.append(f"实时告警: 节点 {r['node_name']} 网络延迟异常 ({r['scrape_duration_ms']}ms)。")
 
-        # Calculate health score
-        base_score = (online / max(total, 1)) * 100
-        anomaly_penalty = len(anomalies) * 3
-        warning_penalty = max(0, len(warnings) - 3) * 2
-        health_score = max(0, min(100, base_score - anomaly_penalty - warning_penalty))
+        # Health score: pure average of per-node resource health (CPU/MEM/disk)
+        # Reflects actual resource state, not penalized by anomaly counts
+        health_score = round(
+            sum(float(r.get('health_score', 100) or 100) for r in rows) / max(len(rows), 1),
+            1
+        )
 
-        # Get average health score from nodes
-        avg_node_health = sum(float(r.get('health_score', 100) or 100) for r in rows) / max(len(rows), 1)
-        health_score = round((health_score + avg_node_health) / 2, 1)
+        # Status: independent rule-based judgment, not derived from health_score
+        has_offline = any(r["status"] != "ONLINE" for r in rows)
+        has_high_anomaly = any(a.get('severity') == 'HIGH' for a in anomalies)
+        has_realtime_alert = any(
+            r.get("cpu_usage_percent", 0) > 80.0 or
+            r.get("mem_usage_percent", 0) > 85.0 or
+            r.get("scrape_duration_ms", 0) > 800
+            for r in rows
+        )
+
+        if has_offline or has_high_anomaly:
+            fleet_status = "CRITICAL"
+        elif has_realtime_alert or (len(anomalies) > 0):
+            fleet_status = "WARNING"
+        else:
+            fleet_status = "HEALTHY"
 
         return {
             "fleet_health_score": health_score,
             "total_nodes": total,
             "online_nodes": online,
-            "status": "HEALTHY" if health_score >= 80 else "WARNING" if health_score >= 60 else "CRITICAL",
+            "status": fleet_status,
             "anomalies_count": len(anomalies),
             "diagnostics": warnings,
             "heatwave": {
