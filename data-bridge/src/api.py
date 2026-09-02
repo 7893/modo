@@ -661,8 +661,6 @@ from starlette.responses import JSONResponse
 
 INTERNAL_API_SECRET = os.getenv("INTERNAL_API_SECRET")
 
-@app.middleware("http")
-
 @app.post("/api/maintenance/prune")
 def prune_old_data():
     """Prune telemetry data older than 60 days. Protected by X-Internal-Secret middleware."""
@@ -685,6 +683,7 @@ def prune_old_data():
         logger.error(f"Error during pruning: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.middleware("http")
 async def verify_internal_secret(request: Request, call_next):
     if request.url.path.startswith("/api/") and request.method != "OPTIONS":
         secret = request.headers.get("X-Internal-Secret")
