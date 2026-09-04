@@ -717,7 +717,7 @@
                 <p class="text-xs text-slate-400 mt-0.5">11 台生产主机实时运行状态 · 资源指标瞬时差分计算</p>
               </div>
             </div>
-            <span class="px-3.5 py-1 rounded-full bg-slate-900/90 border border-slate-700 text-xs font-mono text-slate-200 font-bold flex items-center gap-1.5 shadow-sm">
+            <span id="table-fleet-badge" class="px-3.5 py-1 rounded-full bg-slate-900/90 border border-slate-700 text-xs font-mono text-slate-200 font-bold flex items-center gap-1.5 shadow-sm">
               <i class="fa-solid fa-server text-emerald-400"></i>
               <span>共 11 台主机 (全部正常)</span>
             </span>
@@ -852,6 +852,7 @@
                 <span><i class="fa-solid fa-shield-heart mr-1.5 text-amber-500"></i>ML 异常检测 &amp; 特征工程</span>
                 <span id="anomaly-count-badge" class="text-[10px] text-slate-300 px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 font-bold">0 告警</span>
               </div>
+              <div id="ai-anomaly-tags" class="flex flex-wrap gap-1 mb-2 shrink-0"></div>
               <div class="flex-1 overflow-y-auto space-y-2 pr-1" id="ai-diagnostics-list">
                 <div class="p-2.5 rounded-xl bg-slate-900/70 border border-emerald-500/20 text-xs space-y-1.5">
                   <div class="flex items-center justify-between text-[10px] font-mono">
@@ -1111,9 +1112,10 @@
         console.error('Failed to fetch diagnostics:', err);
       }
 
-      // Fetch HeatWave status and hourly trends
+      // Fetch HeatWave status, hourly trends, and anomaly breakdown
       try { fetchHeatWaveStatus(); } catch(e) { console.error('fetchHeatWaveStatus error:', e); }
       try { fetchHourlyTrend(); } catch(e) { console.error('fetchHourlyTrend error:', e); }
+      try { fetchAnomalyBreakdown(); } catch(e) { console.error('fetchAnomalyBreakdown error:', e); }
 
       finally {
         setTimeout(() => icon?.classList.remove('fa-spin'), 600);
@@ -1176,9 +1178,16 @@
       const pill = document.getElementById('ai-score-pill');
       const badge = document.getElementById('fleet-health-badge');
 
-      if (pill) pill.innerText = `HEALTH: ${score}%`;
+      const status = diag.status || 'HEALTHY';
+      if (pill) {
+        pill.innerText = `HEALTH: ${score}%`;
+        pill.className = status === 'HEALTHY'
+          ? 'px-4 py-1.5 rounded-full text-xs font-mono font-extrabold bg-slate-900/90 text-emerald-300 border border-emerald-800 shadow-sm'
+          : status === 'WARNING'
+          ? 'px-4 py-1.5 rounded-full text-xs font-mono font-extrabold bg-slate-900/90 text-amber-300 border border-amber-800 shadow-sm'
+          : 'px-4 py-1.5 rounded-full text-xs font-mono font-extrabold bg-slate-900/90 text-rose-300 border border-rose-800 shadow-sm';
+      }
       if (badge) {
-        const status = diag.status || 'HEALTHY';
         badge.innerText = `${score}% ${status}`;
         badge.className = status === 'HEALTHY'
           ? 'px-2.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-800 font-semibold text-[11px]'
@@ -1192,7 +1201,9 @@
       if (anomalyBadge) {
         const count = diag.anomalies_count || 0;
         anomalyBadge.innerText = `${count} 告警`;
-        anomalyBadge.className = count > 0 
+        anomalyBadge.className = status === 'CRITICAL'
+          ? 'text-[10px] text-rose-300 px-2 py-0.5 rounded-full bg-rose-950/80 border border-rose-800 font-bold'
+          : count > 0 
           ? 'text-[10px] text-amber-300 px-2 py-0.5 rounded-full bg-amber-950/80 border border-amber-800 font-bold'
           : 'text-[10px] text-slate-300 px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 font-bold';
       }
@@ -1240,6 +1251,43 @@
           `;
         }).join('');
       }
+    }
+
+    // Fetch HeatWave ML detected anomalies breakdown
+    async function fetchAnomalyBreakdown() {
+      try {
+        const res = await fetch(`/api/analytics/anomalies?_t=${Date.now()}`);
+        const data = await res.json();
+        if (data.status === 'success' && Array.isArray(data.data)) {
+          renderAnomalyTags(data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch anomalies:', err);
+      }
+    }
+
+    function renderAnomalyTags(anomalies) {
+      const tagsContainer = document.getElementById('ai-anomaly-tags');
+      if (!tagsContainer) return;
+      if (!anomalies || anomalies.length === 0) {
+        tagsContainer.innerHTML = `<span class="text-[10px] text-emerald-400 font-mono"><i class="fa-solid fa-check mr-1"></i>当前无未恢复异常</span>`;
+        return;
+      }
+      tagsContainer.innerHTML = anomalies.slice(0, 4).map(a => {
+        const isCritical = a.severity === 'CRITICAL';
+        const isHigh = a.severity === 'HIGH';
+        const isMedium = a.severity === 'MEDIUM';
+        const colorClass = isCritical 
+          ? 'bg-rose-950/80 text-rose-300 border-rose-800' 
+          : isHigh 
+          ? 'bg-amber-950/80 text-amber-300 border-amber-800' 
+          : isMedium 
+          ? 'bg-yellow-950/60 text-yellow-300 border-yellow-800' 
+          : 'bg-blue-950/60 text-blue-300 border-blue-800';
+        return `<span class="px-2 py-0.5 rounded-md border text-[10px] font-mono font-semibold ${colorClass}">
+          ${a.anomaly_type} (${a.open_count || a.count}) · ${a.severity}
+        </span>`;
+      }).join('');
     }
 
     // Fetch HeatWave cluster status
@@ -1420,6 +1468,18 @@
     }
 
     function renderTable(nodes) {
+      const fleetBadge = document.getElementById('table-fleet-badge');
+      if (fleetBadge) {
+        const onlineCount = nodes.filter(n => n.status === 'ONLINE').length;
+        if (onlineCount === nodes.length) {
+          fleetBadge.innerHTML = `<i class="fa-solid fa-server text-emerald-400"></i><span>共 ${nodes.length} 台主机 (全部正常)</span>`;
+          fleetBadge.className = "px-3.5 py-1 rounded-full bg-slate-900/90 border border-slate-700 text-xs font-mono text-slate-200 font-bold flex items-center gap-1.5 shadow-sm";
+        } else {
+          fleetBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-400"></i><span>${onlineCount} / ${nodes.length} 台在线 (${nodes.length - onlineCount} 异常)</span>`;
+          fleetBadge.className = "px-3.5 py-1 rounded-full bg-amber-950/80 border border-amber-800 text-xs font-mono text-amber-300 font-bold flex items-center gap-1.5 shadow-sm";
+        }
+      }
+
       const tbody = document.getElementById('nodes-table-body');
       if (!tbody) return;
 
@@ -1455,7 +1515,7 @@
           <td class="py-2 px-3.5">
             <div class="flex items-center space-x-2">
               <div class="w-16 lg:w-20 bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700">
-                <div class="bg-indigo-500 h-full rounded-full" style="width: ${n.disk_usage_percent}%"></div>
+                <div class="bg-amber-500 h-full rounded-full" style="width: ${n.disk_usage_percent}%"></div>
               </div>
               <span class="font-semibold text-slate-200">${n.disk_usage_percent}%</span>
             </div>
@@ -1486,7 +1546,7 @@
         series: [
           { name: 'CPU', type: 'bar', data: cpus, itemStyle: { color: '#E11D48', borderRadius: [4, 4, 0, 0] } },
           { name: '内存', type: 'bar', data: mems, itemStyle: { color: '#10B981', borderRadius: [4, 4, 0, 0] } },
-          { name: '磁盘', type: 'bar', data: disks, itemStyle: { color: '#8B5CF6', borderRadius: [4, 4, 0, 0] } }
+          { name: '磁盘', type: 'bar', data: disks, itemStyle: { color: '#F59E0B', borderRadius: [4, 4, 0, 0] } }
         ]
       });
     }
