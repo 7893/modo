@@ -79,8 +79,57 @@ def init_db():
         ) ENGINE=InnoDB;
         """
         cursor.execute(create_table_sql)
+
+        # 3. Create HeatWave AutoML compliant feature views
+        logger.info("Creating view 'v_telemetry_ml_features'...")
+        create_ml_view_sql = """
+        CREATE OR REPLACE VIEW v_telemetry_ml_features AS
+        SELECT 
+            node_name,
+            cpu_usage_percent,
+            mem_usage_percent,
+            disk_usage_percent,
+            ROUND(net_in_bytes_sec / 1024 / 1024, 2) AS net_in_mb,
+            ROUND(net_out_bytes_sec / 1024 / 1024, 2) AS net_out_mb,
+            status,
+            recorded_at
+        FROM vm_telemetry
+        WHERE recorded_at >= NOW() - INTERVAL 7 DAY
+          AND status IS NOT NULL
+          AND cpu_usage_percent IS NOT NULL
+          AND mem_usage_percent IS NOT NULL
+          AND disk_usage_percent IS NOT NULL
+        ORDER BY recorded_at DESC;
+        """
+        cursor.execute(create_ml_view_sql)
+
+        logger.info("Creating view 'v_telemetry_hourly_forecasting'...")
+        create_forecast_view_sql = """
+        CREATE OR REPLACE VIEW v_telemetry_hourly_forecasting AS
+        SELECT 
+            node_name,
+            hour_bucket,
+            sample_count,
+            online_count,
+            online_ratio,
+            cpu_avg,
+            cpu_max,
+            cpu_min,
+            cpu_stddev,
+            mem_avg,
+            mem_max,
+            disk_avg,
+            disk_max,
+            latency_avg,
+            latency_max,
+            latency_p95
+        FROM vm_telemetry_hourly
+        ORDER BY hour_bucket DESC, node_name ASC;
+        """
+        cursor.execute(create_forecast_view_sql)
+
         conn.commit()
-        logger.info("Database and table initialized successfully")
+        logger.info("Database, table, and AutoML views initialized successfully")
         
         cursor.close()
         conn.close()
