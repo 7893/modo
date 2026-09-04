@@ -509,8 +509,8 @@ def get_heatwave_status():
             },
             "memory": {
                 "used_mb": round(heap_bytes / 1024 / 1024, 1),
-                "total_mb": 5120,
-                "usage_percent": round(heap_bytes / 1024 / 1024 / 51.2, 1)
+                "total_mb": 16384,
+                "usage_percent": round(heap_bytes / 1024 / 1024 / 163.84, 1)
             },
             "performance": {
                 "queries_offloaded": offload,

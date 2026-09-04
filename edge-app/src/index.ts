@@ -142,6 +142,23 @@ app.get('/api/analytics/heatwave-status', async (c) => {
   }
 })
 
+// Proxy API: HeatWave ML Features
+app.get('/api/analytics/ml-features', async (c) => {
+  const backend = c.env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'
+  try {
+    const res = await fetch(`${backend}/api/analytics/ml-features`, {
+      headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
+    })
+    const data = await res.json()
+    return c.json(data, res.status as any, {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      'Pragma': 'no-cache'
+    })
+  } catch (err: any) {
+    return c.json({ status: 'error', message: 'ML features query failed', error: err.message }, 502)
+  }
+})
+
 import htmlTemplate from './index.html'
 
 // Frontend Dashboard SPA
