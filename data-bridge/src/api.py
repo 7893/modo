@@ -180,7 +180,7 @@ def health_check():
     return {
         "status": "online",
         "service": "MODO Data Bridge Gateway",
-        "node": "usa-ashburn",
+        "node": "jpa-osaka",
         "database_status": "connected" if db_ok else "error",
         "timestamp": datetime.now().isoformat(),
         "tunnel_endpoint": "tunnel.example.com"
