@@ -428,6 +428,38 @@ def get_anomaly_dashboard():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/api/analytics/ml-features")
+def get_ml_features(limit: int = Query(default=100, ge=1, le=1000)):
+    """
+    Returns sanitized telemetry features prepared for HeatWave AutoML.
+    Complies with Oracle HeatWave AutoML strict data type and language requirements.
+    """
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT node_name, cpu_usage_percent, mem_usage_percent, disk_usage_percent, "
+                    "net_in_mb, net_out_mb, status, recorded_at "
+                    "FROM v_telemetry_ml_features LIMIT %s",
+                    (limit,)
+                )
+                rows = cur.fetchall()
+                for r in rows:
+                    if isinstance(r.get("recorded_at"), datetime):
+                        r["recorded_at"] = r["recorded_at"].isoformat()
+
+        return {
+            "status": "success",
+            "count": len(rows),
+            "data": rows,
+            "engine": "HeatWave AutoML Feature Store",
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error fetching ML features: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/analytics/heatwave-status")
 def get_heatwave_status():
     """
