@@ -44,10 +44,10 @@
                                              │  (Zero-Trust Private Ingress)
                                              ▼
                         ┌─────────────────────────────────────────┐
-                        │       usa (US Ashburn Ingestion Hub)    │
+                        │       jpa (JP Tokyo Ingestion Hub)      │
                         │                                         │
                         │  • systemd: modo-api.service (FastAPI)  │
-                        │  • systemd: modo-ingest.service (60s)   │
+                        │  • systemd: modo-ingest.service (15s)   │
                         └──────────────┬──────────────────┬───────┘
                                        │                  │
                 (Prometheus Scrape)   │                  │ (Private Subnet TCP 3306)
