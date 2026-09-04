@@ -563,7 +563,7 @@ def get_ai_diagnostics():
     SELECT node_name, anomaly_type, severity, description, confidence
     FROM anomaly_detection
     WHERE status = 'OPEN' AND detected_at >= NOW() - INTERVAL 24 HOUR
-    ORDER BY severity DESC, confidence DESC
+    ORDER BY FIELD(severity, 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'), confidence DESC
     LIMIT 10
     """
 
@@ -614,7 +614,7 @@ def get_ai_diagnostics():
         # Add ML-detected anomalies
         if anomalies:
             for a in anomalies:
-                sev_icon = "🔴" if a['severity'] == 'HIGH' else "🟡" if a['severity'] == 'MEDIUM' else "🟢"
+                sev_icon = "🔴" if a['severity'] in ('CRITICAL', 'HIGH') else "🟡" if a['severity'] == 'MEDIUM' else "🟢"
                 conf = float(a['confidence']) if a['confidence'] else 0
                 warnings.append(
                     f"HeatWave ML 检测 {sev_icon}: [{a['anomaly_type']}] {a['node_name']} - "
@@ -643,7 +643,7 @@ def get_ai_diagnostics():
 
         # Status: independent rule-based judgment, not derived from health_score
         has_offline = any(r["status"] != "ONLINE" for r in rows)
-        has_high_anomaly = any(a.get('severity') == 'HIGH' for a in anomalies)
+        has_high_anomaly = any(a.get('severity') in ('CRITICAL', 'HIGH') for a in anomalies)
         has_realtime_alert = any(
             r.get("cpu_usage_percent", 0) > 80.0 or
             r.get("mem_usage_percent", 0) > 85.0 or
