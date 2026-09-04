@@ -182,8 +182,8 @@
           <span>控制台鉴权</span>
         </button>
         <div id="user-profile" class="hidden items-center space-x-2">
-          <span id="user-email" class="text-xs text-emerald-700 font-mono font-bold"></span>
-          <button onclick="handleLogout()" class="px-2 py-1 text-xs text-rose-600 hover:text-rose-700 font-mono">
+          <span id="user-email" class="text-xs text-emerald-400 font-mono font-bold"></span>
+          <button onclick="handleLogout()" class="px-2 py-1 text-xs text-rose-400 hover:text-rose-300 font-mono">
             <i class="fa-solid fa-right-from-bracket"></i>
           </button>
         </div>
@@ -230,48 +230,48 @@
             <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between items-center text-center shadow-sm">
               <div class="flex items-center justify-center gap-1.5 text-slate-400 text-xs font-sans font-semibold w-full">
                 <span>生产在线主机</span>
-                <i class="fa-solid fa-server text-emerald-600"></i>
+                <i class="fa-solid fa-server text-emerald-400"></i>
               </div>
               <div class="text-3xl font-extrabold text-white my-0.5 text-center" id="stat-online-nodes">11 <span class="text-sm font-normal text-slate-400">/ 11</span></div>
               <div class="text-[11px] text-slate-500 flex items-center justify-center gap-2 pt-1 border-t border-slate-800/60 w-full">
                 <span>Oracle (8) · GCP · Ali · AWS</span>
-                <span class="text-emerald-600 font-bold">100%</span>
+                <span class="text-emerald-400 font-bold">100%</span>
               </div>
             </div>
 
             <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between items-center text-center shadow-sm">
               <div class="flex items-center justify-center gap-1.5 text-slate-400 text-xs font-sans font-semibold w-full">
                 <span>跨区域平均网络时延</span>
-                <i class="fa-solid fa-bolt text-teal-600"></i>
+                <i class="fa-solid fa-bolt text-teal-400"></i>
               </div>
               <div class="text-3xl font-extrabold text-white my-0.5 text-center" id="stat-avg-latency">-- <span class="text-sm font-normal text-slate-400">ms</span></div>
               <div class="text-[11px] text-slate-500 flex items-center justify-center gap-2 pt-1 border-t border-slate-800/60 w-full">
                 <span>同区 14ms · 跨洋 ~350ms</span>
-                <span class="text-teal-600 font-bold">正常</span>
+                <span class="text-teal-400 font-bold">正常</span>
               </div>
             </div>
 
             <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between items-center text-center shadow-sm">
               <div class="flex items-center justify-center gap-1.5 text-slate-400 text-xs font-sans font-semibold w-full">
                 <span>全网平均内存利用率</span>
-                <i class="fa-solid fa-microchip text-cyan-600"></i>
+                <i class="fa-solid fa-microchip text-cyan-400"></i>
               </div>
               <div class="text-3xl font-extrabold text-white my-0.5 text-center" id="stat-avg-mem">-- <span class="text-sm font-normal text-slate-400">%</span></div>
               <div class="text-[11px] text-slate-500 flex items-center justify-center gap-2 pt-1 border-t border-slate-800/60 w-full">
                 <span>集群资源水位平衡</span>
-                <span class="text-cyan-600 font-bold">正常</span>
+                <span class="text-cyan-400 font-bold">正常</span>
               </div>
             </div>
 
             <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between items-center text-center shadow-sm">
               <div class="flex items-center justify-center gap-1.5 text-slate-400 text-xs font-sans font-semibold w-full">
                 <span>时序遥测存储引擎</span>
-                <i class="fa-solid fa-database text-amber-600"></i>
+                <i class="fa-solid fa-database text-amber-400"></i>
               </div>
-              <div class="text-3xl font-extrabold text-amber-600 my-0.5 text-center">HeatWave</div>
+              <div class="text-3xl font-extrabold text-amber-400 my-0.5 text-center">HeatWave</div>
               <div class="text-[11px] text-slate-500 flex items-center justify-center gap-2 pt-1 border-t border-slate-800/60 w-full">
                 <span>MySQL 26.7 引擎 · 15s 周期</span>
-                <span class="text-amber-600 font-bold" id="kpi-db-records">同步中</span>
+                <span class="text-amber-400 font-bold" id="kpi-db-records">同步中</span>
               </div>
             </div>
           </div>
@@ -319,7 +319,7 @@
                     </div>
                   </div>
                   <div class="flex items-center space-x-6 text-xs text-slate-400">
-                    <div class="hidden sm:block">延迟: <strong class="text-emerald-600">~30ms</strong></div>
+                    <div class="hidden sm:block">延迟: <strong class="text-emerald-400">~30ms</strong></div>
                     <span class="px-2.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-800 font-bold text-[10px]">ONLINE</span>
                   </div>
                 </div>
@@ -336,7 +336,7 @@
                     </div>
                   </div>
                   <div class="flex items-center space-x-6 text-xs text-slate-400">
-                    <div class="hidden sm:block">延迟: <strong class="text-amber-500">~330ms</strong></div>
+                    <div class="hidden sm:block">延迟: <strong class="text-amber-400">~330ms</strong></div>
                     <span class="px-2.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-800 font-bold text-[10px]">ONLINE</span>
                   </div>
                 </div>
@@ -353,7 +353,7 @@
                     </div>
                   </div>
                   <div class="flex items-center space-x-6 text-xs text-slate-400">
-                    <div class="hidden sm:block">延迟: <strong class="text-cyan-600">~350ms</strong></div>
+                    <div class="hidden sm:block">延迟: <strong class="text-cyan-400">~350ms</strong></div>
                     <span class="px-2.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-800 font-bold text-[10px]">ONLINE</span>
                   </div>
                 </div>
@@ -370,7 +370,7 @@
                     </div>
                   </div>
                   <div class="flex items-center space-x-6 text-xs text-slate-400">
-                    <div class="hidden sm:block">延迟: <strong class="text-amber-600">~150-350ms</strong></div>
+                    <div class="hidden sm:block">延迟: <strong class="text-amber-400">~150-350ms</strong></div>
                     <span class="px-2.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-800 font-bold text-[10px]">ONLINE</span>
                   </div>
                 </div>
@@ -381,10 +381,10 @@
             <div class="lg:col-span-5 p-4 rounded-2xl supabase-light-card flex flex-col justify-between overflow-hidden font-mono shadow-sm">
               <div class="flex items-center justify-between mb-2 shrink-0">
                 <span class="text-xs font-bold text-slate-200 flex items-center gap-2">
-                  <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+                  <i class="fa-solid fa-shield-halved text-emerald-400"></i>
                   <span>算力架构与安全状态</span>
                 </span>
-                <span class="text-[10px] text-emerald-700 px-2 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 font-bold">ACTIVE</span>
+                <span class="text-[10px] text-emerald-300 px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-800 font-bold">ACTIVE</span>
               </div>
 
               <div class="grid grid-cols-2 gap-2.5 flex-1 py-0.5">
@@ -396,26 +396,26 @@
 
                 <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800/80 flex flex-col justify-between items-center text-center">
                   <div class="text-slate-500 text-[10px] uppercase font-semibold">传输隧道通道</div>
-                  <div class="text-sky-600 font-extrabold text-lg my-0.5">Cloudflare QUIC</div>
+                  <div class="text-sky-400 font-extrabold text-lg my-0.5">Cloudflare QUIC</div>
                   <div class="text-[10px] text-slate-400">双向加密穿透</div>
                 </div>
 
                 <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800/80 flex flex-col justify-between items-center text-center">
                   <div class="text-slate-500 text-[10px] uppercase font-semibold">API 访问鉴权</div>
-                  <div class="text-indigo-600 font-extrabold text-lg my-0.5">X-Internal-Secret</div>
+                  <div class="text-indigo-400 font-extrabold text-lg my-0.5">X-Internal-Secret</div>
                   <div class="text-[10px] text-slate-400">网关全流量验证</div>
                 </div>
 
                 <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800/80 flex flex-col justify-between items-center text-center">
                   <div class="text-slate-500 text-[10px] uppercase font-semibold">底层时序数据库</div>
-                  <div class="text-amber-600 font-extrabold text-lg my-0.5">MySQL HeatWave</div>
+                  <div class="text-amber-400 font-extrabold text-lg my-0.5">MySQL HeatWave</div>
                   <div class="text-[10px] text-slate-400">时序聚集索引</div>
                 </div>
               </div>
 
               <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800/80 text-xs text-slate-400 flex items-center justify-between mt-2 shrink-0">
-                <span><i class="fa-solid fa-arrow-pointer mr-1.5 text-emerald-600"></i>点击右侧各面板展开对应独立模块</span>
-                <span class="text-emerald-700 font-bold">5 个独立视图 &rarr;</span>
+                <span><i class="fa-solid fa-arrow-pointer mr-1.5 text-emerald-400"></i>点击右侧各面板展开对应独立模块</span>
+                <span class="text-emerald-400 font-bold">5 个独立视图 &rarr;</span>
               </div>
             </div>
           </div>
@@ -441,7 +441,7 @@
                 集群总览
               </span>
             </div>
-            <div class="my-1 flex items-center justify-center text-emerald-600 font-bold text-sm select-none">
+            <div class="my-1 flex items-center justify-center text-emerald-400 font-bold text-sm select-none">
               ·
             </div>
             <div class="flex-1 flex items-start justify-center w-full">
@@ -476,7 +476,7 @@
                   <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white">多云网络拓扑与节点雷达</h2>
                   <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-blue-950/80 text-blue-300 border border-blue-800 font-mono font-bold uppercase">02 · Topology Radar</span>
                 </div>
-                <p class="text-xs text-slate-400 mt-0.5">11 节点地理测距分布 · 5 节点区域星团离散投影 · 实时探测时延</p>
+                <p class="text-xs text-slate-400 mt-0.5">11 节点地理测距分布 · 6 大多云区域星团离散投影 · 实时探测时延</p>
               </div>
             </div>
             <div class="flex items-center space-x-3 text-xs font-mono text-slate-400">
@@ -515,7 +515,7 @@
                 拓扑雷达
               </span>
             </div>
-            <div class="my-1 flex items-center justify-center text-blue-600 font-bold text-sm select-none">
+            <div class="my-1 flex items-center justify-center text-blue-400 font-bold text-sm select-none">
               ·
             </div>
             <div class="flex-1 flex items-start justify-center w-full">
@@ -562,15 +562,15 @@
           <div class="grid grid-cols-3 gap-3 font-mono text-xs shrink-0">
             <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
               <span class="text-slate-400">CPU 负载最高主机</span>
-              <span class="text-rose-600 font-extrabold text-sm" id="res-peak-cpu">cna (12%)</span>
+              <span class="text-rose-400 font-extrabold text-sm" id="res-peak-cpu">-- (0%)</span>
             </div>
             <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
               <span class="text-slate-400">内存平均利用率</span>
-              <span class="text-cyan-700 font-extrabold text-sm" id="res-avg-mem">34.2%</span>
+              <span class="text-cyan-400 font-extrabold text-sm" id="res-avg-mem">--%</span>
             </div>
             <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
               <span class="text-slate-400">磁盘平均利用率</span>
-              <span class="text-emerald-700 font-extrabold text-sm">22.4% (正常)</span>
+              <span class="text-emerald-400 font-extrabold text-sm" id="res-avg-disk">--% (正常)</span>
             </div>
           </div>
 
@@ -597,7 +597,7 @@
                 算力占用
               </span>
             </div>
-            <div class="my-1 flex items-center justify-center text-rose-600 font-bold text-sm select-none">
+            <div class="my-1 flex items-center justify-center text-rose-400 font-bold text-sm select-none">
               ·
             </div>
             <div class="flex-1 flex items-start justify-center w-full">
@@ -679,7 +679,7 @@
                 时延波形
               </span>
             </div>
-            <div class="my-1 flex items-center justify-center text-purple-600 font-bold text-sm select-none">
+            <div class="my-1 flex items-center justify-center text-purple-400 font-bold text-sm select-none">
               ·
             </div>
             <div class="flex-1 flex items-start justify-center w-full">
@@ -712,13 +712,13 @@
               <div>
                 <div class="flex items-center gap-2">
                   <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white">生产节点实时遥测清单</h2>
-                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-200 border border-slate-700 font-mono font-bold uppercase">05 · Asset Inventory</span>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-mono font-bold uppercase">05 · Asset Inventory</span>
                 </div>
                 <p class="text-xs text-slate-400 mt-0.5">11 台生产主机实时运行状态 · 资源指标瞬时差分计算</p>
               </div>
             </div>
             <span class="px-3.5 py-1 rounded-full bg-slate-900/90 border border-slate-700 text-xs font-mono text-slate-200 font-bold flex items-center gap-1.5 shadow-sm">
-              <i class="fa-solid fa-server text-emerald-600"></i>
+              <i class="fa-solid fa-server text-emerald-400"></i>
               <span>共 11 台主机 (全部正常)</span>
             </span>
           </div>
@@ -739,7 +739,7 @@
                   <th class="py-2.5 px-3.5">最后采集时间</th>
                 </tr>
               </thead>
-              <tbody id="nodes-table-body" class="divide-y divide-slate-100 text-slate-300 flex-1">
+              <tbody id="nodes-table-body" class="divide-y divide-slate-800/50 text-slate-300 flex-1">
                 <tr>
                   <td colspan="9" class="text-center py-12 text-slate-400">
                     <i class="fa-solid fa-spinner fa-spin mr-2"></i>正在拉取最新资产明细...
@@ -752,7 +752,7 @@
           <!-- Footer -->
           <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
             <span>数据格式: CPU 瞬时差分 · 内存实时占用 · 磁盘物理挂载</span>
-            <span class="text-emerald-700 font-bold">数据持续更新中</span>
+            <span class="text-emerald-400 font-bold">数据持续更新中</span>
           </div>
         </div>
 
@@ -767,7 +767,7 @@
                 资产清单
               </span>
             </div>
-            <div class="my-1 flex items-center justify-center text-slate-500 font-bold text-sm select-none">
+            <div class="my-1 flex items-center justify-center text-slate-400 font-bold text-sm select-none">
               ·
             </div>
             <div class="flex-1 flex items-start justify-center w-full">
@@ -794,7 +794,7 @@
         <div id="content-ai-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden gap-3 text-slate-200">
           <div class="flex items-center justify-between shrink-0">
             <div class="flex items-center space-x-3.5">
-              <div class="w-11 h-11 rounded-2xl bg-slate-900/90 border border-amber-300 flex items-center justify-center text-amber-600 shadow-sm">
+              <div class="w-11 h-11 rounded-2xl bg-slate-900/90 border border-amber-800 flex items-center justify-center text-amber-400 shadow-sm">
                 <i class="fa-solid fa-brain text-xl"></i>
               </div>
               <div>
@@ -832,7 +832,7 @@
                 <div class="p-3 rounded-xl bg-slate-900/70 border border-amber-500/20 flex flex-col justify-between items-center text-center">
                   <div class="text-slate-400 text-[10px] uppercase font-semibold">已加载表</div>
                   <div id="hw-tables-loaded" class="text-white font-extrabold text-lg my-0.5">--</div>
-                  <div class="text-[10px] text-slate-400">/ 10 张</div>
+                  <div class="text-[10px] text-slate-400">内存加速表</div>
                 </div>
                 <div class="p-3 rounded-xl bg-slate-900/70 border border-amber-500/20 flex flex-col justify-between items-center text-center">
                   <div class="text-slate-400 text-[10px] uppercase font-semibold">总记录数</div>
@@ -900,7 +900,7 @@
                 智能诊断
               </span>
             </div>
-            <div class="my-1 flex items-center justify-center text-amber-600 font-bold text-sm select-none">
+            <div class="my-1 flex items-center justify-center text-amber-400 font-bold text-sm select-none">
               ·
             </div>
             <div class="flex-1 flex items-start justify-center w-full">
@@ -1038,6 +1038,7 @@
         if (panelId === 'map') mapChart?.resize();
         if (panelId === 'resource') resourceChart?.resize();
         if (panelId === 'latency') latencyChart?.resize();
+        if (panelId === 'ai') hourlyTrendChart?.resize();
       }, 300);
     }
 
@@ -1058,6 +1059,7 @@
           resourceChart?.resize();
           latencyChart?.resize();
           mapChart?.resize();
+          hourlyTrendChart?.resize();
         });
         
         // Bulletproof resize observer for accordion panels
@@ -1160,6 +1162,13 @@
         const peakCpuEl = document.getElementById('res-peak-cpu');
         if (peakCpuEl) peakCpuEl.innerText = `${sortedCpu[0].node_name} (${sortedCpu[0].cpu_usage_percent || 0}%)`;
       }
+
+      const disks = nodes.filter(n => n.disk_usage_percent > 0).map(n => n.disk_usage_percent);
+      if (disks.length > 0) {
+        const avgDisk = (disks.reduce((a, b) => a + b, 0) / disks.length).toFixed(1);
+        const resDiskEl = document.getElementById('res-avg-disk');
+        if (resDiskEl) resDiskEl.innerText = `${avgDisk}% (正常)`;
+      }
     }
 
     function renderDiagnostics(diag) {
@@ -1212,10 +1221,18 @@
           </div>
         `;
         list.innerHTML = featurePipelineHtml + diag.diagnostics.map((item, idx) => {
-          const isHeatWave = item.includes('HeatWave');
-          const isAlert = item.includes('告警') || item.includes('检测');
-          const iconClass = isAlert ? 'fa-triangle-exclamation text-amber-500' : 'fa-circle-check text-emerald-500';
-          const borderClass = isAlert ? 'border-amber-500/30' : 'border-emerald-500/20';
+          let iconClass = 'fa-circle-check text-emerald-400';
+          let borderClass = 'border-emerald-500/20';
+          if (item.includes('🔴') || item.includes('CRITICAL')) {
+            iconClass = 'fa-circle-xmark text-rose-400';
+            borderClass = 'border-rose-500/30';
+          } else if (item.includes('🟡') || item.includes('告警') || item.includes('WARNING') || item.includes('LATENCY_SURGE') || item.includes('CPU_SPIKE') || item.includes('TIMEOUT') || item.includes('OFFLINE')) {
+            iconClass = 'fa-triangle-exclamation text-amber-400';
+            borderClass = 'border-amber-500/30';
+          } else if (item.includes('HTAP') || item.includes('HeatWave')) {
+            iconClass = 'fa-brain text-purple-400';
+            borderClass = 'border-purple-500/20';
+          }
           return `
             <div class="p-2.5 rounded-lg bg-slate-900/70 border ${borderClass} text-[11px] shadow-xs mb-1.5">
               <p class="text-slate-200 leading-relaxed"><i class="fa-solid ${iconClass} mr-1.5"></i>${item}</p>
@@ -1413,7 +1430,7 @@
             <span class="text-xs lg:text-sm">${n.node_name}</span>
           </td>
           <td class="py-2 px-3.5 text-slate-400">${n.provider || 'Cloud'} (${n.region})</td>
-          <td class="py-2 px-3.5 text-slate-400 font-mono"><span class="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-slate-300 text-[11px] inline-flex items-center gap-1.5 shadow-xs"><i class="fa-solid fa-lock text-[10px] text-emerald-600"></i><span>QUIC 隧道 (隐藏)</span></span></td>
+          <td class="py-2 px-3.5 text-slate-400 font-mono"><span class="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-slate-300 text-[11px] inline-flex items-center gap-1.5 shadow-xs"><i class="fa-solid fa-lock text-[10px] text-emerald-400"></i><span>QUIC 隧道 (隐藏)</span></span></td>
           <td class="py-2 px-3.5">
             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${n.status === 'ONLINE' ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-800' : 'bg-rose-950/70 text-rose-300 border border-rose-800'}">
               ${n.status}
@@ -1513,6 +1530,8 @@
       });
 
       const scatterData = [];
+      const nodeCoords = {};
+
       Object.keys(regionGroups).forEach(region => {
         const group = regionGroups[region];
         const centerLng = group[0].lng || 0;
@@ -1530,6 +1549,7 @@
             lat += radius * Math.sin(angle);
           }
           
+          nodeCoords[n.node_name] = [lng, lat];
           scatterData.push({
             name: n.node_name,
             value: [lng, lat, n.scrape_duration_ms, n.status, n.mem_usage_percent, n.region, n.cpu_usage_percent || 0]
@@ -1537,12 +1557,30 @@
         });
       });
 
+      const linesData = [];
+      const hubCoord = nodeCoords['jpa'];
+      if (hubCoord) {
+        nodes.forEach(n => {
+          if (n.node_name !== 'jpa' && nodeCoords[n.node_name]) {
+            linesData.push({
+              fromName: 'jpa (大阪中枢)',
+              toName: `${n.node_name} (${n.region})`,
+              coords: [hubCoord, nodeCoords[n.node_name]]
+            });
+          }
+        });
+      }
+
       mapChart.setOption({
         backgroundColor: 'transparent',
         tooltip: {
           formatter: function (params) {
+            if (params.seriesType === 'lines') {
+              return `<div class="font-mono text-xs text-slate-200"><i class="fa-solid fa-satellite-dish text-sky-400 mr-1.5"></i>跨云遥测链路:<br/><b>${params.data.fromName}</b> &rarr; <b>${params.data.toName}</b></div>`;
+            }
             const d = params.value;
-            return `<div class="font-mono text-xs text-slate-200"><b>${params.name}</b> (${d[5]})<br/>状态: <span class="${d[3] === 'ONLINE' ? 'text-emerald-400' : 'text-rose-400'} font-bold">${d[3]}</span><br/>延迟: ${d[2]}ms<br/>CPU: ${d[6]}%<br/>内存: ${d[4]}%</div>`;
+            const isHub = params.name === 'jpa';
+            return `<div class="font-mono text-xs text-slate-200"><b>${params.name}</b> ${isHub ? '<span class="text-purple-400 font-bold">[数据中枢]</span>' : ''} (${d[5]})<br/>状态: <span class="${d[3] === 'ONLINE' ? 'text-emerald-400' : 'text-rose-400'} font-bold">${d[3]}</span><br/>延迟: ${d[2]}ms<br/>CPU: ${d[6]}%<br/>内存: ${d[4]}%</div>`;
           }
         },
         grid: { top: 30, bottom: 40, left: 50, right: 30 },
@@ -1562,28 +1600,57 @@
         },
         series: [
           {
+            name: '遥测链路',
+            type: 'lines',
+            coordinateSystem: 'cartesian2d',
+            zlevel: 1,
+            effect: {
+              show: true,
+              period: 4,
+              trailLength: 0.25,
+              symbol: 'arrow',
+              symbolSize: 4,
+              color: '#38BDF8'
+            },
+            lineStyle: {
+              color: 'rgba(56, 189, 248, 0.22)',
+              width: 1.2,
+              curveness: 0.18
+            },
+            data: linesData
+          },
+          {
             name: '集群节点',
             type: 'effectScatter',
             coordinateSystem: 'cartesian2d',
+            zlevel: 2,
             data: scatterData,
-            symbolSize: function (val) { return Math.max(14, 26 - val[2]/30); },
+            symbolSize: function (val, params) {
+              if (params.name === 'jpa') return 22;
+              return Math.max(14, 26 - val[2]/30);
+            },
             showEffectOn: 'render',
-            rippleEffect: { brushType: 'stroke', scale: 4 },
+            rippleEffect: { brushType: 'stroke', scale: 3.5 },
             label: {
               show: true,
               formatter: '{b}',
               position: 'top',
-              color: '#93C5FD',
+              color: function(params) {
+                return params.name === 'jpa' ? '#C084FC' : '#93C5FD';
+              },
               fontFamily: 'monospace',
               fontWeight: 'bold',
               fontSize: 11
             },
             itemStyle: {
               color: function(params) {
+                if (params.name === 'jpa') return '#A855F7';
                 return params.value[3] === 'ONLINE' ? '#38BDF8' : '#F43F5E';
               },
-              shadowBlur: 10,
-              shadowColor: 'rgba(56, 189, 248, 0.5)'
+              shadowBlur: 12,
+              shadowColor: function(params) {
+                return params.name === 'jpa' ? 'rgba(168, 85, 247, 0.7)' : 'rgba(56, 189, 248, 0.5)';
+              }
             }
           }
         ]
