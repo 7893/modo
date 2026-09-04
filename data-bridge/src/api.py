@@ -489,8 +489,8 @@ def get_heatwave_status():
                 cur.execute("SELECT COUNT(*) as cnt FROM performance_schema.rpd_tables")
                 tables_loaded = cur.fetchone()['cnt']
                 
-                # Get total records
-                cur.execute("SELECT COUNT(*) as cnt FROM vm_telemetry")
+                # Get total records across active and archive partitions
+                cur.execute("SELECT GREATEST(COALESCE((SELECT MAX(id) FROM vm_telemetry), 0), COALESCE((SELECT MAX(id) FROM vm_telemetry_archive), 0)) as cnt")
                 total_records = cur.fetchone()['cnt']
 
         heap_bytes = int(status_vars.get('rapid_heap_usage', 0) or 0)
@@ -588,8 +588,8 @@ def get_ai_diagnostics():
                 cur.execute(query_anomalies)
                 anomalies = cur.fetchall()
                 
-                # 4. Get total record count for display
-                cur.execute("SELECT COUNT(*) as cnt FROM vm_telemetry")
+                # 4. Get total record count across active and archive partitions for display
+                cur.execute("SELECT GREATEST(COALESCE((SELECT MAX(id) FROM vm_telemetry), 0), COALESCE((SELECT MAX(id) FROM vm_telemetry_archive), 0)) as cnt")
                 total_records = cur.fetchone()['cnt']
                 
                 # 5. Get HeatWave offload stats
