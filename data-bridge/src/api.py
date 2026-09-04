@@ -369,10 +369,9 @@ def get_fleet_health_report():
     Includes health scores, trends, and hour-over-hour comparisons.
     """
     query = """
-    SELECT node_name, hour_bucket, cpu_avg, mem_avg, latency_avg,
-           cpu_trend_1h, cpu_trend_24h, health_index
+    SELECT *
     FROM v_fleet_health_report
-    ORDER BY hour_bucket DESC, node_name ASC
+    ORDER BY cpu_load_rank ASC
     LIMIT 200;
     """
 
@@ -381,10 +380,6 @@ def get_fleet_health_report():
             with conn.cursor() as cur:
                 cur.execute(query)
                 rows = cur.fetchall()
-
-        for r in rows:
-            if isinstance(r.get("hour_bucket"), datetime):
-                r["hour_bucket"] = r["hour_bucket"].isoformat()
 
         return {
             "status": "success",
@@ -553,9 +548,9 @@ def get_ai_diagnostics():
                 cur.execute(query_htap)
                 htap_res = cur.fetchone()
                 htap_duration = time.time() - htap_start
-                total_samples = htap_res['sample_count'] if htap_res else 0
-                avg_cpu = htap_res['avg_cpu'] if htap_res else 0
-                cpu_vol = htap_res['cpu_volatility'] if htap_res else 0
+                total_samples = int(htap_res.get('sample_count') or 0) if htap_res else 0
+                avg_cpu = float(htap_res.get('avg_cpu') or 0.0) if htap_res else 0.0
+                cpu_vol = float(htap_res.get('cpu_volatility') or 0.0) if htap_res else 0.0
                 
                 # 3. Get ML-detected anomalies
                 cur.execute(query_anomalies)

@@ -24,7 +24,8 @@ def test_health_endpoint():
 
 def test_nodes_summary_endpoint():
     """Verify /api/nodes/summary returns the 10 registered nodes."""
-    response = client.get("/api/nodes/summary")
+    headers = {"X-Internal-Secret": os.getenv("INTERNAL_API_SECRET", "")} if os.getenv("INTERNAL_API_SECRET") else {}
+    response = client.get("/api/nodes/summary", headers=headers)
     assert response.status_code == 200
     data = response.json()
     assert data["total_nodes"] == 11
