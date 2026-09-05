@@ -210,7 +210,7 @@ def get_latest_metrics():
     # Use HeatWave-optimized view instead of subquery
     format_strings = ','.join(['%s'] * len(active_names))
     query = f"""
-    SELECT 
+    SELECT /*+ SET_VAR(secondary_engine_cost_threshold=0) */
         v.node_name,
         v.host_ip,
         v.region,
@@ -330,7 +330,8 @@ def get_hourly_analytics(
         params.append(node)
 
     query = f"""
-    SELECT node_name, hour, samples, avg_cpu, avg_mem, 
+    SELECT /*+ SET_VAR(secondary_engine_cost_threshold=0) */
+    node_name, hour, samples, avg_cpu, avg_mem, 
            cpu_volatility, peak_latency
     FROM v_realtime_analytics
     {where_clause}
@@ -469,21 +470,18 @@ def get_heatwave_status():
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cur:
-                # Get HeatWave status variables
-                status_vars = {}
-                key_vars = [
-                    'rapid_cluster_status', 'rapid_service_status', 
-                    'rapid_heap_usage', 'rapid_query_offload_count',
-                    'rapid_query_nonoffload_count', 'rapid_change_propagation_status',
-                    'rapid_ml_status'
-                ]
-                for var in key_vars:
-                    cur.execute(
-                        "SELECT VARIABLE_VALUE FROM performance_schema.global_status WHERE VARIABLE_NAME = %s",
-                        (var,)
+                # Get HeatWave status variables - single query instead of 7 separate ones
+                cur.execute("""
+                    SELECT VARIABLE_NAME, VARIABLE_VALUE
+                    FROM performance_schema.global_status
+                    WHERE VARIABLE_NAME IN (
+                        'rapid_cluster_status', 'rapid_service_status',
+                        'rapid_heap_usage', 'rapid_query_offload_count',
+                        'rapid_query_nonoffload_count', 'rapid_change_propagation_status',
+                        'rapid_ml_status'
                     )
-                    row = cur.fetchone()
-                    status_vars[var] = row['VARIABLE_VALUE'] if row else None
+                """)
+                status_vars = {row['VARIABLE_NAME']: row['VARIABLE_VALUE'] for row in cur.fetchall()}
                 
                 # Get loaded tables count
                 cur.execute("SELECT COUNT(*) as cnt FROM performance_schema.rpd_tables")
@@ -547,9 +545,9 @@ def get_ai_diagnostics():
     WHERE node_name IN ({format_strings});
     """
     
-    # HeatWave OLAP analytics query
+    # HeatWave OLAP analytics query - force offload via cost threshold hint
     query_htap = """
-    SELECT 
+    SELECT /*+ SET_VAR(secondary_engine_cost_threshold=0) */
         COUNT(*) as sample_count,
         MAX(scrape_duration_ms) as peak_latency,
         AVG(cpu_usage_percent) as avg_cpu,
