@@ -1623,9 +1623,9 @@
         nodes.forEach(n => {
           if (n.node_name !== 'jpa' && nodeCoords[n.node_name]) {
             linesData.push({
-              fromName: 'jpa (大阪中枢)',
-              toName: `${n.node_name} (${n.region})`,
-              coords: [hubCoord, nodeCoords[n.node_name]]
+              fromName: `${n.node_name} (${n.region})`,
+              toName: 'jpa (大阪中枢)',
+              coords: [nodeCoords[n.node_name], hubCoord]
             });
           }
         });
@@ -1636,7 +1636,7 @@
         tooltip: {
           formatter: function (params) {
             if (params.seriesType === 'lines') {
-              return `<div class="font-mono text-xs text-slate-200"><i class="fa-solid fa-satellite-dish text-sky-400 mr-1.5"></i>跨云遥测链路:<br/><b>${params.data.fromName}</b> &rarr; <b>${params.data.toName}</b></div>`;
+              return `<div class="font-mono text-xs text-slate-200"><i class="fa-solid fa-satellite-dish text-sky-400 mr-1.5"></i>遥测上报链路:<br/><b>${params.data.fromName}</b> &rarr; <b>${params.data.toName}</b></div>`;
             }
             const d = params.value;
             const isHub = params.name === 'jpa';
@@ -1666,7 +1666,7 @@
             zlevel: 1,
             effect: {
               show: true,
-              period: 4,
+              period: 15,
               trailLength: 0.25,
               symbol: 'arrow',
               symbolSize: 4,
