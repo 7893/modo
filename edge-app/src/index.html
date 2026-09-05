@@ -513,7 +513,7 @@
               <span class="px-2.5 py-0.5 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300 shadow-xs">🇯🇵 大阪 (3)</span>
               <span class="px-2.5 py-0.5 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300 shadow-xs">🇯🇵 东京 (2)</span>
               <span class="px-2.5 py-0.5 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300 shadow-xs">🇺🇸 阿什本 (3)</span>
-              <span class="px-2.5 py-0.5 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300 shadow-xs">🇹🇼 台湾 (1)</span>
+              <span class="px-2.5 py-0.5 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300 shadow-xs">🇹🇼 彰化 (1)</span>
               <span class="px-2.5 py-0.5 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300 shadow-xs">🇨🇳 北京 (1)</span>
               <span class="px-2.5 py-0.5 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300 shadow-xs">🇸🇬 新加坡 (1)</span>
             </div>
@@ -660,16 +660,16 @@
           <!-- Latency 3-Tier Badges -->
           <div class="grid grid-cols-3 gap-3 font-mono text-xs shrink-0">
             <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
-              <span class="text-emerald-400 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>第一梯队 (&lt;35ms)</span>
-              <span class="text-white font-extrabold">大阪 · 东京 (14~34ms)</span>
+              <span id="tier1-label" class="text-emerald-400 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>第一梯队</span>
+              <span id="tier1-nodes" class="text-white font-extrabold">--</span>
             </div>
             <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
-              <span class="text-blue-400 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>第二梯队 (~150-330ms)</span>
-              <span class="text-white font-extrabold">新加坡 · 阿什本跨洋</span>
+              <span id="tier2-label" class="text-blue-400 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>第二梯队</span>
+              <span id="tier2-nodes" class="text-white font-extrabold">--</span>
             </div>
             <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
-              <span class="text-amber-400 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>第三梯队 (~350ms+)</span>
-              <span class="text-white font-extrabold">北京 Ali · 台湾 GCP</span>
+              <span id="tier3-label" class="text-amber-400 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>第三梯队</span>
+              <span id="tier3-nodes" class="text-white font-extrabold">--</span>
             </div>
           </div>
 
@@ -902,8 +902,8 @@
 
           <!-- Footer -->
           <div class="pt-2 border-t border-amber-900/60 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
-            <span>AI 诊断引擎: v2.7.0 Neural Agent</span>
-            <span class="text-emerald-400 flex items-center font-bold"><i class="fa-solid fa-circle-check mr-1"></i>巡检服务正常</span>
+            <span>AI 诊断引擎: v2.7.0 Neural Agent · 评估时间: <span id="diag-evaluated-at" class="text-slate-300">--</span></span>
+            <span id="diag-footer-status" class="text-emerald-400 flex items-center font-bold"><i class="fa-solid fa-circle-check mr-1"></i>巡检服务正常</span>
           </div>
         </div>
 
@@ -1231,6 +1231,24 @@
         const hwRecordsEl = document.getElementById('hw-total-records');
         if (hwQueriesEl) hwQueriesEl.innerText = diag.heatwave.queries_offloaded || '--';
         if (hwRecordsEl) hwRecordsEl.innerText = (diag.heatwave.total_records || 0).toLocaleString();
+      }
+
+      // Update footer: evaluated_at and status
+      const diagTime = document.getElementById('diag-evaluated-at');
+      if (diagTime && diag.evaluated_at) {
+        const d = new Date(diag.evaluated_at + 'Z');
+        diagTime.innerText = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+      }
+      const diagFooter = document.getElementById('diag-footer-status');
+      if (diagFooter) {
+        const s = diag.status || 'HEALTHY';
+        const cfg = {
+          HEALTHY:  { cls: 'text-emerald-400', icon: 'fa-circle-check',    txt: '巡检正常' },
+          WARNING:  { cls: 'text-amber-400',   icon: 'fa-triangle-exclamation', txt: '存在告警' },
+          CRITICAL: { cls: 'text-rose-400',    icon: 'fa-circle-exclamation',   txt: '需要介入' }
+        }[s] || { cls: 'text-emerald-400', icon: 'fa-circle-check', txt: '巡检正常' };
+        diagFooter.className = `${cfg.cls} flex items-center font-bold`;
+        diagFooter.innerHTML = `<i class="fa-solid ${cfg.icon} mr-1"></i>${cfg.txt}`;
       }
 
       const list = document.getElementById('ai-diagnostics-list');
@@ -1573,6 +1591,30 @@
       const sorted = [...nodes].sort((a, b) => a.scrape_duration_ms - b.scrape_duration_ms);
       const names = sorted.map(n => n.node_name);
       const latencies = sorted.map(n => n.scrape_duration_ms);
+
+      // Dynamic tier calculation based on actual latency distribution
+      const tier1 = sorted.filter(n => n.scrape_duration_ms < 50);
+      const tier2 = sorted.filter(n => n.scrape_duration_ms >= 50 && n.scrape_duration_ms < 300);
+      const tier3 = sorted.filter(n => n.scrape_duration_ms >= 300);
+
+      const fmtRange = arr => arr.length
+        ? `${Math.min(...arr.map(n=>n.scrape_duration_ms))}~${Math.max(...arr.map(n=>n.scrape_duration_ms))}ms`
+        : '--';
+      const fmtNames = arr => arr.map(n => n.node_name).join(' · ') || '--';
+
+      const t1l = document.getElementById('tier1-label');
+      const t2l = document.getElementById('tier2-label');
+      const t3l = document.getElementById('tier3-label');
+      const t1n = document.getElementById('tier1-nodes');
+      const t2n = document.getElementById('tier2-nodes');
+      const t3n = document.getElementById('tier3-nodes');
+
+      if (t1l) t1l.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>第一梯队 (${tier1.length ? fmtRange(tier1) : '<50ms'})`;
+      if (t2l) t2l.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>第二梯队 (${tier2.length ? fmtRange(tier2) : '50~300ms'})`;
+      if (t3l) t3l.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>第三梯队 (${tier3.length ? fmtRange(tier3) : '300ms+'})`;
+      if (t1n) t1n.innerText = fmtNames(tier1);
+      if (t2n) t2n.innerText = fmtNames(tier2);
+      if (t3n) t3n.innerText = fmtNames(tier3);
 
       latencyChart.setOption({
         tooltip: { trigger: 'axis', formatter: '{b}: {c} ms' },
