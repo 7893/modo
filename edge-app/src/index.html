@@ -1671,7 +1671,7 @@
           nodeCoords[n.node_name] = [lng, lat];
           scatterData.push({
             name: n.node_name,
-            value: [lng, lat, n.scrape_duration_ms, n.status, n.mem_usage_percent, n.region, n.cpu_usage_percent || 0, n.host_ip || '', n.disk_usage_percent || 0]
+            value: [lng, lat, n.scrape_duration_ms, n.status, n.mem_usage_percent, n.region, n.cpu_usage_percent || 0, n.disk_usage_percent || 0]
           });
         });
       });
@@ -1724,7 +1724,6 @@
             const isOnline = status === 'ONLINE';
             const lat = d[2];
             const latColor = lat < 50 ? '#34D399' : (lat < 300 ? '#38BDF8' : '#FBBF24');
-            const ipStr = d[7] ? `<div style="color: #64748B; font-size: 10px; margin-top: 6px; padding-top: 5px; border-top: 1px dashed rgba(51, 65, 85, 0.5); font-family: monospace;">Host IP: ${d[7]}</div>` : '';
 
             return `
               <div style="font-family: 'JetBrains Mono', -apple-system, sans-serif; min-width: 195px; line-height: 1.5;">
@@ -1755,13 +1754,18 @@
                     <span style="color: #94A3B8;">内存占用:</span>
                     <span style="color: #34D399; font-weight: 700;">${d[4]}%</span>
                   </div>
-                  ${d[8] !== undefined ? `
+                  ${d[7] !== undefined ? `
                   <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="color: #94A3B8;">磁盘空间:</span>
-                    <span style="color: #FBBF24; font-weight: 700;">${d[8]}%</span>
+                    <span style="color: #FBBF24; font-weight: 700;">${d[7]}%</span>
                   </div>` : ''}
                 </div>
-                ${ipStr}
+                <div style="color: #64748B; font-size: 10.5px; margin-top: 6px; padding-top: 5px; border-top: 1px dashed rgba(51, 65, 85, 0.5); display: flex; align-items: center; justify-content: space-between;">
+                  <span style="color: #64748B;">网络接入:</span>
+                  <span style="color: #38BDF8; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                    <i class="fa-solid fa-lock" style="font-size: 9px; color: #34D399;"></i>QUIC 隧道 (隐藏)
+                  </span>
+                </div>
               </div>
             `;
           }
