@@ -676,6 +676,113 @@ def get_ai_diagnostics():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/api/analytics/latency-forecast")
+def get_latency_forecast():
+    """
+    Returns per-node latency forecast using HeatWave AutoML (ML_PREDICT_ROW)
+    combined with EMA of recent 5 samples for real-time correction.
+    Used by the radar panel to drive arrow animation period dynamically.
+    """
+    active_names = [n["name"] for n in TARGET_NODES]
+    format_strings = ','.join(['%s'] * len(active_names))
+
+    # Query recent EMA: use last 5 scrape values per node via window function
+    # Use v_node_latest_status for the latest single reading (lightweight)
+    query_recent = f"""
+    SELECT /*+ SET_VAR(secondary_engine_cost_threshold=0) */
+        node_name,
+        latency_ms as ema_ms,
+        latency_ms as min_ms,
+        latency_ms as max_ms,
+        1 as samples,
+        recorded_at as latest_at
+    FROM v_node_latest_status
+    WHERE node_name IN ({format_strings})
+      AND latency_ms > 0
+    """
+
+    # ML prediction per node using current hour/dow features
+    query_predict = f"""
+    SELECT
+        node_name,
+        ROUND(ML_PREDICT_ROW(
+            JSON_OBJECT(
+                'node_name', node_name,
+                'hour_of_day', HOUR(NOW()),
+                'day_of_week', DAYOFWEEK(NOW()),
+                'cpu_usage_percent', cpu_usage_percent,
+                'mem_usage_percent', mem_usage_percent,
+                'net_in_mb', ROUND(net_in_bytes_sec / 1048576.0, 2)
+            ),
+            (SELECT model_object FROM ML_SCHEMA_admin.MODEL_CATALOG
+             WHERE train_table_name = 'modo_db.latency_forecast_train'
+               AND task = 'regression'
+               AND model_type IS NOT NULL
+             ORDER BY model_id DESC LIMIT 1)
+        )) as predicted_ms
+    FROM v_node_latest_status
+    WHERE node_name IN ({format_strings})
+    """
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # EMA from recent samples
+                cur.execute(query_recent, tuple(active_names))
+                recent_rows = {r['node_name']: r for r in cur.fetchall()}
+
+                # ML prediction
+                ml_available = False
+                predicted = {}
+                try:
+                    cur.execute(query_predict, tuple(active_names))
+                    for r in cur.fetchall():
+                        if r['predicted_ms'] is not None:
+                            predicted[r['node_name']] = float(r['predicted_ms'])
+                    ml_available = len(predicted) > 0
+                except Exception as ml_err:
+                    logger.warning(f"ML prediction unavailable, using EMA only: {ml_err}")
+
+                results = []
+                for name in active_names:
+                    row = recent_rows.get(name, {})
+                    ema = float(row.get('ema_ms') or 200)
+                    ml_val = predicted.get(name)
+
+                    # Blend: 60% ML prediction + 40% EMA when model available
+                    if ml_available and ml_val and ml_val > 0:
+                        blended = round(ml_val * 0.6 + ema * 0.4, 1)
+                    else:
+                        blended = round(ema, 1)
+
+                    # Map latency to animation period using log scale
+                    # 15ms → ~1.5s,  200ms → ~6s,  500ms → ~9s,  700ms → ~11s
+                    import math
+                    clamped = max(10, min(1000, blended))
+                    period = round(1.0 + (math.log10(clamped) / math.log10(1000)) * 14, 2)
+
+                    results.append({
+                        "node_name": name,
+                        "predicted_ms": blended,
+                        "ml_ms": ml_val,
+                        "ema_ms": round(ema, 1),
+                        "period": period,
+                        "ml_available": ml_available,
+                        "samples": row.get('samples', 0),
+                        "latest_at": row.get('latest_at').isoformat() if row.get('latest_at') else None
+                    })
+
+        return {
+            "status": "success",
+            "ml_available": ml_available,
+            "count": len(results),
+            "data": results,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error in latency forecast: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     import uvicorn
