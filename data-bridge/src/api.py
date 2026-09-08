@@ -212,7 +212,7 @@ def get_latest_metrics():
     # Use HeatWave-optimized view instead of subquery
     format_strings = ','.join(['%s'] * len(active_names))
     query = f"""
-    SELECT
+    SELECT /*+ MAX_EXECUTION_TIME(6000) */
         v.node_name,
         v.host_ip,
         v.region,
@@ -332,8 +332,8 @@ def get_hourly_analytics(
         params.append(node)
 
     query = f"""
-    SELECT
-    node_name, hour, samples, avg_cpu, avg_mem, 
+    SELECT /*+ MAX_EXECUTION_TIME(6000) */
+    node_name, hour, samples, avg_cpu, avg_mem,
            cpu_volatility, peak_latency
     FROM v_realtime_analytics
     {where_clause}
@@ -372,7 +372,7 @@ def get_fleet_health_report():
     Includes health scores, trends, and hour-over-hour comparisons.
     """
     query = """
-    SELECT *
+    SELECT /*+ MAX_EXECUTION_TIME(6000) */ *
     FROM v_fleet_health_report
     ORDER BY cpu_load_rank ASC
     LIMIT 200;
@@ -403,7 +403,8 @@ def get_anomaly_dashboard():
     Shows anomaly types, severity distribution, and open issues.
     """
     query = """
-    SELECT anomaly_type, severity, count, open_count, 
+    SELECT /*+ MAX_EXECUTION_TIME(6000) */
+    anomaly_type, severity, count, open_count, 
            avg_confidence, latest
     FROM v_anomaly_dashboard
     ORDER BY open_count DESC, count DESC;
@@ -540,16 +541,17 @@ def get_ai_diagnostics():
 
     # Use HeatWave view for latest status with health scores
     query_latest = f"""
-    SELECT node_name, status, cpu_usage_percent, mem_usage_percent,
-           disk_usage_percent, latency_ms as scrape_duration_ms, 
+    SELECT /*+ MAX_EXECUTION_TIME(6000) */
+    node_name, status, cpu_usage_percent, mem_usage_percent,
+           disk_usage_percent, latency_ms as scrape_duration_ms,
            recorded_at, health_score
     FROM v_node_latest_status
     WHERE node_name IN ({format_strings});
     """
     
-    # HeatWave OLAP analytics query - force offload via cost threshold hint
+    # HeatWave OLAP analytics query
     query_htap = """
-    SELECT
+    SELECT /*+ MAX_EXECUTION_TIME(6000) */
         COUNT(*) as sample_count,
         MAX(scrape_duration_ms) as peak_latency,
         AVG(cpu_usage_percent) as avg_cpu,
@@ -678,6 +680,82 @@ def get_ai_diagnostics():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ── ML latency forecast cache ────────────────────────────────────────────────
+import threading as _threading
+import math as _math
+
+_ml_forecast_cache: dict = {}        # node_name -> predicted_ms
+_ml_forecast_at: float = 0.0         # last successful refresh timestamp
+_ml_forecast_lock = _threading.Lock()
+_ml_forecast_refreshing = False
+_ML_FORECAST_TTL = 60                # refresh every 60s
+
+
+def _refresh_ml_forecast() -> None:
+    """Background thread: run ML_PREDICT_ROW for all nodes, update cache."""
+    global _ml_forecast_cache, _ml_forecast_at, _ml_forecast_refreshing
+    try:
+        active_names = [n["name"] for n in TARGET_NODES]
+        import pymysql as _pymysql
+        conn = _pymysql.connect(
+            host=os.getenv("MYSQL_HOST"),
+            port=int(os.getenv("MYSQL_PORT", "3306")),
+            user=os.getenv("MYSQL_USER"),
+            password=os.getenv("MYSQL_PASSWORD"),
+            database=os.getenv("MYSQL_DATABASE", "modo_db"),
+            cursorclass=_pymysql.cursors.DictCursor,
+            connect_timeout=5,
+            read_timeout=90,
+            autocommit=True,
+        )
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT model_handle FROM ML_SCHEMA_admin.MODEL_CATALOG
+                WHERE train_table_name = 'modo_db.latency_forecast_train'
+                  AND task = 'regression' AND model_type IS NOT NULL
+                ORDER BY model_id DESC LIMIT 1
+            """)
+            mrow = cur.fetchone()
+            if not mrow:
+                return
+            handle = mrow['model_handle']
+            new_cache = {}
+            for name in active_names:
+                cur.execute("""
+                    SELECT sys.ML_PREDICT_ROW(
+                        JSON_OBJECT('id',0,'node_name',%s,'hour_of_day',HOUR(NOW()),
+                            'day_of_week',DAYOFWEEK(NOW()),
+                            'cpu_usage_percent',0,'mem_usage_percent',0,'net_in_mb',0),
+                        %s, NULL) as pred
+                """, (name, handle))
+                row = cur.fetchone()
+                if row and row.get('pred'):
+                    import json as _json
+                    p = row['pred'] if isinstance(row['pred'], dict) else _json.loads(row['pred'])
+                    val = p.get('Prediction') or p.get('ml_results', {}).get('predictions', {}).get('scrape_duration_ms')
+                    if val:
+                        new_cache[name] = round(float(val), 1)
+        conn.close()
+        with _ml_forecast_lock:
+            _ml_forecast_cache = new_cache
+            _ml_forecast_at = time.time()
+        logger.info(f"ML forecast cache refreshed: {len(new_cache)} nodes")
+    except Exception as e:
+        logger.warning(f"ML forecast refresh failed: {e}")
+    finally:
+        _ml_forecast_refreshing = False
+
+
+def get_ml_forecast(node_name: str) -> float | None:
+    """Return cached ML prediction for node, trigger background refresh if stale."""
+    global _ml_forecast_refreshing
+    now = time.time()
+    if now - _ml_forecast_at > _ML_FORECAST_TTL and not _ml_forecast_refreshing:
+        _ml_forecast_refreshing = True
+        _threading.Thread(target=_refresh_ml_forecast, name="ml-forecast", daemon=True).start()
+    return _ml_forecast_cache.get(node_name)
+
+
 @app.get("/api/analytics/latency-forecast")
 def get_latency_forecast():
     """
@@ -704,23 +782,30 @@ def get_latency_forecast():
     """
 
     # ML prediction per node using current hour/dow features
+    # Get model handle first
+    query_model_handle = """
+    SELECT model_handle FROM ML_SCHEMA_admin.MODEL_CATALOG
+    WHERE train_table_name = 'modo_db.latency_forecast_train'
+      AND task = 'regression'
+      AND model_type IS NOT NULL
+    ORDER BY model_id DESC LIMIT 1
+    """
+
     query_predict = f"""
     SELECT
         node_name,
-        ROUND(ML_PREDICT_ROW(
+        ROUND(sys.ML_PREDICT_ROW(
             JSON_OBJECT(
+                'id', 0,
                 'node_name', node_name,
                 'hour_of_day', HOUR(NOW()),
                 'day_of_week', DAYOFWEEK(NOW()),
                 'cpu_usage_percent', cpu_usage_percent,
                 'mem_usage_percent', mem_usage_percent,
-                'net_in_mb', ROUND(net_in_bytes_sec / 1048576.0, 2)
+                'net_in_mb', 0
             ),
-            (SELECT model_object FROM ML_SCHEMA_admin.MODEL_CATALOG
-             WHERE train_table_name = 'modo_db.latency_forecast_train'
-               AND task = 'regression'
-               AND model_type IS NOT NULL
-             ORDER BY model_id DESC LIMIT 1)
+            %s,
+            NULL
         )) as predicted_ms
     FROM v_node_latest_status
     WHERE node_name IN ({format_strings})
@@ -729,50 +814,42 @@ def get_latency_forecast():
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cur:
-                # EMA from recent samples
+                # EMA from recent samples (lightweight, uses view index)
                 cur.execute(query_recent, tuple(active_names))
                 recent_rows = {r['node_name']: r for r in cur.fetchall()}
 
-                # ML prediction
-                ml_available = False
-                predicted = {}
-                try:
-                    cur.execute(query_predict, tuple(active_names))
-                    for r in cur.fetchall():
-                        if r['predicted_ms'] is not None:
-                            predicted[r['node_name']] = float(r['predicted_ms'])
-                    ml_available = len(predicted) > 0
-                except Exception as ml_err:
-                    logger.warning(f"ML prediction unavailable, using EMA only: {ml_err}")
+        # ML prediction: use background cache (non-blocking)
+        predicted = {name: get_ml_forecast(name) for name in active_names}
+        ml_available = any(v is not None for v in predicted.values())
 
-                results = []
-                for name in active_names:
-                    row = recent_rows.get(name, {})
-                    ema = float(row.get('ema_ms') or 200)
-                    ml_val = predicted.get(name)
+        results = []
+        import math
+        for name in active_names:
+            row = recent_rows.get(name, {})
+            ema = float(row.get('ema_ms') or 200)
+            ml_val = predicted.get(name)
 
-                    # Blend: 60% ML prediction + 40% EMA when model available
-                    if ml_available and ml_val and ml_val > 0:
-                        blended = round(ml_val * 0.6 + ema * 0.4, 1)
-                    else:
-                        blended = round(ema, 1)
+            # Blend: 60% ML prediction + 40% EMA when model available
+            if ml_available and ml_val and ml_val > 0:
+                blended = round(ml_val * 0.6 + ema * 0.4, 1)
+            else:
+                blended = round(ema, 1)
 
-                    # Map latency to animation period using log scale
-                    # 15ms → ~1.5s,  200ms → ~6s,  500ms → ~9s,  700ms → ~11s
-                    import math
-                    clamped = max(10, min(1000, blended))
-                    period = round(1.0 + (math.log10(clamped) / math.log10(1000)) * 14, 2)
+            # Map latency to animation period using log scale
+            # 15ms → ~6s,  200ms → ~10s,  500ms → ~12s,  700ms → ~13s
+            clamped = max(10, min(1000, blended))
+            period = round(1.0 + (math.log10(clamped) / math.log10(1000)) * 14, 2)
 
-                    results.append({
-                        "node_name": name,
-                        "predicted_ms": blended,
-                        "ml_ms": ml_val,
-                        "ema_ms": round(ema, 1),
-                        "period": period,
-                        "ml_available": ml_available,
-                        "samples": row.get('samples', 0),
-                        "latest_at": row.get('latest_at').isoformat() if row.get('latest_at') else None
-                    })
+            results.append({
+                "node_name": name,
+                "predicted_ms": blended,
+                "ml_ms": ml_val,
+                "ema_ms": round(ema, 1),
+                "period": period,
+                "ml_available": ml_available,
+                "samples": row.get('samples', 0),
+                "latest_at": row.get('latest_at').isoformat() if row.get('latest_at') else None
+            })
 
         return {
             "status": "success",
