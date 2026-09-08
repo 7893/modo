@@ -146,6 +146,8 @@ def get_db_pool() -> PooledDB:
             database=database,
             cursorclass=pymysql.cursors.DictCursor,
             connect_timeout=5,
+            read_timeout=8,      # query timeout: kill stuck OLAP queries after 8s
+            write_timeout=8,
             autocommit=True,
         )
         logger.info(f"Database connection pool initialized (host={host}, database={database})")
@@ -210,7 +212,7 @@ def get_latest_metrics():
     # Use HeatWave-optimized view instead of subquery
     format_strings = ','.join(['%s'] * len(active_names))
     query = f"""
-    SELECT /*+ SET_VAR(secondary_engine_cost_threshold=0) */
+    SELECT
         v.node_name,
         v.host_ip,
         v.region,
@@ -330,7 +332,7 @@ def get_hourly_analytics(
         params.append(node)
 
     query = f"""
-    SELECT /*+ SET_VAR(secondary_engine_cost_threshold=0) */
+    SELECT
     node_name, hour, samples, avg_cpu, avg_mem, 
            cpu_volatility, peak_latency
     FROM v_realtime_analytics
@@ -547,7 +549,7 @@ def get_ai_diagnostics():
     
     # HeatWave OLAP analytics query - force offload via cost threshold hint
     query_htap = """
-    SELECT /*+ SET_VAR(secondary_engine_cost_threshold=0) */
+    SELECT
         COUNT(*) as sample_count,
         MAX(scrape_duration_ms) as peak_latency,
         AVG(cpu_usage_percent) as avg_cpu,
@@ -689,7 +691,7 @@ def get_latency_forecast():
     # Query recent EMA: use last 5 scrape values per node via window function
     # Use v_node_latest_status for the latest single reading (lightweight)
     query_recent = f"""
-    SELECT /*+ SET_VAR(secondary_engine_cost_threshold=0) */
+    SELECT
         node_name,
         latency_ms as ema_ms,
         latency_ms as min_ms,
