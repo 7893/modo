@@ -996,6 +996,7 @@
     let countdown = 15;
     let currentActiveCurtain = 'overview';
     let cachedNodesData = [];
+    let cachedForecastData = {};
 
     // Helper: Convert UTC string to Clean Time without brackets or timezone text
     function formatCleanTime(utcStr) {
@@ -1129,10 +1130,11 @@
         console.error('Failed to fetch diagnostics:', err);
       }
 
-      // Fetch HeatWave status, hourly trends, and anomaly breakdown
+      // Fetch HeatWave status, hourly trends, anomaly breakdown, and latency forecast
       try { fetchHeatWaveStatus(); } catch(e) { console.error('fetchHeatWaveStatus error:', e); }
       try { fetchHourlyTrend(); } catch(e) { console.error('fetchHourlyTrend error:', e); }
       try { fetchAnomalyBreakdown(); } catch(e) { console.error('fetchAnomalyBreakdown error:', e); }
+      try { fetchLatencyForecast(); } catch(e) { console.error('fetchLatencyForecast error:', e); }
 
       finally {
         setTimeout(() => icon?.classList.remove('fa-spin'), 600);
@@ -1385,6 +1387,24 @@
         }
       } catch (err) {
         console.error('Failed to fetch hourly trend:', err);
+      }
+    }
+
+    async function fetchLatencyForecast() {
+      try {
+        const res = await fetch(`/api/analytics/latency-forecast?_t=${Date.now()}`);
+        const data = await res.json();
+        if (data.status === 'success' && Array.isArray(data.data)) {
+          // rebuild lookup map
+          cachedForecastData = {};
+          data.data.forEach(d => { cachedForecastData[d.node_name] = d; });
+          // re-render map with updated forecast periods
+          if (cachedNodesData.length > 0) {
+            try { renderMapChart(cachedNodesData); } catch(e) {}
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch latency forecast:', err);
       }
     }
 
@@ -1681,10 +1701,23 @@
       if (hubCoord) {
         nodes.forEach(n => {
           if (n.node_name !== 'example-node-1' && nodeCoords[n.node_name]) {
+            // Use forecast period if available, fallback to realtime scrape_duration_ms
+            const forecast = cachedForecastData[n.node_name];
+            let period;
+            if (forecast && forecast.period) {
+              period = forecast.period;
+            } else {
+              // Fallback: log-scale mapping from actual scrape_duration_ms
+              const ms = Math.max(10, Math.min(1000, n.scrape_duration_ms || 200));
+              period = Math.round((1.0 + (Math.log10(ms) / Math.log10(1000)) * 14) * 10) / 10;
+            }
             linesData.push({
               fromName: `${n.node_name} (${n.region})`,
               toName: 'jpa (大阪中枢)',
-              coords: [nodeCoords[n.node_name], hubCoord]
+              coords: [nodeCoords[n.node_name], hubCoord],
+              period: period,
+              predictedMs: forecast ? forecast.predicted_ms : n.scrape_duration_ms,
+              mlAvailable: forecast ? forecast.ml_available : false
             });
           }
         });
@@ -1704,7 +1737,7 @@
               return `
                 <div style="font-family: 'JetBrains Mono', monospace; min-width: 170px; line-height: 1.5;">
                   <div style="color: #38BDF8; font-size: 11px; font-weight: 600; margin-bottom: 5px; display: flex; align-items: center; gap: 6px;">
-                    <i class="fa-solid fa-satellite-dish"></i> 跨云遥测链路
+                    <i class="fa-solid fa-satellite-dish"></i> 遥测上报链路
                   </div>
                   <div style="color: #F1F5F9; font-size: 12px; font-weight: 700;">
                     ${params.data.fromName}
@@ -1714,6 +1747,12 @@
                   </div>
                   <div style="color: #C084FC; font-size: 12px; font-weight: 700;">
                     ${params.data.toName}
+                  </div>
+                  <div style="margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(51,65,85,0.5); font-size: 11px; color: #94A3B8;">
+                    ${params.data.mlAvailable
+                      ? `<span style="color:#34D399">▸ ML预测:</span> <b style="color:#fff">${params.data.predictedMs}ms</b> · period ${params.data.period}s`
+                      : `<span style="color:#FBBF24">▸ EMA估算:</span> <b style="color:#fff">${params.data.predictedMs}ms</b>`
+                    }
                   </div>
                 </div>
               `;
@@ -1786,14 +1825,15 @@
           axisLabel: { color: '#94A3B8', formatter: function(v) { return v + '°N'; } }
         },
         series: [
-          {
+          // One series per line so each arrow has its own period
+          ...linesData.map(line => ({
             name: '遥测链路',
             type: 'lines',
             coordinateSystem: 'cartesian2d',
             zlevel: 1,
             effect: {
               show: true,
-              period: 15,
+              period: line.period,
               trailLength: 0.25,
               symbol: 'arrow',
               symbolSize: 4,
@@ -1804,8 +1844,8 @@
               width: 1.2,
               curveness: 0.18
             },
-            data: linesData
-          },
+            data: [line]
+          })),
           {
             name: '集群节点',
             type: 'effectScatter',
