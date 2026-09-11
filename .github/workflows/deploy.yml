@@ -53,15 +53,41 @@ jobs:
     runs-on: ubuntu-latest
     needs: ci
     steps:
-      - name: Deploy to JPA Node
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DEPLOY_HOST_IP }}
-          username: ubuntu
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: |
-            cd /home/ubuntu/modo
-            git fetch origin main
-            git reset --hard origin/main
-            sudo systemctl restart modo-api.service
-            sudo systemctl restart modo-ingest.service
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy Artifacts to USA Node
+        env:
+          TARGET_HOST: ${{ secrets.USA_HOST || secrets.DEPLOY_HOST_IP || secrets.DEPLOY_HOST }}
+          TARGET_KEY: ${{ secrets.USA_SSH_KEY || secrets.DEPLOY_SSH_KEY }}
+        run: |
+          if [ -z "$TARGET_HOST" ] || [ -z "$TARGET_KEY" ]; then
+            echo "ERROR: Target host or SSH key secret is missing."
+            exit 1
+          fi
+
+          mkdir -p ~/.ssh
+          echo "$TARGET_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "$TARGET_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+          echo "Syncing data-bridge code to USA..."
+          rsync -avz -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=accept-new" \
+            --exclude='__pycache__' --exclude='*.pyc' --exclude='venv/' --exclude='.env' \
+            data-bridge/src/ \
+            ubuntu@"$TARGET_HOST":/home/ubuntu/modo/data-bridge/src/
+
+          rsync -avz -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=accept-new" \
+            data-bridge/requirements.txt \
+            ubuntu@"$TARGET_HOST":/home/ubuntu/modo/data-bridge/requirements.txt
+
+          echo "Restarting services and running health probe on USA..."
+          ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=accept-new ubuntu@"$TARGET_HOST" "
+            if [ -f /home/ubuntu/modo/data-bridge/requirements.txt ]; then
+              /home/ubuntu/modo/data-bridge/venv/bin/pip install -q -r /home/ubuntu/modo/data-bridge/requirements.txt
+            fi
+            sudo systemctl restart modo-api.service modo-ingest.service
+            sleep 3
+            curl -sf http://127.0.0.1:8000/health || (echo 'modo-api health check failed' && exit 1)
+          "
+          echo "Backend deployment to USA completed successfully."
