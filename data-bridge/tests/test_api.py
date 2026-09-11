@@ -18,19 +18,18 @@ def test_health_endpoint():
     data = response.json()
     assert data["status"] == "online"
     assert data["service"] == "MODO Data Bridge Gateway"
+    assert "node" in data
     assert "timestamp" in data
-    assert "tunnel_endpoint" in data
 
 
 def test_nodes_summary_endpoint():
-    """Verify /api/nodes/summary returns the registered nodes."""
+    """Verify /api/nodes/summary returns the 10 registered nodes."""
     headers = {"X-Internal-Secret": os.getenv("INTERNAL_API_SECRET", "")} if os.getenv("INTERNAL_API_SECRET") else {}
     response = client.get("/api/nodes/summary", headers=headers)
     assert response.status_code == 200
     data = response.json()
-    assert "total_nodes" in data
-    assert "nodes" in data
-    assert len(data["nodes"]) == data["total_nodes"]
+    assert data["total_nodes"] == 11
+    assert len(data["nodes"]) == 11
     
     # Check that core nodes are present
     node_names = [n["name"] for n in data["nodes"]]
@@ -61,7 +60,7 @@ def test_rate_limit():
     # Next request should be rate limited
     response = client.get("/health", headers={"X-Forwarded-For": test_ip})
     assert response.status_code == 429
-    assert response.json() == {"error": "Too many requests"}
+    assert "retry_after" in response.json()
     
     # Clean up
     _rate_limit_store.clear()

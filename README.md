@@ -1,12 +1,12 @@
-# 🌐 MODO (墨斗) // 多云分布式边缘数据网关与拓扑大屏
+# 🌐 MODO (墨斗) // 多云分布式数据底座与智能中枢
 
 [![CI](https://github.com/7893/modo/actions/workflows/ci.yml/badge.svg)](https://github.com/7893/modo/actions/workflows/ci.yml)
 [![Deploy to Cloudflare Workers](https://github.com/7893/modo/actions/workflows/deploy.yml/badge.svg)](https://github.com/7893/modo/actions/workflows/deploy.yml)
 [![Production Dashboard](https://img.shields.io/badge/Live%20Demo-modo-06b6d4?style=flat-square&logo=cloudflare)](https://modo.53.workers.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg?style=flat-square)](LICENSE)
 
-> **MODO（墨斗）—— 专为多云分布式拓扑打造的轻量边缘网关与全景拓扑大屏。**  
-> 采用无状态解耦设计，前置 **Cloudflare Workers (Hono)** 全球边缘代理，结合 **Cloudflare Tunnel** 与 USA **FastAPI** 节点元数据网关。
+> **MODO（墨斗）—— 专为多云分布式业务打造的高可用数据底座与全景遥测中枢。**  
+> Powered by **Cloudflare Workers (Hono)**, **MySQL HeatWave Engine (`modo_db`)**, **Network Load Balancer (NLB)**, and **FastAPI**.
 
 ---
 
@@ -14,64 +14,69 @@
 
 | Service | Access URL | Architecture Role | Status |
 | :--- | :--- | :--- | :---: |
-| 🌐 **MODO Command Dashboard** | [`https://modo.53.workers.dev`](https://modo.53.workers.dev) | Edge Worker UI + ECharts 5 Multi-Curtain Panorama | 🟢 **ONLINE** |
-| 🚇 **MODO Private API Gateway** | `https://api-modo.8n8m.cfd` | Zero-Trust Cloudflare Tunnel ➡️ FastAPI Node Gateway | 🟢 **ACTIVE** |
+| 🌐 **MODO Command Dashboard** | [`https://modo.53.workers.dev`](https://modo.53.workers.dev) | Edge Worker UI + ECharts 5 + Supabase Auth | 🟢 **ONLINE** |
+| 🚇 **MODO Private API Gateway** | `https://api-modo.8n8m.cfd` | Zero-Trust Cloudflare Tunnel ➡️ FastAPI Bridge | 🟢 **ACTIVE** |
+| 🗄️ **Managed MySQL Data Store** | `modo_db` (`10.0.0.145:3306` via US VPC) | OCI MySQL HeatWave Cloud Database System | 🟢 **ACTIVE** |
 
 ---
 
 ## 🗺️ System Architecture
 
 ```text
-                             【Client / Operations】
-                                        │  (HTTPS / TLS 1.3)
-                                        ▼
-                   ┌─────────────────────────────────────────┐
-                   │      Cloudflare Edge Network (CDN)      │
-                   │        https://modo.53.workers.dev      │
-                   │                                         │
-                   │  • Hono.js Edge Application             │
-                   │  • ECharts 5 Dark Neon Theme            │
-                   │  • 4-Curtain Multi-Screen Dashboard     │
-                   │  • Anti-Cache & Rate Limiting Guard     │
-                   └────────────────────┬────────────────────┘
-                                        │  (Encrypted Edge Proxy)
-                                        ▼
-                   ┌─────────────────────────────────────────┐
-                   │     Cloudflare Tunnel (QUIC Protocol)   │
-                   │          api-modo.8n8m.cfd              │
-                   └────────────────────┬────────────────────┘
-                                        │  (Zero-Trust Private Ingress)
-                                        ▼
-                   ┌─────────────────────────────────────────┐
-                   │       usa (US Ashburn Central Hub)      │
-                   │                                         │
-                   │  • systemd: modo.service                │
-                   │  • Lightweight FastAPI Gateway (8000)   │
-                   │  • Multi-Cloud Node Registry            │
-                   └────────────────────┬────────────────────┘
-                                        │
-                                        │ (Target Fleet Definition)
-                                        ▼
-                   ┌─────────────────────────────────────────┐
-                   │        11 Multi-Cloud Fleet Nodes       │
-                   │                                         │
-                   │ • Ashburn (usa, usb, usc)               │
-                   │ • Osaka / Tokyo (jpa, jpb, jpc, jpd,    │
-                   │   jpe)                                  │
-                   │ • Singapore (sga), Taiwan (gcp)         │
-                   │ • Beijing (cna)                         │
-                   └─────────────────────────────────────────┘
+                               【Operations & Management】
+                                             │  (HTTPS / TLS 1.3)
+                                             ▼
+                        ┌─────────────────────────────────────────┐
+                        │      Cloudflare Edge Network (CDN)      │
+                        │        https://modo.53.workers.dev      │
+                        │                                         │
+                        │  • Hono.js Edge Application             │
+                        │  • ECharts 5 Supabase Dark Theme       │
+                        │  • 4-Curtain Multi-Screen Dashboard     │
+                        │  • Supabase Auth Security Guard         │
+                        └────────────────────┬────────────────────┘
+                                             │  (Encrypted Edge Proxy)
+                                             ▼
+                        ┌─────────────────────────────────────────┐
+                        │     Cloudflare Tunnel (QUIC Protocol)   │
+                        │          api-modo.8n8m.cfd              │
+                        └────────────────────┬────────────────────┘
+                                             │  (Zero-Trust Private Ingress)
+                                             ▼
+                        ┌─────────────────────────────────────────┐
+                        │       usa (US Ashburn Central Hub)      │
+                        │                                         │
+                        │  • systemd: modo.service (Unified API   │
+                        │    8000 + Ingest daemon 15s)            │
+                        │  • HeatWave AutoML: MODO_LATENCY_       │
+                        │    FORECAST (ExtraTreesRegressor)       │
+                        └──────────────┬──────────────────┬───────┘
+                                       │                  │
+                (Prometheus Scrape)    │                  │ (Private VPC TCP 3306)
+                                       ▼                  ▼
+             ┌────────────────────────────────────┐   ┌───────────────────────────┐
+             │      11 Multi-Cloud VM Fleet       │   │    Cloud MySQL HeatWave   │
+             │                                    │   │     Enterprise System     │
+             │ • Ashburn (usa, usb, usc)          │   │        (modo_db)          │
+             │ • Osaka/Tokyo (jpa, jpb, jpc,      │   │                           │
+             │   jpd, jpe)                        │   │ • vm_telemetry (timeseries│
+             │ • Singapore (sga), Taiwan (gcp)    │   │ • latency_forecast_train  │
+             │ • Beijing (cna)                    │   │ • ML_SCHEMA_admin Catalog │
+             └────────────────────────────────────┘   └───────────────────────────┘
 ```
 
 ---
 
 ## 🚀 Key Features
 
-* 🌐 **多云拓扑雷达大屏 (Curtain 2)**：基于 ECharts 5 渲染的全球 11 节点地理拓扑网格，覆盖阿什本、大阪、东京、新加坡、台湾及北京节点，动态粒子流直观汇聚至 **USA（阿什本中枢）**。
-* 🚇 **轻量无状态网关**：全面剥离重型数据库依赖，专注多云节点元数据治理、IP 映射与边缘 API 安全代理。
-* 🛡️ **Zero-Trust 隧道防护**：源站零公网开放端口，所有流量通过 Cloudflare Tunnel 穿透至内网 `127.0.0.1:8000`。
-* ⚡ **系统级进程守护**：USA 生产中枢使用 `modo.service`（由 `src/run_unified.py` 驱动）实施进程级自愈与崩溃重启。
-* 🔄 **自动化 CI/CD 流水线**：代码提交至 `main` 自动触发 GitHub Actions，自动化构建、校验并热部署至 Cloudflare Workers 边缘网络。
+* 🌐 **Multi-Cloud Topology Map & Radar (Curtain 2)**: Dynamic geographical visualization rendered with ECharts 5, mapping nodes across Ashburn, Osaka, Tokyo, Singapore, Taiwan, and Beijing. All telemetry lines converge towards the **USA Ashburn Central Hub**, with particle flow speeds dynamically driven by HeatWave AutoML latency forecasting.
+* 🧠 **HeatWave AutoML In-Database Intelligence**: Native in-database regression modeling (`sys.ML_TRAIN` on `latency_forecast_train`) using `ExtraTreesRegressor` (`MODO_LATENCY_FORECAST`, model_id 5) loaded in HeatWave memory. Inference via `sys.ML_PREDICT_ROW` blended with real-time EMA (60% ML + 40% EMA) calculates precise per-link latency and particle animation periods.
+* 📈 **Time-Series Telemetry Waveforms**: Live streaming CPU, memory utilization, disk space, and network I/O throughput stored in MySQL HeatWave.
+* 🤖 **AI Autonomous Diagnostics**: Real-time anomaly detection heuristics, fleet health scoring (`0~100%`), and remediation recommendations.
+* 🚇 **Zero-Trust Network Bridge**: Zero public database ports. Cloudflare Tunnel connects Cloudflare Workers directly to private internal subnet instances.
+* 🛡️ **Enterprise Process Supervision**: Unified `systemd` daemon supervision (`modo.service`) on USA Central Hub with automatic crash recovery and on-boot restart.
+* 🔐 **Supabase Authentication**: Integrated glassmorphic login modal with session persistence.
+* 🔄 **Automated CI/CD**: GitHub Actions workflow running `pytest` test suites, instant Wrangler edge deployment on push, and automated code rsync to USA node.
 
 ---
 
@@ -83,18 +88,18 @@ modo/
 │   └── workflows/
 │       ├── ci.yml                 # Pytest & TypeScript verification
 │       └── deploy.yml             # Cloudflare Workers automated deployment & USA rsync
-├── data-bridge/                   # Lightweight Backend API Gateway (Python)
-│   ├── config/
-│   │   └── nodes.json             # Multi-cloud target node metadata
-│   ├── src/
-│   │   ├── api.py                 # FastAPI REST server (/health, /api/nodes/summary)
-│   │   └── run_unified.py         # Supervisor daemon for API Gateway (port 8000)
-│   ├── tests/                     # Unit test suite
-│   │   └── test_api.py            # API endpoint tests
-│   └── requirements.txt           # Minimal Python dependencies
+├── data-bridge/                   # Backend Ingestion & API Gateway (Python)
+│   ├── api.py                     # FastAPI REST server & AutoML latency forecast
+│   ├── ingest.py                  # Concurrent multi-threaded Prometheus scraper
+│   ├── db_setup.py                # MySQL schema initializer
+│   ├── run_unified.py             # Single systemd service supervisor
+│   ├── train_latency_model.py     # HeatWave AutoML model training script
+│   ├── requirements.txt           # Python dependencies
+│   └── tests/                     # Automated pytest unit test suite
+│       ├── test_parser.py         # Metrics parsing algorithm tests
+│       └── test_api.py            # API endpoint integration tests
 ├── deploy/                        # Deployment configuration
-│   ├── modo.service               # Unified systemd unit for API Gateway
-│   └── cloudflared.yml            # Cloudflare Tunnel ingress configuration
+│   └── modo.service               # Unified systemd unit for API + Ingest
 └── edge-app/                      # Edge Application (Cloudflare Workers)
     ├── src/
     │   ├── index.ts               # Hono app & Edge API Router
@@ -111,8 +116,9 @@ modo/
 * Python 3.12+
 * Node.js 22+ & pnpm / npm
 * Cloudflare account with Wrangler CLI configured
+* MySQL 8.0+ / OCI HeatWave instance
 
-### 2. Backend Gateway Setup
+### 2. Backend Setup
 ```bash
 cd data-bridge
 python3 -m venv venv
@@ -120,10 +126,14 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Run Unit Tests
-pytest -v tests/test_api.py
+pytest -v tests/
 
-# Start Gateway Daemon via Supervisor
-python src/run_unified.py
+# Initialize database schema
+python db_setup.py
+
+# Start ingestion daemon and API
+python ingest.py &
+uvicorn api:app --host 127.0.0.1 --port 8000
 ```
 
 ### 3. Edge Worker Setup
@@ -132,10 +142,35 @@ cd edge-app
 npm install
 
 # Local development
-npm run dev
+npx wrangler dev
 
 # Deploy to Cloudflare Workers
-npm run deploy
+npx wrangler deploy --minify
+```
+
+---
+
+## 📊 Database Schema (`vm_telemetry`)
+
+```sql
+CREATE TABLE IF NOT EXISTS vm_telemetry (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    node_name VARCHAR(32) NOT NULL,
+    host_ip VARCHAR(64) NOT NULL,
+    region VARCHAR(32) DEFAULT '',
+    cpu_usage_percent FLOAT DEFAULT 0.0,
+    mem_total_bytes BIGINT DEFAULT 0,
+    mem_available_bytes BIGINT DEFAULT 0,
+    mem_usage_percent FLOAT DEFAULT 0.0,
+    disk_usage_percent FLOAT DEFAULT 0.0,
+    net_in_bytes_sec BIGINT DEFAULT 0,
+    net_out_bytes_sec BIGINT DEFAULT 0,
+    scrape_duration_ms INT DEFAULT 0,
+    status VARCHAR(16) DEFAULT 'ONLINE',
+    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_node_time (node_name, recorded_at),
+    INDEX idx_recorded_at (recorded_at)
+) ENGINE=InnoDB;
 ```
 
 ---
