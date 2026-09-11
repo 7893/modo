@@ -16,7 +16,7 @@
 | :--- | :--- | :--- | :---: |
 | 🌐 **MODO Command Dashboard** | [`https://modo.53.workers.dev`](https://modo.53.workers.dev) | Edge Worker UI + ECharts 5 + Supabase Auth | 🟢 **ONLINE** |
 | 🚇 **MODO Private API Gateway** | `https://api-modo.8n8m.cfd` | Zero-Trust Cloudflare Tunnel ➡️ FastAPI Bridge | 🟢 **ACTIVE** |
-| 🗄️ **Managed MySQL Data Store** | `modo_db` (`<INTERNAL_DB_IP>:3306` via NLB) | MySQL HeatWave Cloud Database System | 🟢 **ACTIVE** |
+| 🗄️ **Managed MySQL Data Store** | `modo_db` (`10.0.0.145:3306` via US VPC) | OCI MySQL HeatWave Cloud Database System | 🟢 **ACTIVE** |
 
 ---
 
@@ -32,7 +32,7 @@
                         │                                         │
                         │  • Hono.js Edge Application             │
                         │  • ECharts 5 Supabase Dark Theme       │
-                        │  • Real-time Waveform Charts            │
+                        │  • 4-Curtain Multi-Screen Dashboard     │
                         │  • Supabase Auth Security Guard         │
                         └────────────────────┬────────────────────┘
                                              │  (Encrypted Edge Proxy)
@@ -44,21 +44,24 @@
                                              │  (Zero-Trust Private Ingress)
                                              ▼
                         ┌─────────────────────────────────────────┐
-                        │       jpa (JP Tokyo Ingestion Hub)      │
+                        │       usa (US Ashburn Central Hub)      │
                         │                                         │
-                        │  • systemd: modo-api.service (FastAPI)  │
-                        │  • systemd: modo-ingest.service (15s)   │
+                        │  • systemd: modo.service (Unified API   │
+                        │    8000 + Ingest daemon 15s)            │
+                        │  • HeatWave AutoML: MODO_LATENCY_       │
+                        │    FORECAST (ExtraTreesRegressor)       │
                         └──────────────┬──────────────────┬───────┘
                                        │                  │
-                (Prometheus Scrape)   │                  │ (Private Subnet TCP 3306)
+                (Prometheus Scrape)    │                  │ (Private VPC TCP 3306)
                                        ▼                  ▼
              ┌────────────────────────────────────┐   ┌───────────────────────────┐
              │      11 Multi-Cloud VM Fleet       │   │    Cloud MySQL HeatWave   │
              │                                    │   │     Enterprise System     │
-             │ • Tokyo (jpa, jpb, jpc, jpd, jpe)  │   │        (modo_db)          │
-             │ • Ashburn (usa, usb, usc)          │   │                           │
-             │ • Singapore (sga), Taiwan (gcp)    │   │ • vm_telemetry (timeseries)
-             │ • Beijing (cna)                    │   │ • High-performance index │
+             │ • Ashburn (usa, usb, usc)          │   │        (modo_db)          │
+             │ • Osaka/Tokyo (jpa, jpb, jpc,      │   │                           │
+             │   jpd, jpe)                        │   │ • vm_telemetry (timeseries│
+             │ • Singapore (sga), Taiwan (gcp)    │   │ • latency_forecast_train  │
+             │ • Beijing (cna)                    │   │ • ML_SCHEMA_admin Catalog │
              └────────────────────────────────────┘   └───────────────────────────┘
 ```
 
@@ -66,13 +69,14 @@
 
 ## 🚀 Key Features
 
-* 🌐 **Multi-Cloud Topology Map**: Dynamic geographical visualization rendered with ECharts 5, mapping nodes across Tokyo, Ashburn, Singapore, Taiwan, and Beijing with real-time ping latency and health beacons.
+* 🌐 **Multi-Cloud Topology Map & Radar (Curtain 2)**: Dynamic geographical visualization rendered with ECharts 5, mapping nodes across Ashburn, Osaka, Tokyo, Singapore, Taiwan, and Beijing. All telemetry lines converge towards the **USA Ashburn Central Hub**, with particle flow speeds dynamically driven by HeatWave AutoML latency forecasting.
+* 🧠 **HeatWave AutoML In-Database Intelligence**: Native in-database regression modeling (`sys.ML_TRAIN` on `latency_forecast_train`) using `ExtraTreesRegressor` (`MODO_LATENCY_FORECAST`, model_id 5) loaded in HeatWave memory. Inference via `sys.ML_PREDICT_ROW` blended with real-time EMA (60% ML + 40% EMA) calculates precise per-link latency and particle animation periods.
 * 📈 **Time-Series Telemetry Waveforms**: Live streaming CPU, memory utilization, disk space, and network I/O throughput stored in MySQL HeatWave.
 * 🤖 **AI Autonomous Diagnostics**: Real-time anomaly detection heuristics, fleet health scoring (`0~100%`), and remediation recommendations.
 * 🚇 **Zero-Trust Network Bridge**: Zero public database ports. Cloudflare Tunnel connects Cloudflare Workers directly to private internal subnet instances.
-* 🛡️ **Enterprise Process Supervision**: `systemd` daemon supervision on Ingestion Hub with automatic crash recovery and on-boot restart.
+* 🛡️ **Enterprise Process Supervision**: Unified `systemd` daemon supervision (`modo.service`) on USA Central Hub with automatic crash recovery and on-boot restart.
 * 🔐 **Supabase Authentication**: Integrated glassmorphic login modal with session persistence.
-* 🔄 **Automated CI/CD**: GitHub Actions workflow running `pytest` test suites and instant Wrangler edge deployment on push.
+* 🔄 **Automated CI/CD**: GitHub Actions workflow running `pytest` test suites, instant Wrangler edge deployment on push, and automated code rsync to USA node.
 
 ---
 
@@ -83,21 +87,23 @@ modo/
 ├── .github/
 │   └── workflows/
 │       ├── ci.yml                 # Pytest & TypeScript verification
-│       └── deploy.yml             # Cloudflare Workers automated deployment
+│       └── deploy.yml             # Cloudflare Workers automated deployment & USA rsync
 ├── data-bridge/                   # Backend Ingestion & API Gateway (Python)
-│   ├── api.py                     # FastAPI REST server
+│   ├── api.py                     # FastAPI REST server & AutoML latency forecast
 │   ├── ingest.py                  # Concurrent multi-threaded Prometheus scraper
 │   ├── db_setup.py                # MySQL schema initializer
+│   ├── run_unified.py             # Single systemd service supervisor
+│   ├── train_latency_model.py     # HeatWave AutoML model training script
 │   ├── requirements.txt           # Python dependencies
 │   └── tests/                     # Automated pytest unit test suite
 │       ├── test_parser.py         # Metrics parsing algorithm tests
 │       └── test_api.py            # API endpoint integration tests
 ├── deploy/                        # Deployment configuration
-│   ├── modo-api.service           # systemd unit for API gateway
-│   └── modo-ingest.service        # systemd unit for ingestion daemon
+│   └── modo.service               # Unified systemd unit for API + Ingest
 └── edge-app/                      # Edge Application (Cloudflare Workers)
     ├── src/
-    │   └── index.ts               # Hono app & Glassmorphic Dashboard SPA
+    │   ├── index.ts               # Hono app & Edge API Router
+    │   └── index.html             # Multi-Curtain Dashboard SPA (ECharts 5)
     ├── package.json               # Node.js dependencies
     └── wrangler.jsonc             # Cloudflare Worker configuration
 ```
