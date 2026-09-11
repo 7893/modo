@@ -65,20 +65,19 @@ jobs:
           mkdir -p ~/.ssh
           echo "$TARGET_KEY" > ~/.ssh/id_deploy
           chmod 600 ~/.ssh/id_deploy
-          ssh-keyscan -H "$TARGET_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
 
           echo "Syncing data-bridge code to USA..."
-          rsync -avz -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=accept-new" \
+          rsync -avz -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
             --exclude='__pycache__' --exclude='*.pyc' --exclude='venv/' --exclude='.env' \
             data-bridge/src/ \
             ubuntu@"$TARGET_HOST":/home/ubuntu/modo/data-bridge/src/
 
-          rsync -avz -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=accept-new" \
+          rsync -avz -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
             data-bridge/requirements.txt \
             ubuntu@"$TARGET_HOST":/home/ubuntu/modo/data-bridge/requirements.txt
 
           echo "Restarting services and running health probe on USA..."
-          ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=accept-new ubuntu@"$TARGET_HOST" "
+          ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@"$TARGET_HOST" "
             if [ -f /home/ubuntu/modo/data-bridge/requirements.txt ]; then
               /home/ubuntu/modo/data-bridge/venv/bin/pip install -q -r /home/ubuntu/modo/data-bridge/requirements.txt
             fi
