@@ -295,15 +295,15 @@
                     <span class="text-lg">🇯🇵</span>
                     <div>
                       <div class="font-bold text-white flex items-center gap-1.5">
-                        <span>日本大阪中枢</span>
-                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-sky-950/70 text-sky-300 border border-sky-800">3台</span>
+                        <span>日本大阪集群</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-950/70 text-emerald-300 border border-emerald-800">3台</span>
                       </div>
                       <div class="text-[10px] text-slate-500">Oracle Cloud · ap-osaka-1</div>
                     </div>
                   </div>
                   <div class="flex items-center space-x-6 text-xs text-slate-400">
-                    <div class="hidden sm:block">延迟: <strong class="text-emerald-400">&lt;20ms</strong></div>
-                    <span class="px-2.5 py-0.5 rounded-full bg-sky-950/70 text-sky-300 border border-sky-800 font-bold text-[10px]">HUB ONLINE</span>
+                    <div class="hidden sm:block">延迟: <strong class="text-amber-400">~360ms</strong></div>
+                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-800 font-bold text-[10px]">ONLINE</span>
                   </div>
                 </div>
 
@@ -319,7 +319,7 @@
                     </div>
                   </div>
                   <div class="flex items-center space-x-6 text-xs text-slate-400">
-                    <div class="hidden sm:block">延迟: <strong class="text-emerald-400">~30ms</strong></div>
+                    <div class="hidden sm:block">延迟: <strong class="text-amber-400">~350ms</strong></div>
                     <span class="px-2.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-800 font-bold text-[10px]">ONLINE</span>
                   </div>
                 </div>
@@ -329,15 +329,15 @@
                     <span class="text-lg">🇺🇸</span>
                     <div>
                       <div class="font-bold text-white flex items-center gap-1.5">
-                        <span>美东阿什本集群</span>
-                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700">3台</span>
+                        <span>美东阿什本中枢</span>
+                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-sky-950/70 text-sky-300 border border-sky-800">3台</span>
                       </div>
                       <div class="text-[10px] text-slate-500">Oracle Cloud · us-ashburn</div>
                     </div>
                   </div>
                   <div class="flex items-center space-x-6 text-xs text-slate-400">
-                    <div class="hidden sm:block">延迟: <strong class="text-amber-400">~330ms</strong></div>
-                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-800 font-bold text-[10px]">ONLINE</span>
+                    <div class="hidden sm:block">延迟: <strong class="text-emerald-400">&lt;20ms</strong></div>
+                    <span class="px-2.5 py-0.5 rounded-full bg-sky-950/70 text-sky-300 border border-sky-800 font-bold text-[10px]">HUB ONLINE</span>
                   </div>
                 </div>
 
@@ -498,7 +498,7 @@
             </div>
             <div class="flex items-center space-x-3 text-xs font-mono text-slate-400">
               <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_#3b82f6]"></span><span>在线探针</span></span>
-              <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span><span>日本大阪中枢</span></span>
+              <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span><span>美国阿什本中枢</span></span>
             </div>
           </div>
 
@@ -649,7 +649,7 @@
                   <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white">节点端到端网络延迟分布</h2>
                   <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-950/80 text-purple-300 border border-purple-800 font-mono font-bold uppercase">04 · Latency Spectrum</span>
                 </div>
-                <p class="text-xs text-slate-400 mt-0.5">日本大阪数据中枢至 11 节点 Prometheus 探测延迟阶梯分析</p>
+                <p class="text-xs text-slate-400 mt-0.5">美国阿什本数据中枢至 11 节点 Prometheus 探测延迟阶梯分析</p>
               </div>
             </div>
             <span class="px-3 py-1 rounded-full bg-slate-900/90 border border-purple-800 text-xs font-mono text-purple-300 font-bold shadow-sm">
@@ -1697,10 +1697,10 @@
       });
 
       const linesData = [];
-      const hubCoord = nodeCoords['jpa'];
+      const hubCoord = nodeCoords['usa'];
       if (hubCoord) {
         nodes.forEach(n => {
-          if (n.node_name !== 'jpa' && nodeCoords[n.node_name]) {
+          if (n.node_name !== 'usa' && nodeCoords[n.node_name]) {
             // Use forecast period if available, fallback to realtime scrape_duration_ms
             const forecast = cachedForecastData[n.node_name];
             let period;
@@ -1713,7 +1713,7 @@
             }
             linesData.push({
               fromName: `${n.node_name} (${n.region})`,
-              toName: 'jpa (大阪中枢)',
+              toName: 'usa (阿什本中枢)',
               coords: [nodeCoords[n.node_name], hubCoord],
               period: period,
               predictedMs: forecast ? forecast.predicted_ms : n.scrape_duration_ms,
@@ -1758,7 +1758,7 @@
               `;
             }
             const d = params.value;
-            const isHub = params.name === 'jpa';
+            const isHub = params.name === 'usa';
             const status = d[3] || 'ONLINE';
             const isOnline = status === 'ONLINE';
             const lat = d[2];
@@ -1853,7 +1853,7 @@
             zlevel: 2,
             data: scatterData,
             symbolSize: function (val, params) {
-              if (params.name === 'jpa') return 22;
+              if (params.name === 'usa') return 22;
               return Math.max(14, 26 - val[2]/30);
             },
             showEffectOn: 'render',
@@ -1863,7 +1863,7 @@
               formatter: '{b}',
               position: 'top',
               color: function(params) {
-                return params.name === 'jpa' ? '#C084FC' : '#93C5FD';
+                return params.name === 'usa' ? '#C084FC' : '#93C5FD';
               },
               fontFamily: 'monospace',
               fontWeight: 'bold',
@@ -1871,12 +1871,12 @@
             },
             itemStyle: {
               color: function(params) {
-                if (params.name === 'jpa') return '#A855F7';
+                if (params.name === 'usa') return '#A855F7';
                 return params.value[3] === 'ONLINE' ? '#38BDF8' : '#F43F5E';
               },
               shadowBlur: 12,
               shadowColor: function(params) {
-                return params.name === 'jpa' ? 'rgba(168, 85, 247, 0.7)' : 'rgba(56, 189, 248, 0.5)';
+                return params.name === 'usa' ? 'rgba(168, 85, 247, 0.7)' : 'rgba(56, 189, 248, 0.5)';
               }
             }
           }
