@@ -1,0 +1,16 @@
+[Unit]
+Description=MODO Telemetry Ingestion Service
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/modo/data-bridge/src
+ExecStart=/home/ubuntu/modo/data-bridge/venv/bin/python ingest.py
+Restart=always
+RestartSec=5
+StandardOutput=append:/home/ubuntu/modo/logs/ingest.log
+StandardError=append:/home/ubuntu/modo/logs/ingest.log
+
+[Install]
+WantedBy=multi-user.target
