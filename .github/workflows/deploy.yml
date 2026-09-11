@@ -82,7 +82,7 @@ jobs:
             if [ -f /home/ubuntu/modo/data-bridge/requirements.txt ]; then
               /home/ubuntu/modo/data-bridge/venv/bin/pip install -q -r /home/ubuntu/modo/data-bridge/requirements.txt
             fi
-            sudo systemctl restart modo-api.service modo-ingest.service
+            sudo systemctl restart modo.service
             sleep 3
             curl -sf http://127.0.0.1:8000/health || (echo 'modo-api health check failed' && exit 1)
           "

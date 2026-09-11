@@ -1,0 +1,18 @@
+[Unit]
+Description=MODO Unified Edge Data Bridge (API Gateway + Telemetry Ingestion)
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/modo/data-bridge/src
+EnvironmentFile=/home/ubuntu/modo/.env
+ExecStart=/home/ubuntu/modo/data-bridge/venv/bin/python run_unified.py
+Restart=always
+RestartSec=5
+TimeoutStopSec=15
+StandardOutput=append:/home/ubuntu/modo/logs/modo.log
+StandardError=append:/home/ubuntu/modo/logs/modo.log
+
+[Install]
+WantedBy=multi-user.target
