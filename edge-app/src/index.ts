@@ -30,7 +30,7 @@ app.get('/api/nodes/latest', async (c) => {
       'Pragma': 'no-cache'
     })
   } catch (err: any) {
-    return c.json({ status: 'error', secret: c.env.INTERNAL_API_SECRET, message: 'Backend gateway unreachable', error: err.message }, 502)
+    return c.json({ status: 'error', message: 'Backend gateway unreachable', error: err.message }, 502)
   }
 })
 
@@ -78,7 +78,7 @@ app.get('/api/ai/diagnostics', async (c) => {
       'Pragma': 'no-cache'
     })
   } catch (err: any) {
-    return c.json({ status: 'error', secret: c.env.INTERNAL_API_SECRET, message: 'Diagnostics unreachable', error: err.message }, 502)
+    return c.json({ status: 'error', message: 'Diagnostics unreachable', error: err.message }, 502)
   }
 })
 
@@ -98,7 +98,7 @@ app.get('/api/metrics/history', async (c) => {
       'Pragma': 'no-cache'
     })
   } catch (err: any) {
-    return c.json({ status: 'error', secret: c.env.INTERNAL_API_SECRET, message: 'History query failed', error: err.message }, 502)
+    return c.json({ status: 'error', message: 'History query failed', error: err.message }, 502)
   }
 })
 
