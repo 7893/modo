@@ -46,12 +46,14 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
         run: |
-          # Inject addresses/secrets as Worker secrets (never committed to the repo).
+          # First deploy so the removed plain-text vars are cleared from the
+          # live Worker (a var and a secret cannot share the same name).
+          npx wrangler deploy --minify
+          # Then inject addresses/secrets as Worker secrets (never committed).
           printf '%s' "$API_BACKEND_URL"     | npx wrangler secret put API_BACKEND_URL
           printf '%s' "$SUPABASE_URL"        | npx wrangler secret put SUPABASE_URL
           printf '%s' "$SUPABASE_ANON_KEY"   | npx wrangler secret put SUPABASE_ANON_KEY
           printf '%s' "$INTERNAL_API_SECRET" | npx wrangler secret put INTERNAL_API_SECRET
-          npx wrangler deploy --minify
 
   deploy-backend:
     name: Deploy Backend Services
