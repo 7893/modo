@@ -779,6 +779,43 @@ def get_ml_forecast(node_name: str) -> float | None:
     return _ml_forecast_cache.get(node_name)
 
 
+# ── Weekly auto-retrain scheduler ────────────────────────────────────────────
+_retrain_last_run: str = ""  # "YYYY-WW" to track if already ran this week
+
+
+def _weekly_retrain_loop() -> None:
+    """Background thread: check hourly, run training on Sunday 3AM."""
+    global _retrain_last_run
+    import subprocess
+    while True:
+        try:
+            now = datetime.now()
+            week_key = now.strftime("%Y-%W")
+            # Sunday = weekday 6, hour 3
+            if now.weekday() == 6 and now.hour == 3 and _retrain_last_run != week_key:
+                logger.info("Weekly retrain triggered (Sunday 3AM)")
+                script_path = os.path.join(os.path.dirname(__file__), "train_latency_model.py")
+                venv_python = os.path.join(os.path.dirname(__file__), "..", "venv", "bin", "python")
+                # Run with low priority to not impact production
+                result = subprocess.run(
+                    ["nice", "-n", "19", "ionice", "-c", "3", venv_python, script_path],
+                    capture_output=True, text=True, timeout=600,
+                    cwd=os.path.dirname(script_path)
+                )
+                if result.returncode == 0:
+                    logger.info(f"Weekly retrain completed successfully")
+                else:
+                    logger.error(f"Weekly retrain failed: {result.stderr[:500]}")
+                _retrain_last_run = week_key
+        except Exception as e:
+            logger.error(f"Weekly retrain error: {e}")
+        time.sleep(3600)  # Check every hour
+
+
+# Start the weekly retrain background thread
+_threading.Thread(target=_weekly_retrain_loop, name="weekly-retrain", daemon=True).start()
+
+
 @app.get("/api/analytics/latency-forecast")
 def get_latency_forecast():
     """
