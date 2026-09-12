@@ -8,6 +8,11 @@ type Bindings = {
   INTERNAL_API_SECRET?: string
 }
 
+const NO_CACHE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+  'Pragma': 'no-cache'
+} as const
+
 const app = new Hono<{ Bindings: Bindings }>()
 
 // Global CORS Middleware
@@ -17,220 +22,106 @@ app.use('*', cors({
   allowHeaders: ['Content-Type', 'Authorization']
 }))
 
-// Proxy API: Nodes Latest Telemetry
-app.get('/api/nodes/latest', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'
+/**
+ * Proxy a request to the private backend gateway.
+ *
+ * Security notes:
+ * - The backend address is read only from env; it is never inlined or echoed.
+ * - On failure we log full details to the Worker console (private) and return
+ *   a generic message to the client, so the internal address and low-level
+ *   error text are never exposed in the HTTP response.
+ */
+async function proxy(c: any, path: string, cache: boolean = true) {
+  const backend = c.env.API_BACKEND_URL
+  if (!backend) {
+    console.error('[proxy] API_BACKEND_URL is not configured')
+    return c.json({ status: 'error', message: 'Service temporarily unavailable' }, 503)
+  }
+
   try {
-    const res = await fetch(`${backend}/api/metrics/latest`, {
-      headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
+    const res = await fetch(`${backend}${path}`, {
+      headers: {
+        'User-Agent': 'MODO-Edge-Worker/1.0',
+        'X-Internal-Secret': c.env.INTERNAL_API_SECRET || ''
+      }
     })
     const data = await res.json()
-    return c.json(data, res.status as any, {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-      'Pragma': 'no-cache'
-    })
+    return c.json(data, res.status as any, cache ? NO_CACHE_HEADERS : undefined)
   } catch (err: any) {
-    return c.json({ status: 'error', message: 'Backend gateway unreachable', error: err.message }, 502)
+    // Log details privately; never return them to the client.
+    console.error(`[proxy] Upstream request failed for ${path}: ${err?.message}`)
+    return c.json({ status: 'error', message: 'Service temporarily unavailable' }, 502)
   }
-})
+}
+
+// Proxy API: Nodes Latest Telemetry
+app.get('/api/nodes/latest', (c) => proxy(c, '/api/metrics/latest'))
 
 // Proxy API: Node metadata summary
-app.get('/api/nodes/summary', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'
-  try {
-    const res = await fetch(`${backend}/api/nodes/summary`, {
-      headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
-    })
-    const data = await res.json()
-    return c.json(data, res.status as any, {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-      'Pragma': 'no-cache'
-    })
-  } catch (err: any) {
-    return c.json({ status: 'error', message: 'Backend unreachable', error: err.message }, 502)
-  }
-})
+app.get('/api/nodes/summary', (c) => proxy(c, '/api/nodes/summary'))
 
 // Proxy API: Health check
-app.get('/api/health', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'
-  try {
-    const res = await fetch(`${backend}/health`, {
-      headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
-    })
-    const data = await res.json()
-    return c.json(data, res.status as any)
-  } catch (err: any) {
-    return c.json({ status: 'error', message: 'Backend unreachable', error: err.message }, 502)
-  }
-})
+app.get('/api/health', (c) => proxy(c, '/health', false))
 
 // Proxy API: AI Diagnostics
-app.get('/api/ai/diagnostics', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'
-  try {
-    const res = await fetch(`${backend}/api/ai/diagnostics`, {
-      headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
-    })
-    const data = await res.json()
-    return c.json(data, res.status as any, {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-      'Pragma': 'no-cache'
-    })
-  } catch (err: any) {
-    return c.json({ status: 'error', message: 'Diagnostics unreachable', error: err.message }, 502)
-  }
-})
+app.get('/api/ai/diagnostics', (c) => proxy(c, '/api/ai/diagnostics'))
 
 // Proxy API: Metrics History
-app.get('/api/metrics/history', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'
+app.get('/api/metrics/history', (c) => {
   const url = new URL(c.req.url)
-  const node = url.searchParams.get('node') || ''
-  const hours = url.searchParams.get('hours') || '24'
-  try {
-    const res = await fetch(`${backend}/api/metrics/history?node=${node}&hours=${hours}`, {
-      headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
-    })
-    const data = await res.json()
-    return c.json(data, res.status as any, {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-      'Pragma': 'no-cache'
-    })
-  } catch (err: any) {
-    return c.json({ status: 'error', message: 'History query failed', error: err.message }, 502)
-  }
+  const node = encodeURIComponent(url.searchParams.get('node') || '')
+  const hours = encodeURIComponent(url.searchParams.get('hours') || '24')
+  return proxy(c, `/api/metrics/history?node=${node}&hours=${hours}`)
 })
 
 // Proxy API: HeatWave Hourly Analytics
-app.get('/api/analytics/hourly', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'
+app.get('/api/analytics/hourly', (c) => {
   const url = new URL(c.req.url)
-  const node = url.searchParams.get('node') || ''
-  const hours = url.searchParams.get('hours') || '48'
-  try {
-    const res = await fetch(`${backend}/api/analytics/hourly?node=${node}&hours=${hours}`, {
-      headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
-    })
-    const data = await res.json()
-    return c.json(data, res.status as any, {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-      'Pragma': 'no-cache'
-    })
-  } catch (err: any) {
-    return c.json({ status: 'error', message: 'Hourly analytics failed', error: err.message }, 502)
-  }
+  const node = encodeURIComponent(url.searchParams.get('node') || '')
+  const hours = encodeURIComponent(url.searchParams.get('hours') || '48')
+  return proxy(c, `/api/analytics/hourly?node=${node}&hours=${hours}`)
 })
 
 // Proxy API: HeatWave Fleet Health Report
-app.get('/api/analytics/fleet', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'
-  try {
-    const res = await fetch(`${backend}/api/analytics/fleet`, {
-      headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
-    })
-    const data = await res.json()
-    return c.json(data, res.status as any, {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-      'Pragma': 'no-cache'
-    })
-  } catch (err: any) {
-    return c.json({ status: 'error', message: 'Fleet report failed', error: err.message }, 502)
-  }
-})
+app.get('/api/analytics/fleet', (c) => proxy(c, '/api/analytics/fleet'))
 
 // Proxy API: HeatWave Anomaly Dashboard
-app.get('/api/analytics/anomalies', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'
-  try {
-    const res = await fetch(`${backend}/api/analytics/anomalies`, {
-      headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
-    })
-    const data = await res.json()
-    return c.json(data, res.status as any, {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-      'Pragma': 'no-cache'
-    })
-  } catch (err: any) {
-    return c.json({ status: 'error', message: 'Anomaly dashboard failed', error: err.message }, 502)
-  }
-})
+app.get('/api/analytics/anomalies', (c) => proxy(c, '/api/analytics/anomalies'))
 
 // Proxy API: HeatWave Cluster Status
-app.get('/api/analytics/heatwave-status', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'
-  try {
-    const res = await fetch(`${backend}/api/analytics/heatwave-status`, {
-      headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
-    })
-    const data = await res.json()
-    return c.json(data, res.status as any, {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-      'Pragma': 'no-cache'
-    })
-  } catch (err: any) {
-    return c.json({ status: 'error', message: 'HeatWave status failed', error: err.message }, 502)
-  }
-})
+app.get('/api/analytics/heatwave-status', (c) => proxy(c, '/api/analytics/heatwave-status'))
 
 // Proxy API: Latency Forecast (HeatWave AutoML + EMA)
-app.get('/api/analytics/latency-forecast', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'
-  try {
-    const res = await fetch(`${backend}/api/analytics/latency-forecast`, {
-      headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
-    })
-    const data = await res.json()
-    return c.json(data, res.status as any, {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-      'Pragma': 'no-cache'
-    })
-  } catch (err: any) {
-    return c.json({ status: 'error', message: 'Latency forecast failed', error: err.message }, 502)
-  }
-})
+app.get('/api/analytics/latency-forecast', (c) => proxy(c, '/api/analytics/latency-forecast'))
 
 // Proxy API: HeatWave ML Features
-app.get('/api/analytics/ml-features', async (c) => {
-  const backend = c.env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'
-  try {
-    const res = await fetch(`${backend}/api/analytics/ml-features`, {
-      headers: { 'User-Agent': 'MODO-Edge-Worker/1.0', 'X-Internal-Secret': c.env.INTERNAL_API_SECRET || '' }
-    })
-    const data = await res.json()
-    return c.json(data, res.status as any, {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-      'Pragma': 'no-cache'
-    })
-  } catch (err: any) {
-    return c.json({ status: 'error', message: 'ML features query failed', error: err.message }, 502)
-  }
-})
+app.get('/api/analytics/ml-features', (c) => proxy(c, '/api/analytics/ml-features'))
 
 import htmlTemplate from './index.html'
 
 // Frontend Dashboard SPA
 app.get('/', (c) => {
-  const supabaseUrl = c.env.SUPABASE_URL || 'https://qkpwuxaylvzycapkojvq.supabase.co'
-  const supabaseKey = c.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrcHd1eGF5bHZ6eWNhcGtvanZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTI1NTksImV4cCI6MjA4ODk4ODU1OX0.iasxckoGYjRiLtaZcrmpwNW8QDuqh-BMGNy3rbmK4mQ'
+  const supabaseUrl = c.env.SUPABASE_URL || ''
+  const supabaseKey = c.env.SUPABASE_ANON_KEY || ''
 
   const finalHtml = htmlTemplate
     .replace('${supabaseUrl}', supabaseUrl)
     .replace('${supabaseKey}', supabaseKey)
 
-  return c.html(finalHtml, 200, {
-    'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-    'Pragma': 'no-cache'
-  })
+  return c.html(finalHtml, 200, NO_CACHE_HEADERS)
 })
 
 
 export default {
   fetch: app.fetch,
   async scheduled(event: any, env: Bindings, ctx: any) {
-    const url = `${env.API_BACKEND_URL || 'https://api-modo.8n8m.cfd'}/api/maintenance/prune`;
+    const backend = env.API_BACKEND_URL
+    if (!backend) {
+      console.error('[Cron] API_BACKEND_URL is not configured')
+      return
+    }
     try {
-      const res = await fetch(url, {
+      const res = await fetch(`${backend}/api/maintenance/prune`, {
         method: 'POST',
         headers: { 'X-Internal-Secret': env.INTERNAL_API_SECRET || '' }
       });
@@ -242,4 +133,3 @@ export default {
     }
   }
 }
-

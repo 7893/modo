@@ -184,8 +184,7 @@ def health_check():
         "service": "MODO Data Bridge Gateway",
         "node": "jpa-osaka",
         "database_status": "connected" if db_ok else "error",
-        "timestamp": datetime.now().isoformat(),
-        "tunnel_endpoint": "api-modo.8n8m.cfd"
+        "timestamp": datetime.now().isoformat()
     }
 
 

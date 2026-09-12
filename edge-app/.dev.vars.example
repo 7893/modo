@@ -1,0 +1,7 @@
+# Local development env for `wrangler dev` (project-level).
+# Copy to `.dev.vars` and fill in real values. `.dev.vars` is gitignored.
+# In production these are injected as Worker secrets via GitHub Actions.
+API_BACKEND_URL=""
+SUPABASE_URL=""
+SUPABASE_ANON_KEY=""
+INTERNAL_API_SECRET=""

@@ -3,10 +3,6 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-08-20",
   "workers_dev": true,
-  "vars": {
-    "API_BACKEND_URL": "https://api-modo.8n8m.cfd",
-    "SUPABASE_URL": "https://qkpwuxaylvzycapkojvq.supabase.co"
-  },
   "rules": [
     {
       "type": "Text",

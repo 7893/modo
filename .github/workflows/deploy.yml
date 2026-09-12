@@ -41,7 +41,16 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          API_BACKEND_URL: ${{ secrets.API_BACKEND_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
         run: |
+          # Inject addresses/secrets as Worker secrets (never committed to the repo).
+          printf '%s' "$API_BACKEND_URL"     | npx wrangler secret put API_BACKEND_URL
+          printf '%s' "$SUPABASE_URL"        | npx wrangler secret put SUPABASE_URL
+          printf '%s' "$SUPABASE_ANON_KEY"   | npx wrangler secret put SUPABASE_ANON_KEY
+          printf '%s' "$INTERNAL_API_SECRET" | npx wrangler secret put INTERNAL_API_SECRET
           npx wrangler deploy --minify
 
   deploy-backend:
