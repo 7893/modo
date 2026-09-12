@@ -718,15 +718,39 @@ def _refresh_ml_forecast() -> None:
             if not mrow:
                 return
             handle = mrow['model_handle']
+
+            # Fetch real current features per node (never predict on zeros:
+            # the model was trained on real cpu/mem/net, so zero inputs push it
+            # far outside the training distribution).
+            format_strings = ','.join(['%s'] * len(active_names))
+            cur.execute(f"""
+                SELECT
+                    v.node_name,
+                    COALESCE(v.cpu_usage_percent, 0) AS cpu,
+                    COALESCE(v.mem_usage_percent, 0) AS mem,
+                    COALESCE((
+                        SELECT t.net_in_bytes_sec / 1000000.0
+                        FROM vm_telemetry t
+                        WHERE t.node_name = v.node_name
+                        ORDER BY t.recorded_at DESC
+                        LIMIT 1
+                    ), 0) AS net_mb
+                FROM v_node_latest_status v
+                WHERE v.node_name IN ({format_strings})
+            """, tuple(active_names))
+            feats = {r['node_name']: r for r in cur.fetchall()}
+
             new_cache = {}
             for name in active_names:
+                f = feats.get(name, {})
                 cur.execute("""
                     SELECT sys.ML_PREDICT_ROW(
                         JSON_OBJECT('id',0,'node_name',%s,'hour_of_day',HOUR(NOW()),
                             'day_of_week',DAYOFWEEK(NOW()),
-                            'cpu_usage_percent',0,'mem_usage_percent',0,'net_in_mb',0),
+                            'cpu_usage_percent',%s,'mem_usage_percent',%s,'net_in_mb',%s),
                         %s, NULL) as pred
-                """, (name, handle))
+                """, (name, float(f.get('cpu') or 0), float(f.get('mem') or 0),
+                      float(f.get('net_mb') or 0), handle))
                 row = cur.fetchone()
                 if row and row.get('pred'):
                     import json as _json
@@ -778,36 +802,6 @@ def get_latency_forecast():
     FROM v_node_latest_status
     WHERE node_name IN ({format_strings})
       AND latency_ms > 0
-    """
-
-    # ML prediction per node using current hour/dow features
-    # Get model handle first
-    query_model_handle = """
-    SELECT model_handle FROM ML_SCHEMA_admin.MODEL_CATALOG
-    WHERE train_table_name = 'modo_db.latency_forecast_train'
-      AND task = 'regression'
-      AND model_type IS NOT NULL
-    ORDER BY model_id DESC LIMIT 1
-    """
-
-    query_predict = f"""
-    SELECT
-        node_name,
-        ROUND(sys.ML_PREDICT_ROW(
-            JSON_OBJECT(
-                'id', 0,
-                'node_name', node_name,
-                'hour_of_day', HOUR(NOW()),
-                'day_of_week', DAYOFWEEK(NOW()),
-                'cpu_usage_percent', cpu_usage_percent,
-                'mem_usage_percent', mem_usage_percent,
-                'net_in_mb', 0
-            ),
-            %s,
-            NULL
-        )) as predicted_ms
-    FROM v_node_latest_status
-    WHERE node_name IN ({format_strings})
     """
 
     try:

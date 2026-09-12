@@ -8,7 +8,6 @@ import os
 import sys
 import time
 import math
-import random
 import logging
 import pymysql
 from dotenv import load_dotenv
@@ -37,21 +36,6 @@ MYSQL_USER = os.getenv("MYSQL_USER", "admin")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "modo_db")
 
-# Calibrated profiles from USA Ashburn Hub perspective
-NODE_PROFILES = {
-    'usa': {'base_ms': 14.0,  'jitter_ms': 2.0,  'cpu': 1.4,  'mem': 4.0,  'net_mb': 1880.0},
-    'usb': {'base_ms': 18.0,  'jitter_ms': 2.5,  'cpu': 0.35, 'mem': 43.0, 'net_mb': 677.0},
-    'usc': {'base_ms': 18.2,  'jitter_ms': 3.0,  'cpu': 0.33, 'mem': 24.3, 'net_mb': 50.0},
-    'gcp': {'base_ms': 110.0, 'jitter_ms': 15.0, 'cpu': 0.45, 'mem': 43.1, 'net_mb': 320.0},
-    'jpd': {'base_ms': 348.0, 'jitter_ms': 3.0,  'cpu': 0.37, 'mem': 34.7, 'net_mb': 61954.0},
-    'jpe': {'base_ms': 347.5, 'jitter_ms': 2.5,  'cpu': 0.18, 'mem': 36.1, 'net_mb': 19271.0},
-    'jpa': {'base_ms': 358.0, 'jitter_ms': 3.0,  'cpu': 15.0, 'mem': 20.0, 'net_mb': 3850.0},
-    'jpc': {'base_ms': 360.0, 'jitter_ms': 4.0,  'cpu': 0.84, 'mem': 42.7, 'net_mb': 255.0},
-    'jpb': {'base_ms': 361.0, 'jitter_ms': 3.5,  'cpu': 1.16, 'mem': 42.5, 'net_mb': 268.0},
-    'sga': {'base_ms': 480.0, 'jitter_ms': 14.0, 'cpu': 0.15, 'mem': 0.0,  'net_mb': 2753.0},
-    'cna': {'base_ms': 595.0, 'jitter_ms': 65.0, 'cpu': 0.23, 'mem': 24.3, 'net_mb': 16.0},
-}
-
 
 def get_conn():
     return pymysql.connect(
@@ -69,61 +53,87 @@ def get_conn():
 
 
 def rebuild_training_data():
-    """Populate latency_forecast_train with 168 cells per node (24h x 7d)."""
-    logger.info("Connecting to database to rebuild training dataset...")
+    """Populate latency_forecast_train by aggregating REAL telemetry from
+    vm_telemetry, grouped by (node_name, hour_of_day, day_of_week).
+
+    This replaces the previous synthetic generator. Each cell is the mean of
+    the observed metrics for that node/hour/day-of-week bucket, so the model
+    learns the actual latency patterns measured from the USA hub rather than a
+    hand-tuned profile.
+    """
+    logger.info("Connecting to database to rebuild training dataset from real telemetry...")
     conn = get_conn()
     with conn.cursor() as cur:
-        # 1. Backup old table if not backed up
-        cur.execute("SHOW TABLES LIKE 'latency_forecast_train_backup_jpa'")
-        if not cur.fetchone():
-            logger.info("Backing up legacy latency_forecast_train to latency_forecast_train_backup_jpa...")
-            cur.execute("CREATE TABLE latency_forecast_train_backup_jpa AS SELECT * FROM latency_forecast_train")
+        # 1. Snapshot the current training table for rollback/comparison.
+        backup_name = f"latency_forecast_train_backup_{int(time.time())}"
+        logger.info(f"Backing up current latency_forecast_train to {backup_name}...")
+        cur.execute(f"CREATE TABLE {backup_name} AS SELECT * FROM latency_forecast_train")
 
-        # 2. Truncate current training table
+        # 2. Aggregate real telemetry into the (node, hour, dow) grid.
+        #    net_in_mb: vm_telemetry stores bytes/sec, training table expects MB.
+        #    Target uses the MEDIAN of scrape_duration_ms per bucket to resist
+        #    the heavy jitter/outliers seen in the raw samples; feature columns
+        #    (cpu/mem/net) use the bucket mean.
+        agg_sql = """
+        WITH ranked AS (
+            SELECT
+                node_name,
+                HOUR(recorded_at)       AS hour_of_day,
+                DAYOFWEEK(recorded_at)  AS day_of_week,
+                cpu_usage_percent,
+                mem_usage_percent,
+                net_in_bytes_sec,
+                scrape_duration_ms,
+                ROW_NUMBER() OVER (
+                    PARTITION BY node_name, HOUR(recorded_at), DAYOFWEEK(recorded_at)
+                    ORDER BY scrape_duration_ms
+                ) AS rn,
+                COUNT(*) OVER (
+                    PARTITION BY node_name, HOUR(recorded_at), DAYOFWEEK(recorded_at)
+                ) AS cnt
+            FROM vm_telemetry
+            WHERE scrape_duration_ms > 0
+        )
+        SELECT
+            node_name,
+            hour_of_day,
+            day_of_week,
+            ROUND(AVG(cpu_usage_percent), 2)             AS cpu_usage_percent,
+            ROUND(AVG(mem_usage_percent), 2)             AS mem_usage_percent,
+            ROUND(AVG(net_in_bytes_sec) / 1000000.0, 2)  AS net_in_mb,
+            ROUND(AVG(CASE WHEN rn IN (FLOOR((cnt + 1) / 2), FLOOR((cnt + 2) / 2))
+                           THEN scrape_duration_ms END)) AS scrape_duration_ms
+        FROM ranked
+        GROUP BY node_name, hour_of_day, day_of_week
+        """
+        cur.execute(agg_sql)
+        rows = cur.fetchall()
+        rows_to_insert = [
+            (
+                r["node_name"], int(r["hour_of_day"]), int(r["day_of_week"]),
+                float(r["cpu_usage_percent"] or 0.0),
+                float(r["mem_usage_percent"] or 0.0),
+                float(r["net_in_mb"] or 0.0),
+                int(r["scrape_duration_ms"] or 0),
+            )
+            for r in rows
+        ]
+
+        if not rows_to_insert:
+            raise RuntimeError("No aggregated rows produced from vm_telemetry; aborting to avoid emptying the training table.")
+
+        # 3. Replace training data only after aggregation succeeded.
         logger.info("Truncating latency_forecast_train...")
         cur.execute("TRUNCATE TABLE latency_forecast_train")
 
-        # 3. Generate balanced 24h x 7d dataset for all 11 nodes
-        rows_to_insert = []
-        random.seed(42)  # Deterministic seed for reproducible model quality
-
-        for node_name, profile in NODE_PROFILES.items():
-            base = profile['base_ms']
-            jitter = profile['jitter_ms']
-            base_cpu = profile['cpu']
-            base_mem = profile['mem']
-            base_net = profile['net_mb']
-
-            for hour in range(24):
-                # Diurnal factor: peak hours (8-20) are slightly busier (+2% to +6%)
-                if 8 <= hour <= 20:
-                    diurnal_factor = 1.0 + 0.04 * math.sin((hour - 8) / 12.0 * math.pi)
-                else:
-                    diurnal_factor = 1.0 - 0.02 * math.cos(hour / 8.0 * math.pi)
-
-                for dow in range(1, 8):  # 1 = Sunday, 7 = Saturday
-                    # Day of week factor: weekdays slightly busier
-                    dow_factor = 1.02 if 2 <= dow <= 6 else 0.98
-
-                    # Generate realistic metrics
-                    noise = random.gauss(0, jitter)
-                    ms = max(5, int(round(base * diurnal_factor * dow_factor + noise)))
-                    cpu = max(0.0, min(100.0, round(base_cpu * diurnal_factor + random.gauss(0, 0.2), 2)))
-                    mem = max(0.0, min(100.0, round(base_mem + random.gauss(0, 0.3), 2)))
-                    net = max(0.0, round(base_net * diurnal_factor + random.gauss(0, base_net * 0.05), 2))
-
-                    rows_to_insert.append((
-                        node_name, hour, dow, cpu, mem, net, ms
-                    ))
-
-        logger.info(f"Inserting {len(rows_to_insert)} calibrated rows into latency_forecast_train...")
+        logger.info(f"Inserting {len(rows_to_insert)} real aggregated rows into latency_forecast_train...")
         insert_sql = """
-        INSERT INTO latency_forecast_train 
+        INSERT INTO latency_forecast_train
         (node_name, hour_of_day, day_of_week, cpu_usage_percent, mem_usage_percent, net_in_mb, scrape_duration_ms)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
         cur.executemany(insert_sql, rows_to_insert)
-        logger.info("Training dataset populated successfully.")
+        logger.info(f"Training dataset rebuilt from real telemetry ({len(rows_to_insert)} rows). Backup: {backup_name}")
     conn.close()
 
 
@@ -192,12 +202,21 @@ def train_automl_model():
 
 
 def verify_predictions(model_handle: str):
-    """Run test predictions for all 11 nodes and compare with USA hub expectations."""
+    """Run test predictions for all nodes and compare with real historical mean."""
     logger.info(f"Verifying sys.ML_PREDICT_ROW using model '{model_handle}'...")
     conn = get_conn()
     results = {}
     with conn.cursor() as cur:
-        for node_name in NODE_PROFILES.keys():
+        # Real historical mean latency per node, for sanity comparison.
+        cur.execute("""
+            SELECT node_name, ROUND(AVG(scrape_duration_ms), 1) AS real_avg_ms
+            FROM vm_telemetry
+            WHERE scrape_duration_ms > 0
+            GROUP BY node_name
+        """)
+        real_avg = {r['node_name']: float(r['real_avg_ms']) for r in cur.fetchall()}
+
+        for node_name in real_avg.keys():
             cur.execute("""
                 SELECT sys.ML_PREDICT_ROW(
                     JSON_OBJECT(
@@ -217,16 +236,17 @@ def verify_predictions(model_handle: str):
             import json
             pred_raw = row['pred'] if isinstance(row['pred'], dict) else json.loads(row['pred'])
             pred_val = pred_raw.get('Prediction') or pred_raw.get('ml_results', {}).get('predictions', {}).get('scrape_duration_ms')
-            
+
             # Compute period as frontend does
             clamped = max(10, min(1000, float(pred_val)))
             period = round(1.0 + (math.log10(clamped) / math.log10(1000)) * 14, 2)
+            expected = real_avg.get(node_name, 0.0)
             results[node_name] = {
                 'predicted_ms': round(float(pred_val), 1),
-                'expected_base': NODE_PROFILES[node_name]['base_ms'],
+                'real_avg_ms': expected,
                 'period': period
             }
-            logger.info(f"Node {node_name:4s} -> ML Predicted: {float(pred_val):6.1f} ms (expected ~{NODE_PROFILES[node_name]['base_ms']} ms) | period: {period:5.2f}s")
+            logger.info(f"Node {node_name:4s} -> ML Predicted: {float(pred_val):6.1f} ms (real avg ~{expected:.1f} ms) | period: {period:5.2f}s")
 
     conn.close()
     return results
