@@ -11,6 +11,7 @@ import argparse
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+import socket
 import requests
 import pymysql
 from dbutils.pooled_db import PooledDB
@@ -90,6 +91,23 @@ def get_db_pool() -> PooledDB:
     return _db_pool
 
 
+def measure_tcp_rtt(host: str, port: int = 9100, timeout: float = 2.0) -> int | None:
+    """
+    Measure TCP connection RTT (round-trip time) to a host:port.
+    Returns RTT in milliseconds, or None if connection fails.
+    """
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        start = time.time()
+        sock.connect((host, port))
+        rtt_ms = int((time.time() - start) * 1000)
+        sock.close()
+        return rtt_ms
+    except (socket.timeout, socket.error, OSError):
+        return None
+
+
 def parse_prometheus_metrics(raw_text: str) -> dict:
     """Extract key metrics from raw Prometheus text format."""
     metrics = {
@@ -140,6 +158,10 @@ def parse_prometheus_metrics(raw_text: str) -> dict:
 def scrape_single_node(node: dict) -> dict:
     """Scrapes metrics from one node's node_exporter."""
     target_url = f"http://{node['host']}:9100/metrics"
+    
+    # Measure TCP RTT first (before HTTP overhead)
+    rtt_ms = measure_tcp_rtt(node['host'], 9100)
+    
     start_time = time.time()
     result = {
         "node_name": node["name"],
@@ -153,6 +175,7 @@ def scrape_single_node(node: dict) -> dict:
         "net_in_bytes_sec": 0,
         "net_out_bytes_sec": 0,
         "scrape_duration_ms": 0,
+        "rtt_ms": rtt_ms,  # TCP connection RTT (may be None if failed)
         "status": "OFFLINE",
     }
     
@@ -238,12 +261,12 @@ def insert_telemetry_batch(records: list):
         node_name, host_ip, region, cpu_usage_percent,
         mem_total_bytes, mem_available_bytes, mem_usage_percent,
         disk_usage_percent, net_in_bytes_sec, net_out_bytes_sec,
-        scrape_duration_ms, status
+        scrape_duration_ms, rtt_ms, status
     ) VALUES (
         %(node_name)s, %(host_ip)s, %(region)s, %(cpu_usage_percent)s,
         %(mem_total_bytes)s, %(mem_available_bytes)s, %(mem_usage_percent)s,
         %(disk_usage_percent)s, %(net_in_bytes_sec)s, %(net_out_bytes_sec)s,
-        %(scrape_duration_ms)s, %(status)s
+        %(scrape_duration_ms)s, %(rtt_ms)s, %(status)s
     );
     """
     try:
