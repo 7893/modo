@@ -1,0 +1,12 @@
+# Cloudflared tunnel config TEMPLATE.
+# Real values are injected from secrets/env at deploy time. Do not commit real
+# tunnel IDs or hostnames. Render with deploy/render-cloudflared.sh.
+tunnel: ${CF_TUNNEL_ID}
+credentials-file: /home/ubuntu/.cloudflared/${CF_TUNNEL_ID}.json
+
+ingress:
+  - hostname: ${CF_TUNNEL_HOSTNAME}
+    service: http://127.0.0.1:8000
+    originRequest:
+      connectTimeout: 10s
+  - service: http_status:404
