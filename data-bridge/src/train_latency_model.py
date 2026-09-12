@@ -56,10 +56,9 @@ def rebuild_training_data():
     """Populate latency_forecast_train by aggregating REAL telemetry from
     vm_telemetry, grouped by (node_name, hour_of_day, day_of_week).
 
-    This replaces the previous synthetic generator. Each cell is the mean of
-    the observed metrics for that node/hour/day-of-week bucket, so the model
-    learns the actual latency patterns measured from the USA hub rather than a
-    hand-tuned profile.
+    PRIORITY: Uses rtt_ms (true TCP RTT) as the target when available.
+    Falls back to scrape_duration_ms only if rtt_ms data is insufficient.
+    This ensures the model learns actual network latency, not HTTP fetch time.
     """
     logger.info("Connecting to database to rebuild training dataset from real telemetry...")
     conn = get_conn()
@@ -69,12 +68,20 @@ def rebuild_training_data():
         logger.info(f"Backing up current latency_forecast_train to {backup_name}...")
         cur.execute(f"CREATE TABLE {backup_name} AS SELECT * FROM latency_forecast_train")
 
-        # 2. Aggregate real telemetry into the (node, hour, dow) grid.
-        #    net_in_mb: vm_telemetry stores bytes/sec, training table expects MB.
-        #    Target uses the MEDIAN of scrape_duration_ms per bucket to resist
-        #    the heavy jitter/outliers seen in the raw samples; feature columns
-        #    (cpu/mem/net) use the bucket mean.
-        agg_sql = """
+        # 2. Check how much rtt_ms data we have
+        cur.execute("SELECT COUNT(*) AS cnt FROM vm_telemetry WHERE rtt_ms IS NOT NULL AND rtt_ms > 0")
+        rtt_count = cur.fetchone()['cnt']
+        logger.info(f"Available rtt_ms records: {rtt_count}")
+
+        # Use rtt_ms if we have enough data (at least 100 records), else fall back
+        use_rtt = rtt_count >= 100
+        target_col = "rtt_ms" if use_rtt else "scrape_duration_ms"
+        logger.info(f"Using '{target_col}' as training target (threshold: 100 records)")
+
+        # 3. Aggregate real telemetry into the (node, hour, dow) grid.
+        #    Target uses a 10% TRIMMED MEAN to resist jitter and outliers.
+        #    For small buckets, falls back to plain mean.
+        agg_sql = f"""
         WITH ranked AS (
             SELECT
                 node_name,
@@ -83,16 +90,16 @@ def rebuild_training_data():
                 cpu_usage_percent,
                 mem_usage_percent,
                 net_in_bytes_sec,
-                scrape_duration_ms,
+                {target_col} AS target_latency,
                 ROW_NUMBER() OVER (
                     PARTITION BY node_name, HOUR(recorded_at), DAYOFWEEK(recorded_at)
-                    ORDER BY scrape_duration_ms
+                    ORDER BY {target_col}
                 ) AS rn,
                 COUNT(*) OVER (
                     PARTITION BY node_name, HOUR(recorded_at), DAYOFWEEK(recorded_at)
                 ) AS cnt
             FROM vm_telemetry
-            WHERE scrape_duration_ms > 0
+            WHERE {target_col} IS NOT NULL AND {target_col} > 0
         )
         SELECT
             node_name,
@@ -101,8 +108,15 @@ def rebuild_training_data():
             ROUND(AVG(cpu_usage_percent), 2)             AS cpu_usage_percent,
             ROUND(AVG(mem_usage_percent), 2)             AS mem_usage_percent,
             ROUND(AVG(net_in_bytes_sec) / 1000000.0, 2)  AS net_in_mb,
-            ROUND(AVG(CASE WHEN rn IN (FLOOR((cnt + 1) / 2), FLOOR((cnt + 2) / 2))
-                           THEN scrape_duration_ms END)) AS scrape_duration_ms
+            ROUND(
+                COALESCE(
+                    AVG(CASE WHEN cnt >= 10
+                              AND rn >  cnt * 0.1
+                              AND rn <= cnt * 0.9
+                             THEN target_latency END),
+                    AVG(target_latency)
+                )
+            )                                            AS latency_ms
         FROM ranked
         GROUP BY node_name, hour_of_day, day_of_week
         """
@@ -114,7 +128,7 @@ def rebuild_training_data():
                 float(r["cpu_usage_percent"] or 0.0),
                 float(r["mem_usage_percent"] or 0.0),
                 float(r["net_in_mb"] or 0.0),
-                int(r["scrape_duration_ms"] or 0),
+                int(r["latency_ms"] or 0),
             )
             for r in rows
         ]
@@ -207,11 +221,18 @@ def verify_predictions(model_handle: str):
     conn = get_conn()
     results = {}
     with conn.cursor() as cur:
-        # Real historical mean latency per node, for sanity comparison.
-        cur.execute("""
-            SELECT node_name, ROUND(AVG(scrape_duration_ms), 1) AS real_avg_ms
+        # Check which target we should compare against (rtt_ms preferred)
+        cur.execute("SELECT COUNT(*) AS cnt FROM vm_telemetry WHERE rtt_ms IS NOT NULL AND rtt_ms > 0")
+        rtt_count = cur.fetchone()['cnt']
+        use_rtt = rtt_count >= 100
+        target_col = "rtt_ms" if use_rtt else "scrape_duration_ms"
+        logger.info(f"Comparing predictions against real '{target_col}' averages")
+
+        # Real historical mean latency per node
+        cur.execute(f"""
+            SELECT node_name, ROUND(AVG({target_col}), 1) AS real_avg_ms
             FROM vm_telemetry
-            WHERE scrape_duration_ms > 0
+            WHERE {target_col} IS NOT NULL AND {target_col} > 0
             GROUP BY node_name
         """)
         real_avg = {r['node_name']: float(r['real_avg_ms']) for r in cur.fetchall()}
