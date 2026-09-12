@@ -184,8 +184,7 @@ def health_check():
         "service": "MODO Data Bridge Gateway",
         "node": "jpa-osaka",
         "database_status": "connected" if db_ok else "error",
-        "timestamp": datetime.now().isoformat(),
-        "tunnel_endpoint": "tunnel.example.com"
+        "timestamp": datetime.now().isoformat()
     }
 
 

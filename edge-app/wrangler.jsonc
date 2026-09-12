@@ -3,10 +3,6 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-08-20",
   "workers_dev": true,
-  "vars": {
-    "API_BACKEND_URL": "https://tunnel.example.com",
-    "SUPABASE_URL": "https://service.example.com"
-  },
   "rules": [
     {
       "type": "Text",
