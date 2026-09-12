@@ -2,7 +2,6 @@
 
 [![CI](https://github.com/7893/modo/actions/workflows/ci.yml/badge.svg)](https://github.com/7893/modo/actions/workflows/ci.yml)
 [![Deploy to Cloudflare Workers](https://github.com/7893/modo/actions/workflows/deploy.yml/badge.svg)](https://github.com/7893/modo/actions/workflows/deploy.yml)
-[![Production Dashboard](https://img.shields.io/badge/Live%20Demo-modo-06b6d4?style=flat-square&logo=cloudflare)](https://service.example.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg?style=flat-square)](LICENSE)
 
 > **MODO（墨斗）—— 专为多云分布式业务打造的高可用数据底座与全景遥测中枢。**  
@@ -12,9 +11,9 @@
 
 ## ⚡ Production Endpoints
 
-| Service | Access URL | Architecture Role | Status |
+| Service | Access | Architecture Role | Status |
 | :--- | :--- | :--- | :---: |
-| 🌐 **MODO Command Dashboard** | [`https://service.example.com`](https://service.example.com) | Edge Worker UI + ECharts 5 + Supabase Auth | 🟢 **ONLINE** |
+| 🌐 **MODO Command Dashboard** | `Cloudflare Edge (Public)` | Edge Worker UI + ECharts 5 + Supabase Auth | 🟢 **ONLINE** |
 | 🚇 **MODO Private API Gateway** | `Encrypted Tunnel (Internal Only)` | Zero-Trust Cloudflare Tunnel ➡️ FastAPI Bridge | 🟢 **ACTIVE** |
 | 🗄️ **Managed MySQL Data Store** | `Private VPC Ingress` | OCI MySQL HeatWave Cloud Database System | 🟢 **ACTIVE** |
 
@@ -28,7 +27,7 @@
                                              ▼
                         ┌─────────────────────────────────────────┐
                         │      Cloudflare Edge Network (CDN)      │
-                        │        https://service.example.com      │
+                        │          Public Edge Endpoint           │
                         │                                         │
                         │  • Hono.js Edge Application             │
                         │  • ECharts 5 Supabase Dark Theme       │
@@ -114,7 +113,7 @@ modo/
 
 ### 1. Prerequisites
 * Python 3.12+
-* Node.js 22+ & pnpm / npm
+* Node.js 22+ & pnpm
 * Cloudflare account with Wrangler CLI configured
 * MySQL 8.0+ / OCI HeatWave instance
 
@@ -129,17 +128,16 @@ pip install -r requirements.txt
 pytest -v tests/
 
 # Initialize database schema
-python db_setup.py
+python src/db_setup.py
 
-# Start ingestion daemon and API
-python ingest.py &
-uvicorn api:app --host 127.0.0.1 --port 8000
+# Start the unified daemon (API gateway + telemetry ingestion)
+python src/run_unified.py
 ```
 
 ### 3. Edge Worker Setup
 ```bash
 cd edge-app
-npm install
+pnpm install
 
 # Local development
 npx wrangler dev
