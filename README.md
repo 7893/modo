@@ -15,8 +15,8 @@
 | Service | Access URL | Architecture Role | Status |
 | :--- | :--- | :--- | :---: |
 | 🌐 **MODO Command Dashboard** | [`https://service.example.com`](https://service.example.com) | Edge Worker UI + ECharts 5 + Supabase Auth | 🟢 **ONLINE** |
-| 🚇 **MODO Private API Gateway** | `https://tunnel.example.com` | Zero-Trust Cloudflare Tunnel ➡️ FastAPI Bridge | 🟢 **ACTIVE** |
-| 🗄️ **Managed MySQL Data Store** | `modo_db` (`mysql.example.internal:3306` via US VPC) | OCI MySQL HeatWave Cloud Database System | 🟢 **ACTIVE** |
+| 🚇 **MODO Private API Gateway** | `Encrypted Tunnel (Internal Only)` | Zero-Trust Cloudflare Tunnel ➡️ FastAPI Bridge | 🟢 **ACTIVE** |
+| 🗄️ **Managed MySQL Data Store** | `Private VPC Ingress` | OCI MySQL HeatWave Cloud Database System | 🟢 **ACTIVE** |
 
 ---
 
@@ -39,7 +39,7 @@
                                              ▼
                         ┌─────────────────────────────────────────┐
                         │     Cloudflare Tunnel (QUIC Protocol)   │
-                        │          tunnel.example.com              │
+                        │       (Zero-Trust Private Ingress)      │
                         └────────────────────┬────────────────────┘
                                              │  (Zero-Trust Private Ingress)
                                              ▼
