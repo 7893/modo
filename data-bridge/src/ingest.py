@@ -34,6 +34,54 @@ SCRAPE_INTERVAL = int(os.getenv("SCRAPE_INTERVAL_SECONDS", "15"))
 # Database connection pool (lazy initialization)
 _db_pool = None
 
+# Supabase Realtime client (lazy initialization)
+_supabase_client = None
+
+
+def get_supabase_client():
+    """Get or create Supabase client for Realtime broadcast."""
+    global _supabase_client
+    if _supabase_client is None:
+        url = os.getenv("SUPABASE_URL")
+        key = os.getenv("SUPABASE_ANON_KEY")
+        if url and key:
+            try:
+                from supabase import create_client
+                _supabase_client = create_client(url, key)
+                logger.info("Supabase Realtime client initialized")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Supabase client: {e}")
+    return _supabase_client
+
+
+def broadcast_telemetry(records: list):
+    """Broadcast telemetry update via Supabase Realtime (non-blocking, fire-and-forget)."""
+    try:
+        client = get_supabase_client()
+        if not client:
+            return
+        
+        payload = [
+            {
+                "node": r["node_name"],
+                "rtt": r.get("rtt_ms"),
+                "cpu": round(r.get("cpu_usage_percent", 0), 1),
+                "mem": round(r.get("mem_usage_percent", 0), 1),
+                "disk": round(r.get("disk_usage_percent", 0), 1),
+                "status": r.get("status", "UNKNOWN"),
+            }
+            for r in records
+        ]
+        
+        # Use Supabase Realtime Broadcast
+        channel = client.channel("modo-telemetry")
+        channel.subscribe()
+        channel.send_broadcast("telemetry", {"nodes": payload, "ts": int(time.time())})
+        logger.debug(f"Broadcast {len(payload)} nodes to Supabase Realtime")
+    except Exception as e:
+        # Silent fail - Realtime is nice-to-have, not critical
+        logger.debug(f"Broadcast failed (non-critical): {e}")
+
 # Load nodes from config file
 _nodes_config_path = os.path.join(os.path.dirname(__file__), "..", "config", "nodes.json")
 
@@ -290,6 +338,7 @@ def run_pipeline():
     online_count = sum(1 for r in records if r["status"] == "ONLINE")
     logger.info(f"Scrape complete: {online_count}/{len(records)} nodes ONLINE")
     insert_telemetry_batch(records)
+    broadcast_telemetry(records)  # Push to Supabase Realtime
 
 
 def main():
