@@ -34,33 +34,33 @@ SCRAPE_INTERVAL = int(os.getenv("SCRAPE_INTERVAL_SECONDS", "15"))
 # Database connection pool (lazy initialization)
 _db_pool = None
 
-# Supabase Realtime client (lazy initialization)
-_supabase_client = None
+# Supabase Realtime configuration
+_supabase_url = None
+_supabase_key = None
 
 
-def get_supabase_client():
-    """Get or create Supabase client for Realtime broadcast."""
-    global _supabase_client
-    if _supabase_client is None:
-        url = os.getenv("SUPABASE_URL")
-        key = os.getenv("SUPABASE_ANON_KEY")
-        if url and key:
-            try:
-                from supabase import create_client
-                _supabase_client = create_client(url, key)
-                logger.info("Supabase Realtime client initialized")
-            except Exception as e:
-                logger.warning(f"Failed to initialize Supabase client: {e}")
-    return _supabase_client
+def init_supabase_config():
+    """Initialize Supabase configuration from environment."""
+    global _supabase_url, _supabase_key
+    _supabase_url = os.getenv("SUPABASE_URL")
+    _supabase_key = os.getenv("SUPABASE_ANON_KEY")
+    if _supabase_url and _supabase_key:
+        logger.info("Supabase Realtime configured")
+    return bool(_supabase_url and _supabase_key)
 
 
 def broadcast_telemetry(records: list):
-    """Broadcast telemetry update via Supabase Realtime (non-blocking, fire-and-forget)."""
+    """Broadcast telemetry update via Supabase Realtime REST API."""
+    global _supabase_url, _supabase_key
+    
+    # Lazy init
+    if _supabase_url is None:
+        init_supabase_config()
+    
+    if not _supabase_url or not _supabase_key:
+        return
+    
     try:
-        client = get_supabase_client()
-        if not client:
-            return
-        
         payload = [
             {
                 "node": r["node_name"],
@@ -73,11 +73,25 @@ def broadcast_telemetry(records: list):
             for r in records
         ]
         
-        # Use Supabase Realtime Broadcast
-        channel = client.channel("modo-telemetry")
-        channel.subscribe()
-        channel.send_broadcast("telemetry", {"nodes": payload, "ts": int(time.time())})
-        logger.debug(f"Broadcast {len(payload)} nodes to Supabase Realtime")
+        # Supabase Realtime Broadcast via REST API
+        broadcast_url = f"{_supabase_url}/realtime/v1/api/broadcast"
+        headers = {
+            "apikey": _supabase_key,
+            "Content-Type": "application/json",
+        }
+        body = {
+            "messages": [{
+                "topic": "realtime:modo-telemetry",
+                "event": "telemetry",
+                "payload": {"nodes": payload, "ts": int(time.time())},
+            }]
+        }
+        
+        resp = requests.post(broadcast_url, json=body, headers=headers, timeout=2)
+        if resp.status_code in (200, 202):
+            logger.debug(f"Broadcast {len(payload)} nodes to Supabase Realtime")
+        else:
+            logger.debug(f"Broadcast response: {resp.status_code}")
     except Exception as e:
         # Silent fail - Realtime is nice-to-have, not critical
         logger.debug(f"Broadcast failed (non-critical): {e}")
