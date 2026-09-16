@@ -81,7 +81,7 @@ def broadcast_telemetry(records: list):
         }
         body = {
             "messages": [{
-                "topic": "realtime:modo-telemetry",
+                "topic": "modo-telemetry",
                 "event": "telemetry",
                 "payload": {"nodes": payload, "ts": int(time.time())},
             }]
