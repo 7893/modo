@@ -4,7 +4,7 @@ import { cors } from 'hono/cors'
 type Bindings = {
   API_BACKEND_URL: string
   SUPABASE_URL?: string
-  SUPABASE_ANON_KEY?: string
+  SUPABASE_PUBLISHABLE_KEY?: string
   INTERNAL_API_SECRET?: string
 }
 
@@ -102,7 +102,7 @@ import htmlTemplate from './index.html'
 // Frontend Dashboard SPA
 app.get('/', (c) => {
   const supabaseUrl = c.env.SUPABASE_URL || ''
-  const supabaseKey = c.env.SUPABASE_ANON_KEY || ''
+  const supabaseKey = c.env.SUPABASE_PUBLISHABLE_KEY || ''
 
   const finalHtml = htmlTemplate
     .replace('${supabaseUrl}', supabaseUrl)
