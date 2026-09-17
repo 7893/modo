@@ -43,7 +43,7 @@ def init_supabase_config():
     """Initialize Supabase configuration from environment."""
     global _supabase_url, _supabase_key
     _supabase_url = os.getenv("SUPABASE_URL")
-    _supabase_key = os.getenv("SUPABASE_ANON_KEY")
+    _supabase_key = os.getenv("SUPABASE_PUBLISHABLE_KEY")
     if _supabase_url and _supabase_key:
         logger.info("Supabase Realtime configured")
     return bool(_supabase_url and _supabase_key)

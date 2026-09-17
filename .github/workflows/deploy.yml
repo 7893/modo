@@ -43,7 +43,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           API_BACKEND_URL: ${{ secrets.API_BACKEND_URL }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
         run: |
           # First deploy so the removed plain-text vars are cleared from the
@@ -52,7 +52,7 @@ jobs:
           # Then inject addresses/secrets as Worker secrets (never committed).
           printf '%s' "$API_BACKEND_URL"     | npx wrangler secret put API_BACKEND_URL
           printf '%s' "$SUPABASE_URL"        | npx wrangler secret put SUPABASE_URL
-          printf '%s' "$SUPABASE_ANON_KEY"   | npx wrangler secret put SUPABASE_ANON_KEY
+          printf '%s' "$SUPABASE_PUBLISHABLE_KEY" | npx wrangler secret put SUPABASE_PUBLISHABLE_KEY
           printf '%s' "$INTERNAL_API_SECRET" | npx wrangler secret put INTERNAL_API_SECRET
 
   deploy-backend:

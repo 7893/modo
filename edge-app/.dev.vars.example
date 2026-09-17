@@ -3,5 +3,5 @@
 # In production these are injected as Worker secrets via GitHub Actions.
 API_BACKEND_URL=""
 SUPABASE_URL=""
-SUPABASE_ANON_KEY=""
+SUPABASE_PUBLISHABLE_KEY=""
 INTERNAL_API_SECRET=""
