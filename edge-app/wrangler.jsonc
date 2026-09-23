@@ -15,6 +15,14 @@
       "fallthrough": true
     }
   ],
+  "secrets": {
+    "required": [
+      "API_BACKEND_URL",
+      "INTERNAL_API_SECRET",
+      "SUPABASE_PUBLISHABLE_KEY",
+      "SUPABASE_URL"
+    ]
+  },
   "triggers": {
     "crons": [
       "0 3 * * *"
