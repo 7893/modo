@@ -1,0 +1,81 @@
+      <!-- ================= 🪟 CURTAIN 4: ROYAL IRIS PURPLE (LATENCY) ================= -->
+      <div id="panel-latency" onclick="handleCurtainClick('latency')"
+           class="curtain-panel curtain-collapsed p-5 lg:p-6 flex flex-col justify-between overflow-hidden relative group"
+           style="background: linear-gradient(135deg, rgba(88, 28, 135, 0.35) 0%, rgba(13, 19, 33, 0.9) 45%, rgba(6, 10, 18, 0.97) 100%); border: 1px solid rgba(168, 85, 247, 0.3);">
+
+        <!-- Expanded View -->
+        <div id="content-latency-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden gap-3 text-slate-200">
+          <div class="flex items-center justify-between shrink-0">
+            <div class="flex items-center space-x-3.5">
+              <div class="w-11 h-11 rounded-2xl bg-slate-900/90 border border-purple-800 flex items-center justify-center text-purple-400 shadow-sm">
+                <i class="fa-solid fa-wave-square text-xl"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white">节点端到端网络延迟分布</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-950/80 text-purple-300 border border-purple-800 font-mono font-bold uppercase">04 · Latency Spectrum</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">配置的拓扑中枢至全局节点 Prometheus 探测延迟阶梯分析</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-slate-900/90 border border-purple-800 text-xs font-mono text-purple-300 font-bold shadow-sm">
+              <i class="fa-solid fa-gauge-high mr-1"></i>延迟阶梯分析
+            </span>
+          </div>
+
+          <!-- Latency 3-Tier Badges -->
+          <div class="grid grid-cols-3 gap-3 font-mono text-xs shrink-0">
+            <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
+              <span id="tier1-label" class="text-emerald-400 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>第一梯队</span>
+              <span id="tier1-nodes" class="text-white font-extrabold">--</span>
+            </div>
+            <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
+              <span id="tier2-label" class="text-blue-400 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>第二梯队</span>
+              <span id="tier2-nodes" class="text-white font-extrabold">--</span>
+            </div>
+            <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
+              <span id="tier3-label" class="text-amber-400 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>第三梯队</span>
+              <span id="tier3-nodes" class="text-white font-extrabold">--</span>
+            </div>
+          </div>
+
+          <!-- Latency Chart -->
+          <div class="flex-1 w-full p-3 rounded-2xl supabase-light-card flex flex-col min-h-0 shadow-sm">
+            <div id="latency-chart" class="w-full flex-1"></div>
+          </div>
+
+          <!-- Footer -->
+          <div class="pt-2 border-t border-purple-900/60 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
+            <span>探测协议: ICMP / Prometheus TCP Ping</span>
+            <span class="text-purple-400 font-bold">高精度时序绘制</span>
+          </div>
+        </div>
+
+        <!-- Collapsed Slat View -->
+        <div id="content-latency-collapsed" class="flex h-full w-full flex-col items-center justify-between">
+          <div class="w-9 h-9 rounded-xl bg-slate-900/90 border border-purple-800 flex items-center justify-center text-purple-400 shadow-sm shrink-0">
+            <i class="fa-solid fa-wave-square text-sm"></i>
+          </div>
+          <div class="flex-1 flex flex-col items-center justify-center my-auto w-full py-2">
+            <div class="flex-1 flex items-end justify-center w-full">
+              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-slate-200">
+                时延波形
+              </span>
+            </div>
+            <div class="my-1 flex items-center justify-center text-purple-400 font-bold text-sm select-none">
+              ·
+            </div>
+            <div class="flex-1 flex items-start justify-center w-full">
+              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-slate-500 uppercase">
+                LATENCY
+              </span>
+            </div>
+          </div>
+          <div class="w-full flex justify-center shrink-0">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-950/80 text-purple-300 border border-purple-800 text-center whitespace-nowrap shadow-xs">
+              网络时延
+            </span>
+          </div>
+        </div>
+
+      </div>

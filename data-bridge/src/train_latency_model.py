@@ -1,6 +1,6 @@
 """
 MODO Data Bridge - HeatWave AutoML Latency Forecast Retraining Script
-Reconstructs latency_forecast_train for the USA Hub architecture (usa as central hub),
+Reconstructs latency_forecast_train for the configured telemetry fleet,
 executes sys.ML_TRAIN with regression task, loads the model into HeatWave memory,
 and verifies real-time inference via sys.ML_PREDICT_ROW.
 """
@@ -9,6 +9,7 @@ import sys
 import time
 import math
 import logging
+import re
 import pymysql
 from dotenv import load_dotenv
 
@@ -23,21 +24,34 @@ logger = logging.getLogger("train_latency_model")
 for env_path in [
     os.path.join(os.path.dirname(__file__), "..", "..", ".env"),
     os.path.join(os.path.dirname(__file__), "..", ".env"),
-    "/home/ubuntu/modo/.env",
     ".env"
 ]:
     if os.path.exists(env_path):
         load_dotenv(dotenv_path=env_path)
         break
 
-MYSQL_HOST = os.getenv("MYSQL_HOST", "mysql.example.internal")
+MYSQL_HOST = os.getenv("MYSQL_HOST")
 MYSQL_PORT = int(os.getenv("MYSQL_PORT", "3306"))
-MYSQL_USER = os.getenv("MYSQL_USER", "admin")
+MYSQL_USER = os.getenv("MYSQL_USER")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "modo_db")
+MYSQL_ML_SCHEMA = os.getenv("MYSQL_ML_SCHEMA") or (f"ML_SCHEMA_{MYSQL_USER}" if MYSQL_USER else None)
+TRAINING_BACKUP_KEEP = max(1, int(os.getenv("TRAINING_BACKUP_KEEP", "2")))
+
+
+def _validate_identifier(value: str | None, setting: str) -> str:
+    if not value or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", value):
+        raise RuntimeError(f"{setting} must be a valid SQL identifier")
+    return value
 
 
 def get_conn():
+    if not all([MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD]):
+        raise RuntimeError("Missing required environment variables: MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD")
+
+    _validate_identifier(MYSQL_DATABASE, "MYSQL_DATABASE")
+    _validate_identifier(MYSQL_ML_SCHEMA, "MYSQL_ML_SCHEMA")
+
     return pymysql.connect(
         host=MYSQL_HOST,
         port=MYSQL_PORT,
@@ -50,6 +64,22 @@ def get_conn():
         write_timeout=600,
         autocommit=True
     )
+
+
+def cleanup_training_backups(cur, keep_last: int = TRAINING_BACKUP_KEEP) -> None:
+    """Keep only the newest validated training-table snapshots."""
+    cur.execute("SHOW TABLES LIKE 'latency_forecast_train_backup_%'")
+    backup_names = []
+    for row in cur.fetchall():
+        name = next(iter(row.values()))
+        match = re.fullmatch(r"latency_forecast_train_backup_(\d+)", name)
+        if match:
+            backup_names.append((int(match.group(1)), name))
+
+    backup_names.sort(reverse=True)
+    for _, name in backup_names[keep_last:]:
+        logger.info("Dropping expired training backup %s", name)
+        cur.execute(f"DROP TABLE IF EXISTS `{name}`")
 
 
 def rebuild_training_data():
@@ -66,7 +96,7 @@ def rebuild_training_data():
         # 1. Snapshot the current training table for rollback/comparison.
         backup_name = f"latency_forecast_train_backup_{int(time.time())}"
         logger.info(f"Backing up current latency_forecast_train to {backup_name}...")
-        cur.execute(f"CREATE TABLE {backup_name} AS SELECT * FROM latency_forecast_train")
+        cur.execute(f"CREATE TABLE `{backup_name}` AS SELECT * FROM latency_forecast_train")
 
         # 2. Check how much rtt_ms data we have
         cur.execute("SELECT COUNT(*) AS cnt FROM vm_telemetry WHERE rtt_ms IS NOT NULL AND rtt_ms > 0")
@@ -147,13 +177,16 @@ def rebuild_training_data():
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
         cur.executemany(insert_sql, rows_to_insert)
+        cleanup_training_backups(cur)
         logger.info(f"Training dataset rebuilt from real telemetry ({len(rows_to_insert)} rows). Backup: {backup_name}")
     conn.close()
 
 
 def train_automl_model():
     """Execute sys.ML_TRAIN and sys.ML_MODEL_LOAD for MODO latency forecast."""
-    logger.info("Executing sys.ML_TRAIN on modo_db.latency_forecast_train...")
+    train_table = f"{_validate_identifier(MYSQL_DATABASE, 'MYSQL_DATABASE')}.latency_forecast_train"
+    ml_schema = _validate_identifier(MYSQL_ML_SCHEMA, "MYSQL_ML_SCHEMA")
+    logger.info("Executing sys.ML_TRAIN on %s...", train_table)
     conn = get_conn()
     model_handle = "MODO_LATENCY_FORECAST"
 
@@ -166,7 +199,10 @@ def train_automl_model():
             logger.info(f"ML_MODEL_UNLOAD info: {e}")
 
         try:
-            cur.execute(f"DELETE FROM ML_SCHEMA_admin.MODEL_CATALOG WHERE model_handle = '{model_handle}'")
+            cur.execute(
+                f"DELETE FROM `{ml_schema}`.MODEL_CATALOG WHERE model_handle = %s",
+                (model_handle,),
+            )
             logger.info(f"Removed previous catalog record for '{model_handle}'")
         except Exception as e:
             logger.info(f"Catalog delete info: {e}")
@@ -179,7 +215,7 @@ def train_automl_model():
         logger.info("Starting HeatWave AutoML training (this typically takes 30-90 seconds)...")
         train_sql = """
         CALL sys.ML_TRAIN(
-            'modo_db.latency_forecast_train',
+            %s,
             'scrape_duration_ms',
             JSON_OBJECT(
                 'task', 'regression',
@@ -188,22 +224,22 @@ def train_automl_model():
             @model_handle
         )
         """
-        cur.execute(train_sql)
+        cur.execute(train_sql, (train_table,))
         duration = time.time() - t0
         logger.info(f"ML_TRAIN completed in {duration:.2f} seconds.")
 
         # Check model catalog record
-        cur.execute("""
-            SELECT model_id, model_handle, train_table_name, target_column_name, task, model_type 
-            FROM ML_SCHEMA_admin.MODEL_CATALOG
-            WHERE train_table_name = 'modo_db.latency_forecast_train'
+        cur.execute(f"""
+            SELECT model_id, model_handle, train_table_name, target_column_name, task, model_type
+            FROM `{ml_schema}`.MODEL_CATALOG
+            WHERE train_table_name = %s
             ORDER BY model_id DESC LIMIT 1
-        """)
+        """, (train_table,))
         m_info = cur.fetchone()
         logger.info(f"Trained model in MODEL_CATALOG: {m_info}")
 
         if not m_info:
-            raise RuntimeError("Model was not found in ML_SCHEMA_admin.MODEL_CATALOG after training!")
+            raise RuntimeError(f"Model was not found in {ml_schema}.MODEL_CATALOG after training")
 
         # Load model into memory
         actual_handle = m_info['model_handle']

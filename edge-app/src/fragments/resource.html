@@ -1,0 +1,81 @@
+      <!-- ================= 🪟 CURTAIN 3: SUNSET ROSE CORAL (RESOURCE) ================= -->
+      <div id="panel-resource" onclick="handleCurtainClick('resource')"
+           class="curtain-panel curtain-collapsed p-5 lg:p-6 flex flex-col justify-between overflow-hidden relative group"
+           style="background: linear-gradient(135deg, rgba(136, 19, 55, 0.35) 0%, rgba(13, 19, 33, 0.9) 45%, rgba(6, 10, 18, 0.97) 100%); border: 1px solid rgba(244, 63, 94, 0.3);">
+
+        <!-- Expanded View -->
+        <div id="content-resource-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden gap-3 text-slate-200">
+          <div class="flex items-center justify-between shrink-0">
+            <div class="flex items-center space-x-3.5">
+              <div class="w-11 h-11 rounded-2xl bg-slate-900/90 border border-rose-800 flex items-center justify-center text-rose-400 shadow-sm">
+                <i class="fa-solid fa-microchip text-xl"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white">全网算力资源负载监控</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-rose-950/80 text-rose-300 border border-rose-800 font-mono font-bold uppercase">03 · Compute Resource</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">配置节点 CPU 瞬时差分计算 · 内存可用率 · 磁盘使用率多维监控</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-slate-900/90 border border-rose-800 text-xs font-mono text-rose-300 font-bold shadow-sm">
+              <i class="fa-solid fa-chart-column mr-1"></i>资源占用分析
+            </span>
+          </div>
+
+          <!-- 3 Resource Metric Pills -->
+          <div class="grid grid-cols-3 gap-3 font-mono text-xs shrink-0">
+            <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
+              <span class="text-slate-400">CPU 负载最高主机</span>
+              <span class="text-rose-400 font-extrabold text-sm" id="res-peak-cpu">-- (0%)</span>
+            </div>
+            <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
+              <span class="text-slate-400">内存平均利用率</span>
+              <span class="text-cyan-400 font-extrabold text-sm" id="res-avg-mem">--%</span>
+            </div>
+            <div class="p-3 rounded-2xl supabase-light-card flex items-center justify-between shadow-sm">
+              <span class="text-slate-400">磁盘平均利用率</span>
+              <span class="text-emerald-400 font-extrabold text-sm" id="res-avg-disk">--% (正常)</span>
+            </div>
+          </div>
+
+          <!-- Resource Chart -->
+          <div class="flex-1 w-full p-3 rounded-2xl supabase-light-card flex flex-col min-h-0 shadow-sm">
+            <div id="resource-bar-chart" class="w-full flex-1"></div>
+          </div>
+
+          <!-- Footer -->
+          <div class="pt-2 border-t border-rose-900/60 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
+            <span>指标说明: <strong class="text-rose-400">CPU 占用率</strong> · <strong class="text-emerald-400">内存占用率</strong> · <strong class="text-amber-400">磁盘占用率</strong></span>
+            <span class="text-rose-400 font-bold">采样频率: 15s</span>
+          </div>
+        </div>
+
+        <!-- Collapsed Slat View -->
+        <div id="content-resource-collapsed" class="flex h-full w-full flex-col items-center justify-between">
+          <div class="w-9 h-9 rounded-xl bg-slate-900/90 border border-rose-800 flex items-center justify-center text-rose-400 shadow-sm shrink-0">
+            <i class="fa-solid fa-microchip text-sm"></i>
+          </div>
+          <div class="flex-1 flex flex-col items-center justify-center my-auto w-full py-2">
+            <div class="flex-1 flex items-end justify-center w-full">
+              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-slate-200">
+                算力占用
+              </span>
+            </div>
+            <div class="my-1 flex items-center justify-center text-rose-400 font-bold text-sm select-none">
+              ·
+            </div>
+            <div class="flex-1 flex items-start justify-center w-full">
+              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-slate-500 uppercase">
+                RESOURCE
+              </span>
+            </div>
+          </div>
+          <div class="w-full flex justify-center shrink-0">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-950/80 text-rose-300 border border-rose-800 text-center whitespace-nowrap shadow-xs">
+              算力负载
+            </span>
+          </div>
+        </div>
+
+      </div>

@@ -1,13 +1,26 @@
 [
-  {"name": "example-node-1", "host": "192.0.2.1", "region": "ap-osaka", "provider": "Oracle Cloud", "lat": 34.6937, "lng": 135.5023},
-  {"name": "example-node-2", "host": "192.0.2.1", "region": "ap-osaka", "provider": "Oracle Cloud", "lat": 34.6937, "lng": 135.5023},
-  {"name": "example-node-3", "host": "192.0.2.1", "region": "ap-osaka", "provider": "Oracle Cloud", "lat": 34.6937, "lng": 135.5023},
-  {"name": "example-node-4", "host": "192.0.2.1", "region": "ap-tokyo", "provider": "Oracle Cloud", "lat": 35.6762, "lng": 139.6503},
-  {"name": "example-node-5", "host": "192.0.2.1", "region": "ap-tokyo", "provider": "Oracle Cloud", "lat": 35.6762, "lng": 139.6503},
-  {"name": "example-node-6", "host": "192.0.2.1", "region": "us-ashburn", "provider": "Oracle Cloud", "lat": 39.0438, "lng": -77.4874},
-  {"name": "example-node-7", "host": "192.0.2.1", "region": "us-ashburn", "provider": "Oracle Cloud", "lat": 39.0438, "lng": -77.4874},
-  {"name": "example-node-8", "host": "192.0.2.1", "region": "us-ashburn", "provider": "Oracle Cloud", "lat": 39.0438, "lng": -77.4874},
-  {"name": "example-node-9", "host": "192.0.2.1", "region": "ap-singapore", "provider": "AWS", "lat": 1.3521, "lng": 103.8198},
-  {"name": "example-node-10", "host": "192.0.2.10", "region": "cn-beijing", "provider": "Alibaba Cloud", "lat": 39.9042, "lng": 116.4074},
-  {"name": "example-node-11", "host": "192.0.2.11", "region": "asia-east1", "provider": "Google Cloud", "lat": 25.0330, "lng": 121.5654}
+  {
+    "name": "hub",
+    "host": "192.0.2.10",
+    "region": "region-a",
+    "provider": "Example Cloud",
+    "lat": 1.3521,
+    "lng": 103.8198
+  },
+  {
+    "name": "edge-a",
+    "host": "192.0.2.11",
+    "region": "region-b",
+    "provider": "Example Cloud",
+    "lat": 35.6762,
+    "lng": 139.6503
+  },
+  {
+    "name": "edge-b",
+    "host": "192.0.2.12",
+    "region": "region-c",
+    "provider": "Example Cloud",
+    "lat": 39.0438,
+    "lng": -77.4874
+  }
 ]

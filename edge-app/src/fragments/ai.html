@@ -1,0 +1,133 @@
+      <!-- ================= 🪟 CURTAIN 6: RADIANT AMBER HONEY (HEATWAVE AUTOML) ================= -->
+      <div id="panel-ai" onclick="handleCurtainClick('ai')"
+           class="curtain-panel curtain-collapsed p-5 lg:p-6 flex flex-col justify-between overflow-hidden relative group"
+           style="background: linear-gradient(135deg, rgba(120, 53, 15, 0.35) 0%, rgba(13, 19, 33, 0.9) 45%, rgba(6, 10, 18, 0.97) 100%); border: 1px solid rgba(245, 158, 11, 0.3);">
+
+        <!-- Expanded View -->
+        <div id="content-ai-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden gap-3 text-slate-200">
+          <div class="flex items-center justify-between shrink-0">
+            <div class="flex items-center space-x-3.5">
+              <div class="w-11 h-11 rounded-2xl bg-slate-900/90 border border-amber-800 flex items-center justify-center text-amber-400 shadow-sm">
+                <i class="fa-solid fa-brain text-xl"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white">MySQL HeatWave AutoML 库内预测与诊断</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-950/80 text-amber-300 border border-amber-800 font-mono font-bold uppercase">06 · HeatWave ML</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">MySQL HeatWave AutoML 自动化建模 · 时序数据库内原生异常预测 · 无需数据移出</p>
+              </div>
+            </div>
+            <span id="ai-score-pill" class="px-4 py-1.5 rounded-full text-xs font-mono font-extrabold bg-slate-900/90 text-amber-300 border border-amber-800 shadow-sm">
+              HEALTH: 100%
+            </span>
+          </div>
+
+          <!-- AI Body Grid (Full Height Extended Space) -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-3.5 flex-1 overflow-hidden min-h-0">
+            <!-- Left: HeatWave Status Cards -->
+            <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between overflow-hidden shadow-sm">
+              <div class="text-xs font-mono font-bold text-amber-400 flex items-center justify-between mb-2 shrink-0">
+                <span><i class="fa-solid fa-database mr-1.5 text-amber-500"></i>HeatWave 集群状态</span>
+                <span id="hw-cluster-status" class="text-[10px] text-emerald-300 px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-800 font-bold">ONLINE</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 flex-1">
+                <div class="p-3 rounded-xl bg-slate-900/70 border border-amber-500/20 flex flex-col justify-between items-center text-center">
+                  <div class="text-slate-400 text-[10px] uppercase font-semibold">内存使用</div>
+                  <div id="hw-memory-used" class="text-white font-extrabold text-lg my-0.5">-- MB</div>
+                  <div id="hw-memory-pct" class="text-[10px] text-amber-400">--%</div>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900/70 border border-amber-500/20 flex flex-col justify-between items-center text-center">
+                  <div class="text-slate-400 text-[10px] uppercase font-semibold">查询卸载</div>
+                  <div id="hw-queries-offloaded" class="text-white font-extrabold text-lg my-0.5">--</div>
+                  <div id="hw-offload-rate" class="text-[10px] text-emerald-400">--%</div>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900/70 border border-amber-500/20 flex flex-col justify-between items-center text-center">
+                  <div class="text-slate-400 text-[10px] uppercase font-semibold">已加载表</div>
+                  <div id="hw-tables-loaded" class="text-white font-extrabold text-lg my-0.5">--</div>
+                  <div class="text-[10px] text-slate-400">内存加速表</div>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-900/70 border border-amber-500/20 flex flex-col justify-between items-center text-center">
+                  <div class="text-slate-400 text-[10px] uppercase font-semibold">总记录数</div>
+                  <div id="hw-total-records" class="text-white font-extrabold text-lg my-0.5">--</div>
+                  <div class="text-[10px] text-slate-400">实时同步</div>
+                </div>
+              </div>
+              <div class="mt-2 p-2 rounded-lg bg-slate-900/50 border border-slate-800 text-[10px] text-slate-400 flex items-center justify-between">
+                <span><i class="fa-solid fa-bolt text-amber-500 mr-1"></i>ML 引擎: <span id="hw-ml-status" class="text-emerald-400">ON</span></span>
+                <span>同步: <span id="hw-cp-status" class="text-emerald-400">ON</span></span>
+              </div>
+            </div>
+
+            <!-- Middle: Anomaly Detection Results -->
+            <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between overflow-hidden shadow-sm">
+              <div class="text-xs font-mono font-bold text-amber-400 flex items-center justify-between mb-2 shrink-0">
+                <span><i class="fa-solid fa-shield-heart mr-1.5 text-amber-500"></i>ML 异常检测 &amp; 特征工程</span>
+                <span id="anomaly-count-badge" class="text-[10px] text-slate-300 px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 font-bold">0 告警</span>
+              </div>
+              <div id="ai-anomaly-tags" class="flex flex-wrap gap-1 mb-2 shrink-0"></div>
+              <div class="flex-1 overflow-y-auto space-y-2 pr-1" id="ai-diagnostics-list">
+                <div class="p-2.5 rounded-xl bg-slate-900/70 border border-emerald-500/20 text-xs space-y-1.5">
+                  <div class="flex items-center justify-between text-[10px] font-mono">
+                    <span class="text-emerald-400 font-bold"><i class="fa-solid fa-check-circle mr-1"></i>AutoML 特征流水线已就绪</span>
+                    <span class="text-slate-400">v_telemetry_ml_features</span>
+                  </div>
+                  <div class="grid grid-cols-3 gap-1.5 text-[10px] font-mono text-center">
+                    <div class="p-1 rounded bg-slate-800/80 text-slate-300">空值率: <span class="text-emerald-400 font-bold">0%</span></div>
+                    <div class="p-1 rounded bg-slate-800/80 text-slate-300">特征: <span class="text-blue-400 font-bold">6 维标量</span></div>
+                    <div class="p-1 rounded bg-slate-800/80 text-slate-300">规范: <span class="text-amber-400 font-bold">英文分词</span></div>
+                  </div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-slate-900/70 border border-amber-500/20 text-xs">
+                  <p class="text-slate-200 leading-relaxed text-[11px]" id="diag-summary-text">
+                    <i class="fa-solid fa-brain text-amber-400 mr-1.5"></i>模型服务与时序巡检已就绪，实时监控集群运行健康度。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Hourly Trend Chart -->
+            <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between font-mono overflow-hidden shadow-sm">
+              <div class="text-xs font-bold text-amber-400 uppercase flex items-center justify-between mb-2 shrink-0">
+                <span><i class="fa-solid fa-chart-line mr-1.5 text-amber-500"></i>24H 多维趋势</span>
+                <span class="text-[10px] text-slate-500">HeatWave OLAP</span>
+              </div>
+              <div id="hourly-trend-chart" class="flex-1 w-full min-h-[180px]"></div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="pt-2 border-t border-amber-900/60 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
+            <span>AI 诊断引擎: v2.7.0 Neural Agent · 评估时间: <span id="diag-evaluated-at" class="text-slate-300">--</span></span>
+            <span id="diag-footer-status" class="text-emerald-400 flex items-center font-bold"><i class="fa-solid fa-circle-check mr-1"></i>巡检服务正常</span>
+          </div>
+        </div>
+
+        <!-- Collapsed Slat View -->
+        <div id="content-ai-collapsed" class="flex h-full w-full flex-col items-center justify-between">
+          <div class="w-9 h-9 rounded-xl bg-slate-900/90 border border-amber-800 flex items-center justify-center text-amber-400 shadow-sm shrink-0">
+            <i class="fa-solid fa-brain text-sm"></i>
+          </div>
+          <div class="flex-1 flex flex-col items-center justify-center my-auto w-full py-2">
+            <div class="flex-1 flex items-end justify-center w-full">
+              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-slate-200">
+                智能诊断
+              </span>
+            </div>
+            <div class="my-1 flex items-center justify-center text-amber-400 font-bold text-sm select-none">
+              ·
+            </div>
+            <div class="flex-1 flex items-start justify-center w-full">
+              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-slate-500 uppercase">
+                AI ENGINE
+              </span>
+            </div>
+          </div>
+          <div class="w-full flex justify-center shrink-0">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-950/80 text-amber-300 border border-amber-800 text-center whitespace-nowrap shadow-xs">
+              健康巡检
+            </span>
+          </div>
+        </div>
+
+      </div>

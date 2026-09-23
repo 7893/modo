@@ -1,0 +1,179 @@
+      <!-- ================= 🪟 CURTAIN 1: SUPABASE EMERALD MINT (OVERVIEW) ================= -->
+      <div id="panel-overview" onclick="handleCurtainClick('overview')"
+           class="curtain-panel curtain-expanded p-5 lg:p-6 flex flex-col justify-between overflow-hidden relative group"
+           style="background: linear-gradient(135deg, rgba(6, 78, 59, 0.35) 0%, rgba(13, 19, 33, 0.9) 45%, rgba(6, 10, 18, 0.97) 100%); border: 1px solid rgba(16, 185, 129, 0.3);">
+
+        <!-- Expanded View -->
+        <div id="content-overview-expanded" class="flex flex-col h-full w-full justify-between overflow-hidden gap-3.5 text-slate-200">
+
+          <!-- Top Hero Header -->
+          <div class="flex items-center justify-between shrink-0">
+            <div class="flex items-center space-x-3.5">
+              <div class="w-11 h-11 rounded-2xl bg-slate-900/90 border border-emerald-800 flex items-center justify-center text-emerald-400 shadow-sm">
+                <i class="fa-solid fa-gauge-high text-xl"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white">多云集群基础设施总览</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-800 font-mono font-bold uppercase">01 · Fleet Overview</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">可配置节点遥测 · 时序数据入库 · 多区域网络拓扑</p>
+              </div>
+            </div>
+            <span id="fleet-status" class="px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-emerald-800 text-xs font-mono text-emerald-300 font-bold flex items-center gap-1.5 shadow-sm">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></span>
+              <span>等待遥测数据</span>
+            </span>
+          </div>
+
+          <!-- Top 4 KPI Cards (flex-1) -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 font-mono flex-[1] min-h-[105px]">
+            <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between items-center text-center shadow-sm">
+              <div class="flex items-center justify-center gap-1.5 text-slate-400 text-xs font-sans font-semibold w-full">
+                <span>在线主机</span>
+                <i class="fa-solid fa-server text-emerald-400"></i>
+              </div>
+              <div class="text-3xl font-extrabold text-white my-0.5 text-center" id="stat-online-nodes">-- <span class="text-sm font-normal text-slate-400">/ --</span></div>
+              <div class="text-[11px] text-slate-500 flex items-center justify-center gap-2 pt-1 border-t border-slate-800/60 w-full">
+                <span>由节点清单动态加载</span>
+                <span class="text-emerald-400 font-bold">实时</span>
+              </div>
+            </div>
+
+            <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between items-center text-center shadow-sm">
+              <div class="flex items-center justify-center gap-1.5 text-slate-400 text-xs font-sans font-semibold w-full">
+                <span>跨区域平均网络时延</span>
+                <i class="fa-solid fa-bolt text-teal-400"></i>
+              </div>
+              <div class="text-3xl font-extrabold text-white my-0.5 text-center" id="stat-avg-latency">-- <span class="text-sm font-normal text-slate-400">ms</span></div>
+              <div class="text-[11px] text-slate-500 flex items-center justify-center gap-2 pt-1 border-t border-slate-800/60 w-full">
+                <span>按实时探测数据计算</span>
+                <span class="text-teal-400 font-bold">动态</span>
+              </div>
+            </div>
+
+            <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between items-center text-center shadow-sm">
+              <div class="flex items-center justify-center gap-1.5 text-slate-400 text-xs font-sans font-semibold w-full">
+                <span>全网平均内存利用率</span>
+                <i class="fa-solid fa-microchip text-cyan-400"></i>
+              </div>
+              <div class="text-3xl font-extrabold text-white my-0.5 text-center" id="stat-avg-mem">-- <span class="text-sm font-normal text-slate-400">%</span></div>
+              <div class="text-[11px] text-slate-500 flex items-center justify-center gap-2 pt-1 border-t border-slate-800/60 w-full">
+                <span>集群资源水位平衡</span>
+                <span class="text-cyan-400 font-bold">正常</span>
+              </div>
+            </div>
+
+            <div class="p-4 rounded-2xl supabase-light-card flex flex-col justify-between items-center text-center shadow-sm">
+              <div class="flex items-center justify-center gap-1.5 text-slate-400 text-xs font-sans font-semibold w-full">
+                <span>时序遥测存储引擎</span>
+                <i class="fa-solid fa-database text-amber-400"></i>
+              </div>
+              <div class="text-3xl font-extrabold text-amber-400 my-0.5 text-center">HeatWave</div>
+              <div class="text-[11px] text-slate-500 flex items-center justify-center gap-2 pt-1 border-t border-slate-800/60 w-full">
+                <span>MySQL HeatWave · 可配置周期</span>
+                <span class="text-amber-400 font-bold" id="kpi-db-records">同步中</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dual Column Main Body (flex-[3]) -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 flex-[3] min-h-[250px] overflow-hidden">
+            <!-- Left 7 Cols: Region Fleet Matrix -->
+            <div class="lg:col-span-7 p-4 rounded-2xl supabase-light-card flex flex-col justify-between overflow-hidden shadow-sm">
+              <div class="flex items-center justify-between mb-2 shrink-0">
+                <span class="text-xs font-bold text-slate-200 flex items-center gap-2">
+                  <i class="fa-solid fa-earth-asia text-emerald-600"></i>
+                  <span>多云区域矩阵速览</span>
+                </span>
+                <span id="fleet-node-count" class="text-[11px] font-mono text-slate-500">等待节点数据</span>
+              </div>
+
+              <div id="overview-region-list" class="flex-1 flex flex-col gap-2 overflow-auto py-0.5">
+                <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800/80 text-xs text-slate-500 font-mono">
+                  区域摘要将在遥测数据加载后显示。
+                </div>
+              </div>
+            </div>
+
+            <!-- Right 5 Cols: Architecture & Security -->
+            <div class="lg:col-span-5 p-4 rounded-2xl supabase-light-card flex flex-col justify-between overflow-hidden font-mono shadow-sm">
+              <div class="flex items-center justify-between mb-2 shrink-0">
+                <span class="text-xs font-bold text-slate-200 flex items-center gap-2">
+                  <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                  <span>算力架构与安全状态</span>
+                </span>
+                <span class="text-[10px] text-emerald-300 px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-800 font-bold">ACTIVE</span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2.5 flex-1 py-0.5">
+                <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800/80 flex flex-col justify-between items-center text-center">
+                  <div class="text-slate-500 text-[10px] uppercase font-semibold">遥测采样周期</div>
+                  <div class="text-white font-extrabold text-lg my-0.5">15 秒 / 批次</div>
+                  <div class="text-[10px] text-slate-400">4,320 批次 / 天</div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800/80 flex flex-col justify-between items-center text-center">
+                  <div class="text-slate-500 text-[10px] uppercase font-semibold">传输隧道通道</div>
+                  <div class="text-sky-400 font-extrabold text-lg my-0.5">Cloudflare QUIC</div>
+                  <div class="text-[10px] text-slate-400">双向加密穿透</div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800/80 flex flex-col justify-between items-center text-center">
+                  <div class="text-slate-500 text-[10px] uppercase font-semibold">API 访问鉴权</div>
+                  <div class="text-indigo-400 font-extrabold text-lg my-0.5">X-Internal-Secret</div>
+                  <div class="text-[10px] text-slate-400">网关全流量验证</div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800/80 flex flex-col justify-between items-center text-center">
+                  <div class="text-slate-500 text-[10px] uppercase font-semibold">底层时序数据库</div>
+                  <div class="text-amber-400 font-extrabold text-lg my-0.5">MySQL HeatWave</div>
+                  <div class="text-[10px] text-slate-400">时序聚集索引</div>
+                </div>
+              </div>
+
+              <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800/80 text-xs text-slate-400 flex items-center justify-between mt-2 shrink-0">
+                <span><i class="fa-solid fa-arrow-pointer mr-1.5 text-emerald-400"></i>点击右侧各面板展开对应独立模块</span>
+                <span class="text-emerald-400 font-bold">5 个独立视图 &rarr;</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Footer -->
+          <div class="flex items-center justify-between pt-2 border-t border-emerald-900/60 text-xs font-mono text-slate-400 shrink-0">
+            <span>数据源: MODO Telemetry Pipeline · 数据库实时记录: <strong class="text-white font-bold text-sm tracking-wide" id="total-db-records">-- 条</strong></span>
+            <span class="text-emerald-400 font-semibold flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></span>
+              <span>实时同步</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Collapsed Slat View -->
+        <div id="content-overview-collapsed" class="hidden h-full w-full flex-col items-center justify-between">
+          <div class="w-9 h-9 rounded-xl bg-slate-900/90 border border-emerald-800 flex items-center justify-center text-emerald-400 shadow-sm shrink-0">
+            <i class="fa-solid fa-gauge-high text-sm"></i>
+          </div>
+          <div class="flex-1 flex flex-col items-center justify-center my-auto w-full py-2">
+            <div class="flex-1 flex items-end justify-center w-full">
+              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-slate-200">
+                集群总览
+              </span>
+            </div>
+            <div class="my-1 flex items-center justify-center text-emerald-400 font-bold text-sm select-none">
+              ·
+            </div>
+            <div class="flex-1 flex items-start justify-center w-full">
+              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-slate-500 uppercase">
+                OVERVIEW
+              </span>
+            </div>
+          </div>
+          <div class="w-full flex justify-center shrink-0">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-800 text-center whitespace-nowrap shadow-xs">
+              动态节点
+            </span>
+          </div>
+        </div>
+
+      </div>

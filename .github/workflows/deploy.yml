@@ -1,9 +1,25 @@
-name: Deploy to Cloudflare Workers
+name: Deploy MODO
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
+    inputs:
+      deploy_edge:
+        description: Deploy the Cloudflare Worker
+        required: true
+        default: false
+        type: boolean
+      deploy_backend:
+        description: Deploy the backend service
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: modo-production-deploy
+  cancel-in-progress: false
 
 jobs:
   ci:
@@ -12,6 +28,7 @@ jobs:
 
   deploy-edge:
     name: Deploy Edge Application
+    if: ${{ inputs.deploy_edge }}
     runs-on: ubuntu-latest
     needs: ci
     environment: production
@@ -22,6 +39,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -31,11 +50,11 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: 11.22.0
 
       - name: Install Dependencies
         run: |
-          pnpm install
+          pnpm install --frozen-lockfile
 
       - name: Deploy to Cloudflare Workers
         env:
@@ -45,55 +64,79 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
+          TOPOLOGY_HUB_NODE: ${{ vars.TOPOLOGY_HUB_NODE }}
         run: |
-          # First deploy so the removed plain-text vars are cleared from the
-          # live Worker (a var and a secret cannot share the same name).
-          npx wrangler deploy --minify
-          # Then inject addresses/secrets as Worker secrets (never committed).
-          printf '%s' "$API_BACKEND_URL"     | npx wrangler secret put API_BACKEND_URL
-          printf '%s' "$SUPABASE_URL"        | npx wrangler secret put SUPABASE_URL
-          printf '%s' "$SUPABASE_PUBLISHABLE_KEY" | npx wrangler secret put SUPABASE_PUBLISHABLE_KEY
-          printf '%s' "$INTERNAL_API_SECRET" | npx wrangler secret put INTERNAL_API_SECRET
+          set -euo pipefail
+          pnpm build:css
+          deploy_args=(deploy --minify)
+          if [ -n "$TOPOLOGY_HUB_NODE" ]; then
+            deploy_args+=(--var "TOPOLOGY_HUB_NODE:$TOPOLOGY_HUB_NODE")
+          fi
+          pnpm exec wrangler "${deploy_args[@]}"
+          # Store connection details as Worker secrets; never commit them.
+          printf '%s' "$API_BACKEND_URL"     | pnpm exec wrangler secret put API_BACKEND_URL
+          printf '%s' "$SUPABASE_URL"        | pnpm exec wrangler secret put SUPABASE_URL
+          printf '%s' "$SUPABASE_PUBLISHABLE_KEY" | pnpm exec wrangler secret put SUPABASE_PUBLISHABLE_KEY
+          printf '%s' "$INTERNAL_API_SECRET" | pnpm exec wrangler secret put INTERNAL_API_SECRET
 
   deploy-backend:
     name: Deploy Backend Services
+    if: ${{ inputs.deploy_backend }}
     runs-on: ubuntu-latest
     needs: ci
+    environment: production
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Deploy Artifacts to USA Node
+      - name: Deploy Artifacts to Backend Host
         env:
-          TARGET_HOST: ${{ secrets.USA_HOST || secrets.DEPLOY_HOST_IP || secrets.DEPLOY_HOST }}
-          TARGET_KEY: ${{ secrets.USA_SSH_KEY || secrets.DEPLOY_SSH_KEY }}
+          TARGET_HOST: ${{ secrets.DEPLOY_HOST }}
+          TARGET_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          TARGET_USER: ${{ secrets.DEPLOY_USER }}
+          TARGET_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
         run: |
-          if [ -z "$TARGET_HOST" ] || [ -z "$TARGET_KEY" ]; then
-            echo "ERROR: Target host or SSH key secret is missing."
+          set -euo pipefail
+          TARGET_USER="${TARGET_USER:-modo}"
+          TARGET_PATH="${TARGET_PATH:-/opt/modo}"
+
+          if [ -z "$TARGET_HOST" ] || [ -z "$TARGET_KEY" ] || [ -z "$DEPLOY_KNOWN_HOSTS" ]; then
+            echo "ERROR: DEPLOY_HOST, DEPLOY_SSH_KEY, and DEPLOY_KNOWN_HOSTS are required."
+            exit 1
+          fi
+          if [[ ! "$TARGET_USER" =~ ^[a-z_][a-z0-9_-]*$ ]] || [[ "$TARGET_PATH" != /* ]] || [ "$TARGET_PATH" = "/" ]; then
+            echo "ERROR: DEPLOY_USER or DEPLOY_PATH is invalid."
             exit 1
           fi
 
           mkdir -p ~/.ssh
-          echo "$TARGET_KEY" > ~/.ssh/id_deploy
+          printf '%s\n' "$TARGET_KEY" > ~/.ssh/id_deploy
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/known_hosts
 
-          echo "Syncing data-bridge code to USA..."
-          rsync -avz -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
+          echo "Syncing data-bridge code to the backend host..."
+          rsync -avz -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=yes" \
             --exclude='__pycache__' --exclude='*.pyc' --exclude='venv/' --exclude='.env' \
             data-bridge/src/ \
-            ubuntu@"$TARGET_HOST":/home/ubuntu/modo/data-bridge/src/
+            "${TARGET_USER}@${TARGET_HOST}:${TARGET_PATH}/data-bridge/src/"
 
-          rsync -avz -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
+          rsync -avz -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=yes" \
             data-bridge/requirements.txt \
-            ubuntu@"$TARGET_HOST":/home/ubuntu/modo/data-bridge/requirements.txt
+            "${TARGET_USER}@${TARGET_HOST}:${TARGET_PATH}/data-bridge/requirements.txt"
 
-          echo "Restarting services and running health probe on USA..."
-          ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@"$TARGET_HOST" "
-            if [ -f /home/ubuntu/modo/data-bridge/requirements.txt ]; then
-              /home/ubuntu/modo/data-bridge/venv/bin/pip install -q -r /home/ubuntu/modo/data-bridge/requirements.txt
+          echo "Restarting services and running the backend health probe..."
+          ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=yes "${TARGET_USER}@${TARGET_HOST}" bash -s -- "$TARGET_PATH" <<'REMOTE'
+            set -euo pipefail
+            target_path="$1"
+            if [ -f "$target_path/data-bridge/requirements.txt" ]; then
+              "$target_path/data-bridge/venv/bin/pip" install -q -r "$target_path/data-bridge/requirements.txt"
             fi
             sudo systemctl restart modo.service
             sleep 3
             curl -sf http://127.0.0.1:8000/health || (echo 'modo-api health check failed' && exit 1)
-          "
-          echo "Backend deployment to USA completed successfully."
+          REMOTE
+          echo "Backend deployment completed successfully."

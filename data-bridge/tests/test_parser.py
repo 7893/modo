@@ -1,11 +1,11 @@
 """
-Unit tests for Prometheus metric parser in ingest.py
+Unit tests for the side-effect-free Prometheus metric parser.
 """
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from ingest import parse_prometheus_metrics
+from metrics_parser import parse_prometheus_metrics
 
 MOCK_PROMETHEUS_METRICS = """
 # HELP node_memory_MemTotal_bytes Memory information field MemTotal_bytes.
@@ -33,15 +33,15 @@ node_network_transmit_bytes_total{device="lo"} 999999
 def test_parse_valid_prometheus_metrics():
     """Verify accurate extraction of memory, disk, and network stats."""
     metrics = parse_prometheus_metrics(MOCK_PROMETHEUS_METRICS)
-    
+
     # Check memory
     assert metrics["mem_total"] == 16777216000
     assert metrics["mem_avail"] == 8388608000
-    
+
     # Check root filesystem
     assert metrics["disk_size"] == 107374182400
     assert metrics["disk_free"] == 53687091200
-    
+
     # Check network ignoring loopback
     assert metrics["net_in"] == 123456789
     assert metrics["net_out"] == 987654321

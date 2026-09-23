@@ -1,15 +1,22 @@
 {
   "name": "modo-edge-app",
   "type": "module",
+  "packageManager": "pnpm@11.22.0",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "build:css": "tailwindcss -i ./src/tailwind.css -o ./src/tailwind.generated.css --minify",
+    "dev": "pnpm build:css && wrangler dev",
+    "deploy": "pnpm build:css && wrangler deploy --minify",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "hono": "^4.13.7"
   },
   "devDependencies": {
-    "wrangler": "^4.131.1"
+    "@tailwindcss/cli": "^4.1.13",
+    "@types/node": "^26.6.2",
+    "tailwindcss": "^4.1.13",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.136.1"
   }
 }

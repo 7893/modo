@@ -7,7 +7,22 @@ on:
     branches: [ main ]
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
+  source-policy:
+    name: Source File Size Policy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Enforce 400-line source limit
+        run: python scripts/check_source_file_lines.py
+
   test-backend:
     name: Backend Unit Tests (Data Bridge)
     runs-on: ubuntu-latest
@@ -18,6 +33,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -30,10 +47,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Setup config files
-        run: |
-          cp config/nodes.json.example config/nodes.json
 
       - name: Run Pytest Suite
         run: |
@@ -49,6 +62,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -58,12 +73,15 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: 11.22.0
 
       - name: Install Dependencies
         run: |
-          pnpm install
+          pnpm install --frozen-lockfile
 
       - name: Verify Wrangler Types & Build
         run: |
-          npx wrangler types --env-interface CloudflareBindings
+          pnpm build:css
+          pnpm run cf-typegen
+          pnpm run typecheck
+          pnpm exec wrangler deploy --dry-run --outdir /tmp/modo-worker-dry-run

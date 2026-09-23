@@ -1,11 +1,22 @@
-import { Hono } from 'hono'
+import { Hono, type Context } from 'hono'
 import { cors } from 'hono/cors'
 
-type Bindings = {
-  API_BACKEND_URL: string
-  SUPABASE_URL?: string
-  SUPABASE_PUBLISHABLE_KEY?: string
-  INTERNAL_API_SECRET?: string
+import htmlTemplate from './index.html'
+import tailwindCss from './tailwind.generated.css'
+import aiPanel from './fragments/ai.html'
+import authModal from './fragments/auth-modal.html'
+import inventoryPanel from './fragments/inventory.html'
+import latencyPanel from './fragments/latency.html'
+import mapPanel from './fragments/map.html'
+import overviewPanel from './fragments/overview.html'
+import resourcePanel from './fragments/resource.html'
+import dashboardAuthScript from './client/dashboard-auth.client.js'
+import dashboardChartsScript from './client/dashboard-charts.client.js'
+import dashboardCoreScript from './client/dashboard-core.client.js'
+import dashboardInsightsScript from './client/dashboard-insights.client.js'
+
+type AppEnv = {
+  Bindings: CloudflareBindings & { TOPOLOGY_HUB_NODE?: string }
 }
 
 const NO_CACHE_HEADERS = {
@@ -13,60 +24,67 @@ const NO_CACHE_HEADERS = {
   'Pragma': 'no-cache'
 } as const
 
-const app = new Hono<{ Bindings: Bindings }>()
+const app = new Hono<AppEnv>()
 
-// Global CORS Middleware
+function inlineScriptString(value: string | undefined): string {
+  return JSON.stringify(value || '')
+    .replace(/</g, '\\u003c')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029')
+}
+
 app.use('*', cors({
   origin: '*',
   allowMethods: ['GET', 'POST', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization']
 }))
 
-/**
- * Proxy a request to the private backend gateway.
- *
- * Security notes:
- * - The backend address is read only from env; it is never inlined or echoed.
- * - On failure we log full details to the Worker console (private) and return
- *   a generic message to the client, so the internal address and low-level
- *   error text are never exposed in the HTTP response.
- */
-async function proxy(c: any, path: string, cache: boolean = true) {
+/** Proxy an authenticated request to the private backend gateway. */
+async function proxy(c: Context<AppEnv>, path: string, noStore: boolean = true): Promise<Response> {
   const backend = c.env.API_BACKEND_URL
-  if (!backend) {
-    console.error('[proxy] API_BACKEND_URL is not configured')
+  const internalSecret = c.env.INTERNAL_API_SECRET
+  if (!backend || !internalSecret) {
+    console.error(JSON.stringify({ message: 'proxy configuration missing', path }))
     return c.json({ status: 'error', message: 'Service temporarily unavailable' }, 503)
   }
 
   try {
-    const res = await fetch(`${backend}${path}`, {
+    const clientIp = c.req.header('CF-Connecting-IP')
+      || c.req.header('X-Forwarded-For')?.split(',')[0]?.trim()
+      || 'unknown'
+    const response = await fetch(`${backend}${path}`, {
       headers: {
         'User-Agent': 'MODO-Edge-Worker/1.0',
-        'X-Internal-Secret': c.env.INTERNAL_API_SECRET || ''
+        'X-Internal-Secret': internalSecret,
+        'X-MODO-Client-IP': clientIp
       }
     })
-    const data = await res.json()
-    return c.json(data, res.status as any, cache ? NO_CACHE_HEADERS : undefined)
-  } catch (err: any) {
-    // Log details privately; never return them to the client.
-    console.error(`[proxy] Upstream request failed for ${path}: ${err?.message}`)
+
+    if (response.status >= 500) {
+      console.error(JSON.stringify({ message: 'backend request failed', path, status: response.status }))
+      return c.json({ status: 'error', message: 'Service temporarily unavailable' }, 502)
+    }
+
+    const headers = new Headers(response.headers)
+    if (noStore) {
+      for (const [name, value] of Object.entries(NO_CACHE_HEADERS)) {
+        headers.set(name, value)
+      }
+    }
+    return new Response(response.body, { status: response.status, headers })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error(JSON.stringify({ message: 'upstream request failed', path, error: message }))
     return c.json({ status: 'error', message: 'Service temporarily unavailable' }, 502)
   }
 }
 
-// Proxy API: Nodes Latest Telemetry
+app.get('/api/dashboard/overview', (c) => proxy(c, '/api/dashboard/overview'))
 app.get('/api/nodes/latest', (c) => proxy(c, '/api/metrics/latest'))
-
-// Proxy API: Node metadata summary
 app.get('/api/nodes/summary', (c) => proxy(c, '/api/nodes/summary'))
-
-// Proxy API: Health check
 app.get('/api/health', (c) => proxy(c, '/health', false))
-
-// Proxy API: AI Diagnostics
 app.get('/api/ai/diagnostics', (c) => proxy(c, '/api/ai/diagnostics'))
 
-// Proxy API: Metrics History
 app.get('/api/metrics/history', (c) => {
   const url = new URL(c.req.url)
   const node = encodeURIComponent(url.searchParams.get('node') || '')
@@ -74,7 +92,6 @@ app.get('/api/metrics/history', (c) => {
   return proxy(c, `/api/metrics/history?node=${node}&hours=${hours}`)
 })
 
-// Proxy API: HeatWave Hourly Analytics
 app.get('/api/analytics/hourly', (c) => {
   const url = new URL(c.req.url)
   const node = encodeURIComponent(url.searchParams.get('node') || '')
@@ -82,54 +99,52 @@ app.get('/api/analytics/hourly', (c) => {
   return proxy(c, `/api/analytics/hourly?node=${node}&hours=${hours}`)
 })
 
-// Proxy API: HeatWave Fleet Health Report
 app.get('/api/analytics/fleet', (c) => proxy(c, '/api/analytics/fleet'))
-
-// Proxy API: HeatWave Anomaly Dashboard
 app.get('/api/analytics/anomalies', (c) => proxy(c, '/api/analytics/anomalies'))
-
-// Proxy API: HeatWave Cluster Status
 app.get('/api/analytics/heatwave-status', (c) => proxy(c, '/api/analytics/heatwave-status'))
-
-// Proxy API: Latency Forecast (HeatWave AutoML + EMA)
 app.get('/api/analytics/latency-forecast', (c) => proxy(c, '/api/analytics/latency-forecast'))
-
-// Proxy API: HeatWave ML Features
 app.get('/api/analytics/ml-features', (c) => proxy(c, '/api/analytics/ml-features'))
 
-import htmlTemplate from './index.html'
-
-// Frontend Dashboard SPA
 app.get('/', (c) => {
-  const supabaseUrl = c.env.SUPABASE_URL || ''
-  const supabaseKey = c.env.SUPABASE_PUBLISHABLE_KEY || ''
-
   const finalHtml = htmlTemplate
-    .replace('${supabaseUrl}', supabaseUrl)
-    .replace('${supabaseKey}', supabaseKey)
+    .replace('${overviewPanel}', () => overviewPanel)
+    .replace('${mapPanel}', () => mapPanel)
+    .replace('${resourcePanel}', () => resourcePanel)
+    .replace('${latencyPanel}', () => latencyPanel)
+    .replace('${inventoryPanel}', () => inventoryPanel)
+    .replace('${aiPanel}', () => aiPanel)
+    .replace('${authModal}', () => authModal)
+    .replace('${dashboardCoreScript}', () => dashboardCoreScript)
+    .replace('${dashboardInsightsScript}', () => dashboardInsightsScript)
+    .replace('${dashboardChartsScript}', () => dashboardChartsScript)
+    .replace('${dashboardAuthScript}', () => dashboardAuthScript)
+    .replace('${tailwindCss}', () => tailwindCss)
+    .replace('${supabaseUrl}', () => inlineScriptString(c.env.SUPABASE_URL))
+    .replace('${supabaseKey}', () => inlineScriptString(c.env.SUPABASE_PUBLISHABLE_KEY))
+    .replace('${topologyHubNode}', () => inlineScriptString(c.env.TOPOLOGY_HUB_NODE))
 
   return c.html(finalHtml, 200, NO_CACHE_HEADERS)
 })
 
-
 export default {
   fetch: app.fetch,
-  async scheduled(event: any, env: Bindings, ctx: any) {
+  async scheduled(event: ScheduledController, env: CloudflareBindings, _ctx: ExecutionContext): Promise<void> {
     const backend = env.API_BACKEND_URL
-    if (!backend) {
-      console.error('[Cron] API_BACKEND_URL is not configured')
+    const internalSecret = env.INTERNAL_API_SECRET
+    if (!backend || !internalSecret) {
+      console.error(JSON.stringify({ message: 'cron configuration missing', cron: event.cron }))
       return
     }
+
     try {
-      const res = await fetch(`${backend}/api/maintenance/prune`, {
+      const response = await fetch(`${backend}/api/maintenance/prune`, {
         method: 'POST',
-        headers: { 'X-Internal-Secret': env.INTERNAL_API_SECRET || '' }
-      });
-      console.log(`[Cron] Triggered at ${event.cron}. Status: ${res.status}`);
-      const data = await res.text();
-      console.log(`[Cron] Output: ${data}`);
-    } catch (e) {
-      console.error(`[Cron] Error: ${e}`);
+        headers: { 'X-Internal-Secret': internalSecret }
+      })
+      console.log(JSON.stringify({ message: 'maintenance cron completed', cron: event.cron, status: response.status }))
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error)
+      console.error(JSON.stringify({ message: 'maintenance cron failed', cron: event.cron, error: message }))
     }
   }
-}
+} satisfies ExportedHandler<CloudflareBindings>

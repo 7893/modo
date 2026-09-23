@@ -1,177 +1,154 @@
-# 🌐 MODO (墨斗) // 多云分布式数据底座与智能中枢
+# MODO（墨斗）
 
 [![CI](https://github.com/7893/modo/actions/workflows/ci.yml/badge.svg)](https://github.com/7893/modo/actions/workflows/ci.yml)
-[![Deploy to Cloudflare Workers](https://github.com/7893/modo/actions/workflows/deploy.yml/badge.svg)](https://github.com/7893/modo/actions/workflows/deploy.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg?style=flat-square)](LICENSE)
 
-> **MODO（墨斗）—— 专为多云分布式业务打造的高可用数据底座与全景遥测中枢。**  
-> Powered by **Cloudflare Workers (Hono)**, **MySQL HeatWave Engine (`modo_db`)**, **Network Load Balancer (NLB)**, and **FastAPI**.
+MODO is a configurable multi-cloud telemetry dashboard built with Cloudflare
+Workers, Hono, FastAPI, Prometheus node exporters, and Oracle MySQL HeatWave.
+It collects infrastructure metrics, exposes a private API gateway, and renders a
+six-panel operational dashboard.
 
----
+The repository contains reference configuration only. It does not include a
+hosted service, production node inventory, database, or Cloudflare account.
 
-## ⚡ Production Endpoints
-
-| Service | Access | Architecture Role | Status |
-| :--- | :--- | :--- | :---: |
-| 🌐 **MODO Command Dashboard** | `Cloudflare Edge (Public)` | Edge Worker UI + ECharts 5 + Supabase Auth | 🟢 **ONLINE** |
-| 🚇 **MODO Private API Gateway** | `Encrypted Tunnel (Internal Only)` | Zero-Trust Cloudflare Tunnel ➡️ FastAPI Bridge | 🟢 **ACTIVE** |
-| 🗄️ **Managed MySQL Data Store** | `Private VPC Ingress` | OCI MySQL HeatWave Cloud Database System | 🟢 **ACTIVE** |
-
----
-
-## 🗺️ System Architecture
+## Architecture
 
 ```text
-                               【Operations & Management】
-                                             │  (HTTPS / TLS 1.3)
-                                             ▼
-                        ┌─────────────────────────────────────────┐
-                        │      Cloudflare Edge Network (CDN)      │
-                        │          Public Edge Endpoint           │
-                        │                                         │
-                        │  • Hono.js Edge Application             │
-                        │  • ECharts 5 Supabase Dark Theme       │
-                        │  • 4-Curtain Multi-Screen Dashboard     │
-                        │  • Supabase Auth Security Guard         │
-                        └────────────────────┬────────────────────┘
-                                             │  (Encrypted Edge Proxy)
-                                             ▼
-                        ┌─────────────────────────────────────────┐
-                        │     Cloudflare Tunnel (QUIC Protocol)   │
-                        │       (Zero-Trust Private Ingress)      │
-                        └────────────────────┬────────────────────┘
-                                             │  (Zero-Trust Private Ingress)
-                                             ▼
-                        ┌─────────────────────────────────────────┐
-                        │       usa (US Ashburn Central Hub)      │
-                        │                                         │
-                        │  • systemd: modo.service (Unified API   │
-                        │    8000 + Ingest daemon 15s)            │
-                        │  • HeatWave AutoML: MODO_LATENCY_       │
-                        │    FORECAST (ExtraTreesRegressor)       │
-                        └──────────────┬──────────────────┬───────┘
-                                       │                  │
-                (Prometheus Scrape)    │                  │ (Private VPC TCP 3306)
-                                       ▼                  ▼
-             ┌────────────────────────────────────┐   ┌───────────────────────────┐
-             │      11 Multi-Cloud VM Fleet       │   │    Cloud MySQL HeatWave   │
-             │                                    │   │     Enterprise System     │
-             │ • Ashburn (usa, usb, usc)          │   │        (modo_db)          │
-             │ • Osaka/Tokyo (jpa, jpb, jpc,      │   │                           │
-             │   jpd, jpe)                        │   │ • vm_telemetry (timeseries│
-             │ • Singapore (sga), Taiwan (gcp)    │   │ • latency_forecast_train  │
-             │ • Beijing (cna)                    │   │ • ML_SCHEMA_admin Catalog │
-             └────────────────────────────────────┘   └───────────────────────────┘
+Browser
+   │ HTTPS
+   ▼
+Cloudflare Worker / Hono
+   │ authenticated private proxy
+   ▼
+FastAPI gateway ───────► Oracle MySQL HeatWave
+   ▲                           │
+   │ Prometheus scrape         └─ optional HeatWave AutoML
+   │
+Configured node_exporter fleet
 ```
 
----
+The backend is intended to remain private. The Worker injects a shared internal
+secret when proxying API requests. Database and node endpoints should not be
+exposed directly to the public Internet.
 
-## 🚀 Key Features
+## Features
 
-* 🌐 **Multi-Cloud Topology Map & Radar (Curtain 2)**: Dynamic geographical visualization rendered with ECharts 5, mapping nodes across Ashburn, Osaka, Tokyo, Singapore, Taiwan, and Beijing. All telemetry lines converge towards the **USA Ashburn Central Hub**, with particle flow speeds dynamically driven by HeatWave AutoML latency forecasting.
-* 🧠 **HeatWave AutoML In-Database Intelligence**: Native in-database regression modeling (`sys.ML_TRAIN` on `latency_forecast_train`) using `ExtraTreesRegressor` (`MODO_LATENCY_FORECAST`, model_id 5) loaded in HeatWave memory. Inference via `sys.ML_PREDICT_ROW` blended with real-time EMA (60% ML + 40% EMA) calculates precise per-link latency and particle animation periods.
-* 📈 **Time-Series Telemetry Waveforms**: Live streaming CPU, memory utilization, disk space, and network I/O throughput stored in MySQL HeatWave.
-* 🤖 **AI Autonomous Diagnostics**: Real-time anomaly detection heuristics, fleet health scoring (`0~100%`), and remediation recommendations.
-* 🚇 **Zero-Trust Network Bridge**: Zero public database ports. Cloudflare Tunnel connects Cloudflare Workers directly to private internal subnet instances.
-* 🛡️ **Enterprise Process Supervision**: Unified `systemd` daemon supervision (`modo.service`) on USA Central Hub with automatic crash recovery and on-boot restart.
-* 🔐 **Supabase Authentication**: Integrated glassmorphic login modal with session persistence.
-* 🔄 **Automated CI/CD**: GitHub Actions workflow running `pytest` test suites, instant Wrangler edge deployment on push, and automated code rsync to USA node.
+- Concurrent node_exporter metric collection with CPU counter warm-up.
+- HeatWave-backed telemetry, analytics views, retention, and optional AutoML.
+- Aggregated dashboard API to avoid high-frequency fan-out polling.
+- ECharts fleet, resource, latency, inventory, and diagnostic views.
+- Optional Supabase authentication and realtime updates.
+- Cloudflare Worker proxy with masked upstream errors and scheduled retention.
+- Bounded API rate limiting with trusted Worker client-IP forwarding.
+- CI checks for Python tests, TypeScript, Wrangler packaging, and the 400-line
+  first-party source limit.
 
----
-
-## 📂 Monorepo Structure
+## Repository layout
 
 ```text
 modo/
-├── .github/
-│   └── workflows/
-│       ├── ci.yml                 # Pytest & TypeScript verification
-│       └── deploy.yml             # Cloudflare Workers automated deployment & USA rsync
-├── data-bridge/                   # Backend Ingestion & API Gateway (Python)
-│   ├── api.py                     # FastAPI REST server & AutoML latency forecast
-│   ├── ingest.py                  # Concurrent multi-threaded Prometheus scraper
-│   ├── db_setup.py                # MySQL schema initializer
-│   ├── run_unified.py             # Single systemd service supervisor
-│   ├── train_latency_model.py     # HeatWave AutoML model training script
-│   ├── requirements.txt           # Python dependencies
-│   └── tests/                     # Automated pytest unit test suite
-│       ├── test_parser.py         # Metrics parsing algorithm tests
-│       └── test_api.py            # API endpoint integration tests
-├── deploy/                        # Deployment configuration
-│   └── modo.service               # Unified systemd unit for API + Ingest
-└── edge-app/                      # Edge Application (Cloudflare Workers)
-    ├── src/
-    │   ├── index.ts               # Hono app & Edge API Router
-    │   └── index.html             # Multi-Curtain Dashboard SPA (ECharts 5)
-    ├── package.json               # Node.js dependencies
-    └── wrangler.jsonc             # Cloudflare Worker configuration
+├── data-bridge/
+│   ├── config/nodes.json.example
+│   ├── src/                    # ingestion, FastAPI modules, schema and AutoML
+│   └── tests/
+├── edge-app/
+│   ├── src/client/             # browser behavior modules
+│   ├── src/fragments/          # dashboard HTML fragments
+│   ├── src/index.ts            # Worker routes and page composition
+│   └── wrangler.jsonc
+├── deploy/                     # reference systemd and Tunnel templates
+├── docs/
+│   ├── deployment/
+│   ├── issues/
+│   └── security/
+├── scripts/
+├── CONTRIBUTING.md
+├── SECURITY.md
+└── LICENSE
 ```
 
----
+First-party source files are limited to 400 physical lines. Generated files and
+vendored dependencies are excluded. CI enforces the rule with
+`scripts/check_source_file_lines.py`.
 
-## 🛠️ Quick Start
+## Requirements
 
-### 1. Prerequisites
-* Python 3.12+
-* Node.js 22+ & pnpm
-* Cloudflare account with Wrangler CLI configured
-* MySQL 8.0+ / OCI HeatWave instance
+- Python 3.12 or newer
+- Node.js 22 or newer
+- pnpm 11.22.0
+- Cloudflare account for deployment
+- Oracle MySQL HeatWave for database-backed runtime features
+- node_exporter on each monitored node
 
-### 2. Backend Setup
+MySQL, HeatWave, and Docker are not required to run the repository's unit tests.
+
+## Backend development
+
+From the repository root:
+
 ```bash
+cp .env.example .env
+cp data-bridge/config/nodes.json.example data-bridge/config/nodes.json
+
+python3 -m venv data-bridge/venv
+source data-bridge/venv/bin/activate
+pip install -r data-bridge/requirements.txt
 cd data-bridge
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Run Unit Tests
 pytest -v tests/
-
-# Initialize database schema
-python src/db_setup.py
-
-# Start the unified daemon (API gateway + telemetry ingestion)
-python src/run_unified.py
 ```
 
-### 3. Edge Worker Setup
+Replace all example values before starting services. The documentation IP
+addresses are non-routable examples.
+
+To run against an Oracle MySQL HeatWave environment you control, follow
+[the HeatWave deployment notes](docs/deployment/ORACLE-HEATWAVE.md). Do not run
+schema initialization against production without a backup and maintenance plan.
+
+## Edge development
+
 ```bash
 cd edge-app
-pnpm install
-
-# Local development
-npx wrangler dev
-
-# Deploy to Cloudflare Workers
-npx wrangler deploy --minify
+cp .dev.vars.example .dev.vars
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
----
+Set `API_BACKEND_URL` and use the same `INTERNAL_API_SECRET` as the backend.
+Supabase values may remain empty when authentication and realtime features are
+not being exercised.
 
-## 📊 Database Schema (`vm_telemetry`)
+Useful checks:
 
-```sql
-CREATE TABLE IF NOT EXISTS vm_telemetry (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    node_name VARCHAR(32) NOT NULL,
-    host_ip VARCHAR(64) NOT NULL,
-    region VARCHAR(32) DEFAULT '',
-    cpu_usage_percent FLOAT DEFAULT 0.0,
-    mem_total_bytes BIGINT DEFAULT 0,
-    mem_available_bytes BIGINT DEFAULT 0,
-    mem_usage_percent FLOAT DEFAULT 0.0,
-    disk_usage_percent FLOAT DEFAULT 0.0,
-    net_in_bytes_sec BIGINT DEFAULT 0,
-    net_out_bytes_sec BIGINT DEFAULT 0,
-    scrape_duration_ms INT DEFAULT 0,
-    status VARCHAR(16) DEFAULT 'ONLINE',
-    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_node_time (node_name, recorded_at),
-    INDEX idx_recorded_at (recorded_at)
-) ENGINE=InnoDB;
+```bash
+pnpm build:css
+pnpm run cf-typegen
+pnpm run typecheck
+pnpm exec wrangler deploy --dry-run
 ```
 
----
+`pnpm deploy` performs a real Cloudflare deployment and should only be used
+with an explicitly authorized account and environment.
 
-## 📄 License
-This project is licensed under the [MIT License](LICENSE).
+## Configuration and generated files
+
+- `.env`, `.dev.vars`, and `data-bridge/config/nodes.json` are local and
+  ignored.
+- `edge-app/src/tailwind.generated.css` is generated by `pnpm build:css`.
+- `edge-app/worker-configuration.d.ts` is generated by Wrangler.
+- `TOPOLOGY_HUB_NODE` selects the dashboard aggregation node; when unset, the
+  first configured node is used.
+- Automatic model retraining is disabled in the example configuration and must
+  be explicitly enabled.
+
+## Documentation
+
+- [Contributing](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
+- [Oracle MySQL HeatWave deployment](docs/deployment/ORACLE-HEATWAVE.md)
+- [Deployment templates](deploy/README.md)
+- [Open-source release checklist](docs/security/OPEN-SOURCE-RELEASE-CHECKLIST.md)
+- [Known Issues](docs/KNOWN-ISSUES.md)
+
+## License
+
+MODO is licensed under the [MIT License](LICENSE).

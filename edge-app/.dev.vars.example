@@ -1,7 +1,9 @@
 # Local development env for `wrangler dev` (project-level).
 # Copy to `.dev.vars` and fill in real values. `.dev.vars` is gitignored.
-# In production these are injected as Worker secrets via GitHub Actions.
-API_BACKEND_URL=""
+# In production, connection values are Worker secrets and the optional topology
+# hub is a GitHub environment variable.
+API_BACKEND_URL="http://127.0.0.1:8000"
 SUPABASE_URL=""
 SUPABASE_PUBLISHABLE_KEY=""
-INTERNAL_API_SECRET=""
+INTERNAL_API_SECRET="replace-with-the-same-local-value-as-the-backend"
+TOPOLOGY_HUB_NODE="hub"

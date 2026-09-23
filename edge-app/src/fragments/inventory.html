@@ -1,0 +1,87 @@
+      <!-- ================= 🪟 CURTAIN 5: PLATINUM SLATE (INVENTORY) ================= -->
+      <div id="panel-table" onclick="handleCurtainClick('table')"
+           class="curtain-panel curtain-collapsed p-5 lg:p-6 flex flex-col justify-between overflow-hidden relative group"
+           style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(13, 19, 33, 0.9) 45%, rgba(6, 10, 18, 0.97) 100%); border: 1px solid rgba(100, 116, 139, 0.3);">
+
+        <!-- Expanded View -->
+        <div id="content-table-expanded" class="hidden flex-col h-full w-full justify-between overflow-hidden gap-3 text-slate-200">
+          <div class="flex items-center justify-between shrink-0">
+            <div class="flex items-center space-x-3.5">
+              <div class="w-11 h-11 rounded-2xl bg-slate-900/90 border border-slate-700 flex items-center justify-center text-slate-300 shadow-sm">
+                <i class="fa-solid fa-table-list text-xl"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white">生产节点实时遥测清单</h2>
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-mono font-bold uppercase">05 · Asset Inventory</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">11 台生产主机实时运行状态 · 资源指标瞬时差分计算</p>
+              </div>
+            </div>
+            <span id="table-fleet-badge" class="px-3.5 py-1 rounded-full bg-slate-900/90 border border-slate-700 text-xs font-mono text-slate-200 font-bold flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-server text-emerald-400"></i>
+              <span>共 11 台主机 (全部正常)</span>
+            </span>
+          </div>
+
+          <!-- Table Container (Occupies 100% of Available Height) -->
+          <div class="flex-1 w-full overflow-hidden rounded-2xl supabase-light-card full-height-table min-h-0 shadow-sm">
+            <table class="w-full text-left text-xs font-mono">
+              <thead class="bg-slate-900/95 text-slate-300 uppercase text-[11px] border-b border-slate-800 shrink-0">
+                <tr class="h-10">
+                  <th class="py-2.5 px-3.5 font-bold text-white">节点标识</th>
+                  <th class="py-2.5 px-3.5">云厂商 / 区域</th>
+                  <th class="py-2.5 px-3.5">网络接入模式</th>
+                  <th class="py-2.5 px-3.5">运行状态</th>
+                  <th class="py-2.5 px-3.5">CPU 占用率</th>
+                  <th class="py-2.5 px-3.5">内存占用率</th>
+                  <th class="py-2.5 px-3.5">磁盘占用率</th>
+                  <th class="py-2.5 px-3.5">探测延迟</th>
+                  <th class="py-2.5 px-3.5">最后采集时间</th>
+                </tr>
+              </thead>
+              <tbody id="nodes-table-body" class="divide-y divide-slate-800/50 text-slate-300 flex-1">
+                <tr>
+                  <td colspan="9" class="text-center py-12 text-slate-400">
+                    <i class="fa-solid fa-spinner fa-spin mr-2"></i>正在拉取最新资产明细...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Footer -->
+          <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between text-xs font-mono text-slate-400 shrink-0">
+            <span>数据格式: CPU 瞬时差分 · 内存实时占用 · 磁盘物理挂载</span>
+            <span class="text-emerald-400 font-bold">数据持续更新中</span>
+          </div>
+        </div>
+
+        <!-- Collapsed Slat View -->
+        <div id="content-table-collapsed" class="flex h-full w-full flex-col items-center justify-between">
+          <div class="w-9 h-9 rounded-xl bg-slate-900/90 border border-slate-700 flex items-center justify-center text-slate-300 shadow-sm shrink-0">
+            <i class="fa-solid fa-table-list text-sm"></i>
+          </div>
+          <div class="flex-1 flex flex-col items-center justify-center my-auto w-full py-2">
+            <div class="flex-1 flex items-end justify-center w-full">
+              <span class="vertical-title font-mono font-bold text-xs tracking-widest text-slate-200">
+                资产清单
+              </span>
+            </div>
+            <div class="my-1 flex items-center justify-center text-slate-400 font-bold text-sm select-none">
+              ·
+            </div>
+            <div class="flex-1 flex items-start justify-center w-full">
+              <span class="vertical-title font-mono font-bold text-[11px] tracking-widest text-slate-500 uppercase">
+                INVENTORY
+              </span>
+            </div>
+          </div>
+          <div class="w-full flex justify-center shrink-0">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-900/90 text-slate-200 border border-slate-700 text-center whitespace-nowrap shadow-xs">
+              资产明细
+            </span>
+          </div>
+        </div>
+
+      </div>
