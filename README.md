@@ -73,9 +73,9 @@ vendored dependencies are excluded. CI enforces the rule with
 
 ## Requirements
 
-- Python 3.12 or newer
-- Node.js 22 or newer
-- pnpm 11.22.0
+- Python 3.13.15
+- Node.js 26.10.0
+- pnpm 12.6.0
 - Cloudflare account for deployment
 - Oracle MySQL HeatWave for database-backed runtime features
 - node_exporter on each monitored node
@@ -92,7 +92,7 @@ cp data-bridge/config/nodes.json.example data-bridge/config/nodes.json
 
 python3 -m venv data-bridge/venv
 source data-bridge/venv/bin/activate
-pip install -r data-bridge/requirements.txt
+pip install --require-hashes -r data-bridge/requirements.lock
 cd data-bridge
 pytest -v tests/
 ```
