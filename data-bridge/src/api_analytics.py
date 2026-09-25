@@ -14,7 +14,9 @@ def get_fleet_health_report():
     Includes health scores, trends, and hour-over-hour comparisons.
     """
     query = """
-    SELECT /*+ MAX_EXECUTION_TIME(6000) */ *
+    SELECT /*+ MAX_EXECUTION_TIME(6000) */
+        node_name, status, cpu_usage_percent, mem_usage_percent,
+        disk_usage_percent, latency_ms, health_score, recorded_at, cpu_load_rank
     FROM v_fleet_health_report
     ORDER BY cpu_load_rank ASC
     LIMIT 200;

@@ -45,12 +45,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '26.10.0'
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 11.22.0
+          version: '12.6.0'
 
       - name: Install Dependencies
         run: |
@@ -125,15 +125,15 @@ jobs:
             "${TARGET_USER}@${TARGET_HOST}:${TARGET_PATH}/data-bridge/src/"
 
           rsync -avz -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=yes" \
-            data-bridge/requirements.txt \
-            "${TARGET_USER}@${TARGET_HOST}:${TARGET_PATH}/data-bridge/requirements.txt"
+            data-bridge/requirements.lock \
+            "${TARGET_USER}@${TARGET_HOST}:${TARGET_PATH}/data-bridge/requirements.lock"
 
           echo "Restarting services and running the backend health probe..."
           ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=yes "${TARGET_USER}@${TARGET_HOST}" bash -s -- "$TARGET_PATH" <<'REMOTE'
             set -euo pipefail
             target_path="$1"
-            if [ -f "$target_path/data-bridge/requirements.txt" ]; then
-              "$target_path/data-bridge/venv/bin/pip" install -q -r "$target_path/data-bridge/requirements.txt"
+            if [ -f "$target_path/data-bridge/requirements.lock" ]; then
+              "$target_path/data-bridge/venv/bin/pip" install -q --require-hashes -r "$target_path/data-bridge/requirements.lock"
             fi
             sudo systemctl restart modo.service
             sleep 3

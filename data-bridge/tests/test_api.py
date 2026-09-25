@@ -63,6 +63,7 @@ def test_nodes_summary_endpoint():
 
     node_names = [n["name"] for n in data["nodes"]]
     assert node_names == ["test-a", "test-b"]
+    assert all("host" not in node for node in data["nodes"])
 
 
 def test_cors_headers():
@@ -166,3 +167,9 @@ def test_three_dashboard_tabs_stay_under_rate_limit(monkeypatch):
     responses = [client.get("/api/dashboard/overview", headers=headers) for _ in range(15)]
 
     assert all(response.status_code == 200 for response in responses)
+
+
+def test_public_schemas_drop_private_and_unknown_fields():
+    from public_data import public_node, public_metric
+    assert public_node({"name": "demo", "host": "192.0.2.1", "password": "test"}) == {"name": "demo"}
+    assert public_metric({"node_name": "demo", "host_ip": "192.0.2.1", "future_secret": "test"}) == {"node_name": "demo"}

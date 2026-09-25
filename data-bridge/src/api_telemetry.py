@@ -5,6 +5,8 @@ from typing import Optional
 
 from fastapi import HTTPException, Query
 
+from public_data import public_metric
+
 import api_config
 from api_database import get_db_connection
 
@@ -45,7 +47,6 @@ def get_latest_metrics():
     query = f"""
     SELECT /*+ MAX_EXECUTION_TIME(6000) */
         v.node_name,
-        v.host_ip,
         v.region,
         v.cpu_usage_percent,
         v.mem_usage_percent,
@@ -79,7 +80,7 @@ def get_latest_metrics():
             r["lng"] = meta.get("lng", 0.0)
             if isinstance(r.get("recorded_at"), datetime):
                 r["recorded_at"] = r["recorded_at"].isoformat()
-            enriched.append(r)
+            enriched.append(public_metric(r))
 
         return {
             "status": "success",
@@ -110,7 +111,7 @@ def get_metrics_history(
         params.append(node)
 
     query = f"""
-    SELECT id, node_name, host_ip, region, cpu_usage_percent,
+    SELECT id, node_name, region, cpu_usage_percent,
            mem_usage_percent, disk_usage_percent, net_in_bytes_sec,
            net_out_bytes_sec, scrape_duration_ms, status, recorded_at
     FROM vm_telemetry
@@ -135,7 +136,7 @@ def get_metrics_history(
             "node": node or "all",
             "hours": hours,
             "count": len(rows),
-            "data": rows,
+            "data": [public_metric(row) for row in rows],
             "engine": "HeatWave",
             "timestamp": datetime.now().isoformat()
         }

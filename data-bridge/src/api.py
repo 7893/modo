@@ -13,6 +13,8 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from public_data import public_node
+
 import api_config
 import api_security
 from api_analytics import (
@@ -105,7 +107,7 @@ def get_nodes_summary():
     """Return registered nodes and geographic metadata."""
     return {
         "total_nodes": len(api_config.TARGET_NODES),
-        "nodes": api_config.TARGET_NODES,
+        "nodes": [public_node(node) for node in api_config.TARGET_NODES],
         "timestamp": datetime.now().isoformat(),
     }
 

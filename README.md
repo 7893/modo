@@ -73,9 +73,9 @@ vendored dependencies are excluded. CI enforces the rule with
 
 ## Requirements
 
-- Python 3.12 or newer
-- Node.js 22 or newer
-- pnpm 11.22.0
+- Python 3.13.15
+- Node.js 26.10.0
+- pnpm 12.6.0
 - Cloudflare account for deployment
 - Oracle MySQL HeatWave for database-backed runtime features
 - node_exporter on each monitored node
@@ -92,7 +92,7 @@ cp data-bridge/config/nodes.json.example data-bridge/config/nodes.json
 
 python3 -m venv data-bridge/venv
 source data-bridge/venv/bin/activate
-pip install -r data-bridge/requirements.txt
+pip install --require-hashes -r data-bridge/requirements.lock
 cd data-bridge
 pytest -v tests/
 ```
@@ -152,3 +152,15 @@ with an explicitly authorized account and environment.
 ## License
 
 MODO is licensed under the [MIT License](LICENSE).
+
+### Public data boundary
+
+The Worker exposes read-only monitoring data anonymously. Frontend login does not
+restrict these APIs. Node summaries expose only name, region, provider and map
+coordinates; telemetry responses use an explicit public field allowlist and omit
+host addresses. Use non-sensitive node names and approximate public coordinates.
+Keep database credentials and real node configuration outside Git.
+
+Python dependencies are installed from `data-bridge/requirements.lock` with hashes.
+To update intentionally, run `uv pip compile requirements.txt --python-version
+3.13.15 --generate-hashes --output-file requirements.lock` inside `data-bridge`.
