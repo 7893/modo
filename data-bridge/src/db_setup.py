@@ -28,7 +28,7 @@ def get_db_config():
 
     if not all([host, user, password]):
         raise RuntimeError("Missing required environment variables: MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD")
-    if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", database):
+    if not re.fullmatch(r"[a-zA-Z_][a-zA-Z0-9_]*", database):
         raise ValueError(f"Invalid database name: {database}")
 
     return host, port, user, password, database

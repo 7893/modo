@@ -9,9 +9,9 @@
   <!-- Tailwind CSS & FontAwesome -->
   <style>${tailwindCss}</style>
   <!-- ECharts 5, Supabase JS & FontAwesome -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js" integrity="sha384-o5uz97et3bErHvpKfD4Jz4n0JfhJDWABFuF4NP+iEEDxE1VwMWJ19QGR0lqFZnr6" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2/dist/umd/supabase.js" integrity="sha384-A97u3Qnt9GZHURO9YJZRe7VQgGUeFzcv6I1oIGnUTxQrCxnpQMwR0/G8F2zt9abZ" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous" referrerpolicy="no-referrer">
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
@@ -71,7 +71,7 @@
       display: table-row-group;
     }
     .full-height-table tbody tr {
-      height: calc(100% / 11);
+      height: calc(100% / var(--node-count, 11));
     }
 
     ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -98,7 +98,7 @@
 
     <!-- Left: Logo & Nav items -->
     <div class="flex items-center space-x-6">
-      <div class="flex items-center space-x-2.5 cursor-pointer" onclick="handleCurtainClick('overview')">
+      <div class="flex items-center space-x-2.5 cursor-pointer" data-curtain="overview">
         <div class="w-8 h-8 rounded-xl bg-emerald-950/60 border border-emerald-800 flex items-center justify-center text-emerald-400 shadow-sm">
           <svg class="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24">
             <path d="M21.362 9.354H12V.343a.343.343 0 0 0-.583-.245L.15 11.597a.343.343 0 0 0 .245.584h9.362v9.011a.343.343 0 0 0 .583.245l11.267-11.499a.343.343 0 0 0-.245-.584z"/>
@@ -112,12 +112,12 @@
 
       <!-- Center Links (Jump to Curtains) -->
       <nav class="hidden xl:flex items-center space-x-1 text-xs text-slate-400 font-medium">
-        <button onclick="handleCurtainClick('overview')" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-slate-800/60 transition">总览 Overview</button>
-        <button onclick="handleCurtainClick('map')" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-slate-800/60 transition">雷达 Radar</button>
-        <button onclick="handleCurtainClick('resource')" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-slate-800/60 transition">算力 Compute</button>
-        <button onclick="handleCurtainClick('latency')" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-slate-800/60 transition">时延 Latency</button>
-        <button onclick="handleCurtainClick('table')" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-slate-800/60 transition">资产 Inventory</button>
-        <button onclick="handleCurtainClick('ai')" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-slate-800/60 transition">AI Engine</button>
+        <button data-curtain="overview" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-slate-800/60 transition">总览 Overview</button>
+        <button data-curtain="map" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-slate-800/60 transition">雷达 Radar</button>
+        <button data-curtain="resource" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-slate-800/60 transition">算力 Compute</button>
+        <button data-curtain="latency" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-slate-800/60 transition">时延 Latency</button>
+        <button data-curtain="table" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-slate-800/60 transition">资产 Inventory</button>
+        <button data-curtain="ai" class="px-2.5 py-1 rounded-md hover:text-white hover:bg-slate-800/60 transition">AI Engine</button>
       </nav>
     </div>
 
@@ -132,7 +132,7 @@
       </div>
       <div class="flex items-center space-x-2">
         <span class="text-slate-500">在线节点:</span>
-        <span id="active-nodes-count" class="text-slate-200 font-bold">11 / 11 ONLINE</span>
+        <span id="active-nodes-count" class="text-slate-200 font-bold">-- / -- ONLINE</span>
       </div>
       <div class="flex items-center space-x-2">
         <span class="text-slate-500">同步时钟:</span>
@@ -145,19 +145,19 @@
 
     <!-- Right Actions -->
     <div class="flex items-center space-x-2.5">
-      <button id="refresh-btn" onclick="fetchData()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition flex items-center space-x-1.5 shadow-sm">
+      <button id="refresh-btn" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition flex items-center space-x-1.5 shadow-sm">
         <i class="fa-solid fa-arrows-rotate text-[11px]" id="refresh-icon"></i>
         <span>刷新</span>
       </button>
 
       <div id="auth-section" class="flex items-center">
-        <button id="login-btn" onclick="toggleAuthModal()" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition flex items-center space-x-1.5">
+        <button id="login-btn" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition flex items-center space-x-1.5">
           <i class="fa-solid fa-shield-halved text-[11px]"></i>
           <span>控制台鉴权</span>
         </button>
         <div id="user-profile" class="hidden items-center space-x-2">
           <span id="user-email" class="text-xs text-emerald-400 font-mono font-bold"></span>
-          <button onclick="handleLogout()" class="px-2 py-1 text-xs text-rose-400 hover:text-rose-300 font-mono">
+          <button id="logout-btn" class="px-2 py-1 text-xs text-rose-400 hover:text-rose-300 font-mono">
             <i class="fa-solid fa-right-from-bracket"></i>
           </button>
         </div>
@@ -183,7 +183,7 @@ ${aiPanel}
 ${authModal}
 
   <!-- Dashboard browser modules are inlined by the Worker at render time. -->
-  <script>
+  <script nonce="${cspNonce}">
 ${dashboardCoreScript}
 ${dashboardInsightsScript}
 ${dashboardChartsScript}

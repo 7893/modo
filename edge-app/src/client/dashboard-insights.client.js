@@ -74,22 +74,23 @@
             </div>
           </div>
         `;
-        list.innerHTML = featurePipelineHtml + diag.diagnostics.map((item, idx) => {
+        list.innerHTML = featurePipelineHtml + diag.diagnostics.map((item) => {
+          const itemText = String(item ?? '');
           let iconClass = 'fa-circle-check text-emerald-400';
           let borderClass = 'border-emerald-500/20';
-          if (item.includes('🔴') || item.includes('CRITICAL')) {
+          if (itemText.includes('🔴') || itemText.includes('CRITICAL')) {
             iconClass = 'fa-circle-xmark text-rose-400';
             borderClass = 'border-rose-500/30';
-          } else if (item.includes('🟡') || item.includes('告警') || item.includes('WARNING') || item.includes('LATENCY_SURGE') || item.includes('CPU_SPIKE') || item.includes('TIMEOUT') || item.includes('OFFLINE')) {
+          } else if (itemText.includes('🟡') || itemText.includes('告警') || itemText.includes('WARNING') || itemText.includes('LATENCY_SURGE') || itemText.includes('CPU_SPIKE') || itemText.includes('TIMEOUT') || itemText.includes('OFFLINE')) {
             iconClass = 'fa-triangle-exclamation text-amber-400';
             borderClass = 'border-amber-500/30';
-          } else if (item.includes('HTAP') || item.includes('HeatWave')) {
+          } else if (itemText.includes('HTAP') || itemText.includes('HeatWave')) {
             iconClass = 'fa-brain text-purple-400';
             borderClass = 'border-purple-500/20';
           }
           return `
             <div class="p-2.5 rounded-lg bg-slate-900/70 border ${borderClass} text-[11px] shadow-xs mb-1.5">
-              <p class="text-slate-200 leading-relaxed"><i class="fa-solid ${iconClass} mr-1.5"></i>${item}</p>
+              <p class="text-slate-200 leading-relaxed"><i class="fa-solid ${iconClass} mr-1.5"></i>${escapeHtml(itemText)}</p>
             </div>
           `;
         }).join('');
@@ -115,7 +116,7 @@
           ? 'bg-yellow-950/60 text-yellow-300 border-yellow-800'
           : 'bg-blue-950/60 text-blue-300 border-blue-800';
         return `<span class="px-2 py-0.5 rounded-md border text-[10px] font-mono font-semibold ${colorClass}">
-          ${a.anomaly_type} (${a.open_count || a.count}) · ${a.severity}
+          ${escapeHtml(a.anomaly_type)} (${escapeHtml(a.open_count ?? a.count ?? 0)}) · ${escapeHtml(a.severity)}
         </span>`;
       }).join('');
     }
@@ -188,10 +189,11 @@
         tooltip: {
           trigger: 'axis',
           formatter: function(params) {
-            let tip = params[0].axisValue + '<br/>';
+            if (!Array.isArray(params) || params.length === 0) return '';
+            let tip = escapeHtml(params[0].axisValue) + '<br/>';
             params.forEach(p => {
               const unit = p.seriesName === 'Latency' ? 'ms' : '%';
-              tip += `${p.marker} ${p.seriesName}: ${p.value}${unit}<br/>`;
+              tip += `${p.marker} ${escapeHtml(p.seriesName)}: ${escapeHtml(p.value)}${unit}<br/>`;
             });
             return tip;
           }

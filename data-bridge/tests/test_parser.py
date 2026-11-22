@@ -62,3 +62,57 @@ def test_parse_corrupt_metrics():
     metrics = parse_prometheus_metrics(corrupt_text)
     assert isinstance(metrics, dict)
     assert metrics["mem_total"] == 0
+
+
+def test_parse_freebsd_memory_metrics():
+    """Verify FreeBSD node_exporter memory fallback metrics are parsed accurately."""
+    bsd_metrics = """
+node_memory_size_bytes 2147483648
+node_memory_free_bytes 536870912
+node_memory_inactive_bytes 268435456
+node_memory_cache_bytes 134217728
+"""
+    metrics = parse_prometheus_metrics(bsd_metrics)
+    assert metrics["mem_total"] == 2147483648
+    assert metrics["mem_avail"] == 536870912 + 268435456 + 134217728
+
+
+def test_parse_freebsd_zfs_root_and_lo0_exclusion():
+    """Verify FreeBSD ZFS root mounts are detected and lo0 loopback traffic is ignored."""
+    bsd_metrics = """
+node_filesystem_size_bytes{device="tmpfs",fstype="tmpfs",mountpoint="/"} 1000
+node_filesystem_size_bytes{device="zroot/ROOT/default",fstype="zfs",mountpoint="/"} 53687091200
+node_filesystem_avail_bytes{device="zroot/ROOT/default",fstype="zfs",mountpoint="/"} 26843545600
+node_filesystem_avail_bytes{device="rootfs",fstype="rootfs",mountpoint="/"} 500
+node_network_receive_bytes_total{device="lo0"} 99999999
+node_network_receive_bytes_total{device="vtnet0"} 4200
+node_network_transmit_bytes_total{device="lo0"} 88888888
+node_network_transmit_bytes_total{device="vtnet0"} 8400
+"""
+    metrics = parse_prometheus_metrics(bsd_metrics)
+    assert metrics["disk_size"] == 53687091200
+    assert metrics["disk_free"] == 26843545600
+    assert metrics["net_in"] == 4200
+    assert metrics["net_out"] == 8400
+
+
+def test_parse_malformed_and_non_finite_values():
+    """Malformed, missing, NaN, and Inf metric lines must be skipped safely."""
+    bad_metrics = """
+node_cpu_seconds_total{cpu="0",mode="idle"} NaN
+node_cpu_seconds_total{cpu="0",mode="user"} +Inf
+node_cpu_seconds_total{cpu="0",mode="system"}
+node_memory_MemTotal_bytes not_a_number
+node_memory_MemAvailable_bytes -Inf
+node_filesystem_size_bytes{device="/dev/sda1",mountpoint="/"} NaN
+node_network_receive_bytes_total{device="eth0"} bad
+node_network_transmit_bytes_total{device="eth0"} 1234
+"""
+    metrics = parse_prometheus_metrics(bad_metrics)
+    assert metrics["cpu_total_secs"] == 0.0
+    assert metrics["cpu_idle_secs"] == 0.0
+    assert metrics["mem_total"] == 0
+    assert metrics["mem_avail"] == 0
+    assert metrics["disk_size"] == 0
+    assert metrics["net_in"] == 0
+    assert metrics["net_out"] == 1234

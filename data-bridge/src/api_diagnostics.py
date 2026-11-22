@@ -1,7 +1,7 @@
 """Fleet health diagnostics backed by HeatWave telemetry."""
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import HTTPException
 
@@ -16,6 +16,21 @@ def get_ai_diagnostics():
     Uses v_node_latest_status view and anomaly_detection table for insights.
     """
     active_names = [n["name"] for n in api_config.TARGET_NODES]
+    if not active_names:
+        return {
+            "fleet_health_score": 100.0,
+            "total_nodes": 0,
+            "online_nodes": 0,
+            "status": "HEALTHY",
+            "anomalies_count": 0,
+            "diagnostics": ["当前未配置监控节点，跳过节点遥测巡检。"],
+            "heatwave": {
+                "queries_offloaded": 0,
+                "total_records": 0,
+                "analysis_time_ms": 0.0,
+            },
+            "evaluated_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
+        }
     format_strings = ','.join(['%s'] * len(active_names))
 
     # Use HeatWave view for latest status with health scores
@@ -150,7 +165,7 @@ def get_ai_diagnostics():
                 "total_records": total_records,
                 "analysis_time_ms": round(htap_duration * 1000, 1)
             },
-            "evaluated_at": datetime.utcnow().isoformat()
+            "evaluated_at": datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
         }
     except Exception as e:
         import traceback

@@ -7,3 +7,6 @@ SUPABASE_URL=""
 SUPABASE_PUBLISHABLE_KEY=""
 INTERNAL_API_SECRET="replace-with-the-same-local-value-as-the-backend"
 TOPOLOGY_HUB_NODE="hub"
+# Optional Cloudflare Access service token credentials when API_BACKEND_URL is Access-protected.
+CF_ACCESS_CLIENT_ID=""
+CF_ACCESS_CLIENT_SECRET=""

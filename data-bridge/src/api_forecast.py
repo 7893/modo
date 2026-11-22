@@ -25,8 +25,15 @@ _ML_FORECAST_TTL = 60
 def _refresh_ml_forecast() -> None:
     """Background thread: run ML_PREDICT_ROW for all nodes, update cache."""
     global _ml_forecast_cache, _ml_forecast_at, _ml_forecast_refreshing
+    conn = None
     try:
         active_names = [n["name"] for n in api_config.TARGET_NODES]
+        if not active_names:
+            with _ml_forecast_lock:
+                _ml_forecast_cache = {}
+                _ml_forecast_at = time.time()
+            return
+
         database = os.getenv("MYSQL_DATABASE", "modo_db")
         mysql_user = os.getenv("MYSQL_USER")
         ml_schema = os.getenv("MYSQL_ML_SCHEMA") or (f"ML_SCHEMA_{mysql_user}" if mysql_user else "")
@@ -48,6 +55,14 @@ def _refresh_ml_forecast() -> None:
             autocommit=True,
         )
         with conn.cursor() as cur:
+            cur.execute("SHOW GLOBAL STATUS LIKE 'rapid_ml_status'")
+            ml_status = cur.fetchone()
+            if not ml_status or ml_status.get("Value") != "ON":
+                with _ml_forecast_lock:
+                    _ml_forecast_at = time.time()
+                logger.info("HeatWave ML status is OFF; skipping ML_PREDICT_ROW refresh")
+                return
+
             cur.execute(f"""
                 SELECT model_handle FROM `{ml_schema}`.MODEL_CATALOG
                 WHERE train_table_name = %s
@@ -56,6 +71,8 @@ def _refresh_ml_forecast() -> None:
             """, (train_table,))
             mrow = cur.fetchone()
             if not mrow:
+                with _ml_forecast_lock:
+                    _ml_forecast_at = time.time()
                 return
             handle = mrow['model_handle']
 
@@ -94,28 +111,48 @@ def _refresh_ml_forecast() -> None:
                 row = cur.fetchone()
                 if row and row.get('pred'):
                     p = row['pred'] if isinstance(row['pred'], dict) else json.loads(row['pred'])
-                    val = p.get('Prediction') or p.get('ml_results', {}).get('predictions', {}).get('scrape_duration_ms')
-                    if val:
-                        new_cache[name] = round(float(val), 1)
-        conn.close()
+                    val = p.get('Prediction')
+                    if val is None:
+                        val = p.get('ml_results', {}).get('predictions', {}).get('scrape_duration_ms')
+                    if val is not None:
+                        pred_float = float(val)
+                        if math.isfinite(pred_float):
+                            new_cache[name] = round(pred_float, 1)
         with _ml_forecast_lock:
             _ml_forecast_cache = new_cache
             _ml_forecast_at = time.time()
         logger.info(f"ML forecast cache refreshed: {len(new_cache)} nodes")
     except Exception as e:
+        with _ml_forecast_lock:
+            _ml_forecast_at = time.time()
         logger.warning(f"ML forecast refresh failed: {e}")
     finally:
-        _ml_forecast_refreshing = False
+        if conn is not None:
+            try:
+                conn.close()
+            except Exception:
+                pass
+        with _ml_forecast_lock:
+            _ml_forecast_refreshing = False
 
 
 def get_ml_forecast(node_name: str) -> float | None:
     """Return cached ML prediction for node, trigger background refresh if stale."""
     global _ml_forecast_refreshing
     now = time.time()
-    if now - _ml_forecast_at > _ML_FORECAST_TTL and not _ml_forecast_refreshing:
-        _ml_forecast_refreshing = True
-        threading.Thread(target=_refresh_ml_forecast, name="ml-forecast", daemon=True).start()
-    return _ml_forecast_cache.get(node_name)
+    should_refresh = False
+    with _ml_forecast_lock:
+        if now - _ml_forecast_at > _ML_FORECAST_TTL and not _ml_forecast_refreshing:
+            _ml_forecast_refreshing = True
+            should_refresh = True
+        cached_value = _ml_forecast_cache.get(node_name)
+    if should_refresh:
+        try:
+            threading.Thread(target=_refresh_ml_forecast, name="ml-forecast", daemon=True).start()
+        except Exception:
+            with _ml_forecast_lock:
+                _ml_forecast_refreshing = False
+    return cached_value
 
 
 def get_latency_forecast():
@@ -125,6 +162,14 @@ def get_latency_forecast():
     Used by the radar panel to drive arrow animation period dynamically.
     """
     active_names = [n["name"] for n in api_config.TARGET_NODES]
+    if not active_names:
+        return {
+            "status": "success",
+            "ml_available": False,
+            "count": 0,
+            "data": [],
+            "timestamp": datetime.now().isoformat(),
+        }
     format_strings = ','.join(['%s'] * len(active_names))
 
     # Query recent EMA: use last 5 scrape values per node via window function

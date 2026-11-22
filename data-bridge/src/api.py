@@ -3,6 +3,7 @@
 Request handlers live in focused modules; this file owns application wiring,
 middleware, and the aggregated dashboard endpoint.
 """
+import hmac
 import logging
 import os
 import threading
@@ -46,7 +47,7 @@ _retrain_thread_started = False
 async def app_lifespan(_app: FastAPI):
     """Start process-local background services only when FastAPI starts."""
     global _retrain_thread_started
-    enabled = os.getenv("AUTO_RETRAIN_ENABLED", "true").lower() in {"1", "true", "yes", "on"}
+    enabled = os.getenv("AUTO_RETRAIN_ENABLED", "false").lower() in {"1", "true", "yes", "on"}
     if enabled and not _retrain_thread_started:
         threading.Thread(
             target=weekly_retrain_loop,
@@ -70,7 +71,8 @@ async def rate_limit_middleware(request: Request, call_next):
     """Apply a bounded per-client request limit."""
     secret = api_config.INTERNAL_API_SECRET
     forwarded_by_worker = None
-    if secret and request.headers.get("X-Internal-Secret") == secret:
+    provided_secret = request.headers.get("X-Internal-Secret")
+    if secret and provided_secret and hmac.compare_digest(provided_secret, secret):
         forwarded_by_worker = request.headers.get("X-MODO-Client-IP")
 
     forwarded = request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
@@ -159,8 +161,9 @@ app.add_api_route("/api/maintenance/prune", prune_old_data, methods=["POST"])
 async def verify_internal_secret(request: Request, call_next):
     """Protect private API routes; the public Worker injects the secret."""
     if request.url.path.startswith("/api/") and request.method != "OPTIONS":
+        expected_secret = api_config.INTERNAL_API_SECRET
         secret = request.headers.get("X-Internal-Secret")
-        if not secret or secret != api_config.INTERNAL_API_SECRET:
+        if not expected_secret or not secret or not hmac.compare_digest(secret, expected_secret):
             return JSONResponse(
                 status_code=403,
                 content={"detail": "Forbidden: Invalid internal secret"},

@@ -10,6 +10,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_call' }}
+
 jobs:
   source-policy:
     name: Source File Size Policy
@@ -89,4 +93,5 @@ jobs:
           pnpm build:css
           pnpm run cf-typegen
           pnpm run typecheck
+          pnpm test
           pnpm exec wrangler deploy --dry-run --outdir /tmp/modo-worker-dry-run

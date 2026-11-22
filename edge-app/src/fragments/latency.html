@@ -1,5 +1,5 @@
       <!-- ================= 🪟 CURTAIN 4: ROYAL IRIS PURPLE (LATENCY) ================= -->
-      <div id="panel-latency" onclick="handleCurtainClick('latency')"
+      <div id="panel-latency" data-curtain="latency"
            class="curtain-panel curtain-collapsed p-5 lg:p-6 flex flex-col justify-between overflow-hidden relative group"
            style="background: linear-gradient(135deg, rgba(88, 28, 135, 0.35) 0%, rgba(13, 19, 33, 0.9) 45%, rgba(6, 10, 18, 0.97) 100%); border: 1px solid rgba(168, 85, 247, 0.3);">
 
@@ -15,7 +15,7 @@
                   <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white">节点端到端网络延迟分布</h2>
                   <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-950/80 text-purple-300 border border-purple-800 font-mono font-bold uppercase">04 · Latency Spectrum</span>
                 </div>
-                <p class="text-xs text-slate-400 mt-0.5">配置的拓扑中枢至全局节点 Prometheus 探测延迟阶梯分析</p>
+                <p id="latency-hub-subtitle" class="text-xs text-slate-400 mt-0.5">配置的拓扑中枢至全局节点 Prometheus 探测延迟阶梯分析</p>
               </div>
             </div>
             <span class="px-3 py-1 rounded-full bg-slate-900/90 border border-purple-800 text-xs font-mono text-purple-300 font-bold shadow-sm">

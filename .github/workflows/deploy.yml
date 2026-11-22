@@ -64,20 +64,43 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
           INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
+          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
           TOPOLOGY_HUB_NODE: ${{ vars.TOPOLOGY_HUB_NODE }}
         run: |
           set -euo pipefail
+          for req in API_BACKEND_URL SUPABASE_URL SUPABASE_PUBLISHABLE_KEY INTERNAL_API_SECRET; do
+            if [ -z "${!req:-}" ]; then
+              echo "ERROR: Required secret $req is missing."
+              exit 1
+            fi
+          done
           pnpm build:css
-          deploy_args=(deploy --minify)
+          # Upload connection secrets atomically with deployment; omit unset optional secrets.
+          secrets_file="$(mktemp)"
+          trap 'rm -f "$secrets_file"' EXIT
+          chmod 600 "$secrets_file"
+          node --input-type=commonjs -e '
+            const fs = require("fs");
+            const names = [
+              "API_BACKEND_URL",
+              "SUPABASE_URL",
+              "SUPABASE_PUBLISHABLE_KEY",
+              "INTERNAL_API_SECRET",
+              "CF_ACCESS_CLIENT_ID",
+              "CF_ACCESS_CLIENT_SECRET",
+            ];
+            const out = {};
+            for (const name of names) {
+              if (process.env[name]) out[name] = process.env[name];
+            }
+            fs.writeFileSync(process.argv[1], JSON.stringify(out), { mode: 0o600 });
+          ' "$secrets_file"
+          deploy_args=(deploy --minify --secrets-file "$secrets_file")
           if [ -n "$TOPOLOGY_HUB_NODE" ]; then
             deploy_args+=(--var "TOPOLOGY_HUB_NODE:$TOPOLOGY_HUB_NODE")
           fi
           pnpm exec wrangler "${deploy_args[@]}"
-          # Store connection details as Worker secrets; never commit them.
-          printf '%s' "$API_BACKEND_URL"     | pnpm exec wrangler secret put API_BACKEND_URL
-          printf '%s' "$SUPABASE_URL"        | pnpm exec wrangler secret put SUPABASE_URL
-          printf '%s' "$SUPABASE_PUBLISHABLE_KEY" | pnpm exec wrangler secret put SUPABASE_PUBLISHABLE_KEY
-          printf '%s' "$INTERNAL_API_SECRET" | pnpm exec wrangler secret put INTERNAL_API_SECRET
 
   deploy-backend:
     name: Deploy Backend Services
@@ -107,7 +130,9 @@ jobs:
             echo "ERROR: DEPLOY_HOST, DEPLOY_SSH_KEY, and DEPLOY_KNOWN_HOSTS are required."
             exit 1
           fi
-          if [[ ! "$TARGET_USER" =~ ^[a-z_][a-z0-9_-]*$ ]] || [[ "$TARGET_PATH" != /* ]] || [ "$TARGET_PATH" = "/" ]; then
+          if [[ ! "$TARGET_USER" =~ ^[a-z_][a-z0-9_-]*$ ]] \
+            || [[ ! "$TARGET_PATH" =~ ^/[A-Za-z0-9._/-]+$ ]] \
+            || [[ "$TARGET_PATH" == *".."* ]]; then
             echo "ERROR: DEPLOY_USER or DEPLOY_PATH is invalid."
             exit 1
           fi

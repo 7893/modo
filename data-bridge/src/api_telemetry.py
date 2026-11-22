@@ -40,6 +40,14 @@ def get_latest_metrics():
     Used for dashboard top cards, world map status, and fleet overview.
     """
     active_names = [n["name"] for n in api_config.TARGET_NODES]
+    if not active_names:
+        return {
+            "status": "success",
+            "count": 0,
+            "data": [],
+            "engine": "HeatWave",
+            "timestamp": datetime.now().isoformat(),
+        }
     node_map = {n["name"]: n for n in api_config.TARGET_NODES}
 
     # Use HeatWave-optimized view instead of subquery

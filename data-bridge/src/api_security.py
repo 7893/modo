@@ -27,7 +27,7 @@ def sweep_rate_limit_store(now: float) -> None:
     if excess > 0:
         oldest_clients = sorted(
             rate_limit_store,
-            key=lambda client_ip: rate_limit_store[client_ip][-1],
+            key=lambda client_ip: rate_limit_store[client_ip][-1] if rate_limit_store[client_ip] else float("-inf"),
         )[:excess]
         for client_ip in oldest_clients:
             rate_limit_store.pop(client_ip, None)
@@ -44,7 +44,10 @@ def check_rate_limit(client_ip: str) -> bool:
         sweep_rate_limit_store(now)
 
     if client_ip not in rate_limit_store and len(rate_limit_store) >= RATE_LIMIT_MAX_CLIENTS:
-        oldest_client = min(rate_limit_store, key=lambda ip: rate_limit_store[ip][-1])
+        oldest_client = min(
+            rate_limit_store,
+            key=lambda ip: rate_limit_store[ip][-1] if rate_limit_store[ip] else float("-inf"),
+        )
         rate_limit_store.pop(oldest_client, None)
 
     timestamps = [

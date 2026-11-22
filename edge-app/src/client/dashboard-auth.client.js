@@ -67,23 +67,35 @@
       try {
         const channel = supabaseClient.channel('modo-telemetry');
 
+        const allowedStatuses = new Set(['ONLINE', 'OFFLINE', 'TIMEOUT', 'ERROR', 'UNKNOWN']);
         channel.on('broadcast', { event: 'telemetry' }, (payload) => {
-          console.log('Realtime update received:', payload);
+          const data = payload && typeof payload === 'object' ? payload.payload : null;
+          if (!data || !Array.isArray(data.nodes)) return;
 
-          const data = payload.payload;
-          if (!data || !data.nodes) return;
-
-          // Convert broadcast format to API format and update UI
-          const nodes = data.nodes.map(n => ({
-            node_name: n.node,
-            rtt_ms: n.rtt,
-            latency_ms: n.rtt,
-            scrape_duration_ms: n.rtt || 0,
-            cpu_usage_percent: n.cpu,
-            mem_usage_percent: n.mem,
-            disk_usage_percent: n.disk,
-            status: n.status,
-          }));
+          // Validate and convert broadcast entries to API format before merging
+          const nodes = [];
+          for (const entry of data.nodes) {
+            if (!entry || typeof entry !== 'object') continue;
+            if (typeof entry.node !== 'string') continue;
+            const nodeName = entry.node.trim();
+            if (!nodeName || nodeName.length > 64) continue;
+            const rtt = safeMetricNumber(entry.rtt, 0);
+            const boundedRtt = Math.max(0, Math.min(60000, Math.round(rtt)));
+            const status = typeof entry.status === 'string' && allowedStatuses.has(entry.status)
+              ? entry.status
+              : 'UNKNOWN';
+            nodes.push({
+              node_name: nodeName,
+              rtt_ms: boundedRtt,
+              latency_ms: boundedRtt,
+              scrape_duration_ms: boundedRtt,
+              cpu_usage_percent: safePercent(entry.cpu),
+              mem_usage_percent: safePercent(entry.mem),
+              disk_usage_percent: safePercent(entry.disk),
+              status,
+            });
+          }
+          if (nodes.length === 0) return;
 
           // Merge with cached data (keep fields not in broadcast)
           const mergedNodes = nodes.map(newNode => {
@@ -141,6 +153,15 @@
 
     // Init lifecycle
     window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-curtain]').forEach((el) => {
+        el.addEventListener('click', () => handleCurtainClick(el.getAttribute('data-curtain')));
+      });
+      document.getElementById('refresh-btn')?.addEventListener('click', () => fetchData());
+      document.getElementById('login-btn')?.addEventListener('click', () => toggleAuthModal());
+      document.getElementById('auth-modal-close')?.addEventListener('click', () => toggleAuthModal());
+      document.getElementById('logout-btn')?.addEventListener('click', () => handleLogout());
+      document.getElementById('auth-form')?.addEventListener('submit', handleAuth);
+
       updateClock();
       initCharts();
       fetchData();

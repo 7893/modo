@@ -173,3 +173,50 @@ def test_public_schemas_drop_private_and_unknown_fields():
     from public_data import public_node, public_metric
     assert public_node({"name": "demo", "host": "192.0.2.1", "password": "test"}) == {"name": "demo"}
     assert public_metric({"node_name": "demo", "host_ip": "192.0.2.1", "future_secret": "test"}) == {"node_name": "demo"}
+
+
+def test_verify_internal_secret_rejects_missing_or_invalid_secret(monkeypatch):
+    """Protected /api/* routes must reject missing, invalid, or unconfigured secrets."""
+    assert client.get("/api/nodes/summary").status_code == 403
+    assert client.get("/api/nodes/summary", headers={"X-Internal-Secret": "wrong-secret"}).status_code == 403
+
+    monkeypatch.setattr(api_config, "INTERNAL_API_SECRET", "")
+    assert client.get("/api/nodes/summary", headers={"X-Internal-Secret": ""}).status_code == 403
+
+
+def test_empty_target_nodes_skip_sql_in_clause(monkeypatch):
+    """Telemetry, diagnostics, and forecast handlers must handle empty TARGET_NODES safely."""
+    import api_diagnostics
+    import api_forecast
+
+    monkeypatch.setattr(api_config, "TARGET_NODES", [])
+
+    latest = api_telemetry.get_latest_metrics()
+    assert latest["status"] == "success"
+    assert latest["count"] == 0
+    assert latest["data"] == []
+
+    diag = api_diagnostics.get_ai_diagnostics()
+    assert diag["status"] == "HEALTHY"
+    assert diag["total_nodes"] == 0
+
+    forecast = api_forecast.get_latency_forecast()
+    assert forecast["status"] == "success"
+    assert forecast["count"] == 0
+    assert forecast["data"] == []
+
+
+def test_rate_limit_evicts_empty_buckets_without_index_error(monkeypatch):
+    """Empty rate-limit buckets must not raise IndexError during eviction."""
+    clock = [3_000.0]
+    monkeypatch.setattr(api_security.time, "time", lambda: clock[0])
+    monkeypatch.setattr(api_security, "RATE_LIMIT_MAX_CLIENTS", 2)
+    monkeypatch.setattr(api_security, "RATE_LIMIT_SWEEP_INTERVAL", 3_600)
+    monkeypatch.setattr(api_security, "rate_limit_last_sweep", clock[0])
+
+    _rate_limit_store["203.0.113.1"] = []
+    _rate_limit_store["203.0.113.2"] = [clock[0]]
+
+    assert api_security.check_rate_limit("203.0.113.3") is True
+    assert "203.0.113.1" not in _rate_limit_store
+    assert "203.0.113.3" in _rate_limit_store

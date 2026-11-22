@@ -19,6 +19,25 @@
     let cachedNodesData = [];
     let cachedForecastData = {};
 
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function safePercent(value) {
+      const n = Number(value);
+      return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 0;
+    }
+
+    function safeMetricNumber(value, fallback = 0) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
     // Helper: Convert UTC string to Clean Time without brackets or timezone text
     function formatCleanTime(utcStr) {
       if (!utcStr) return '刚刚';

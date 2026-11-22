@@ -1,5 +1,5 @@
       <!-- ================= 🪟 CURTAIN 5: PLATINUM SLATE (INVENTORY) ================= -->
-      <div id="panel-table" onclick="handleCurtainClick('table')"
+      <div id="panel-table" data-curtain="table"
            class="curtain-panel curtain-collapsed p-5 lg:p-6 flex flex-col justify-between overflow-hidden relative group"
            style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(13, 19, 33, 0.9) 45%, rgba(6, 10, 18, 0.97) 100%); border: 1px solid rgba(100, 116, 139, 0.3);">
 
@@ -15,12 +15,12 @@
                   <h2 class="text-lg lg:text-xl font-extrabold tracking-tight text-white">生产节点实时遥测清单</h2>
                   <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-mono font-bold uppercase">05 · Asset Inventory</span>
                 </div>
-                <p class="text-xs text-slate-400 mt-0.5">11 台生产主机实时运行状态 · 资源指标瞬时差分计算</p>
+                <p id="inventory-subtitle" class="text-xs text-slate-400 mt-0.5">生产主机实时运行状态 · 资源指标瞬时差分计算</p>
               </div>
             </div>
             <span id="table-fleet-badge" class="px-3.5 py-1 rounded-full bg-slate-900/90 border border-slate-700 text-xs font-mono text-slate-200 font-bold flex items-center gap-1.5 shadow-sm">
               <i class="fa-solid fa-server text-emerald-400"></i>
-              <span>共 11 台主机 (全部正常)</span>
+              <span>等待资产数据...</span>
             </span>
           </div>
 

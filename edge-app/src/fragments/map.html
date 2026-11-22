@@ -1,5 +1,5 @@
       <!-- ================= 🪟 CURTAIN 2: ELECTRIC SKY BLUE (RADAR) ================= -->
-      <div id="panel-map" onclick="handleCurtainClick('map')"
+      <div id="panel-map" data-curtain="map"
            class="curtain-panel curtain-collapsed p-5 lg:p-6 flex flex-col justify-between overflow-hidden relative group"
            style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.35) 0%, rgba(13, 19, 33, 0.9) 45%, rgba(6, 10, 18, 0.97) 100%); border: 1px solid rgba(59, 130, 246, 0.3);">
 
@@ -20,7 +20,7 @@
             </div>
             <div class="flex items-center space-x-3 text-xs font-mono text-slate-400">
               <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_#3b82f6]"></span><span>在线探针</span></span>
-              <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span><span>配置的拓扑中枢</span></span>
+              <span class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_8px_#a855f7]"></span><span id="map-hub-label">配置的拓扑中枢</span></span>
             </div>
           </div>
 

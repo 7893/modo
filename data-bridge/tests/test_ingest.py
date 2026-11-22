@@ -65,3 +65,22 @@ def test_once_mode_warms_before_pipeline(monkeypatch):
 
     assert ingest.TARGET_NODES == test_nodes
     assert events == ["warmup", ("sleep", 0.25), "pipeline"]
+
+
+def test_measure_tcp_rtt_closes_socket_on_connect_error(monkeypatch):
+    """TCP RTT probe must close its socket even when connect fails."""
+    closed = []
+
+    class FailingSocket:
+        def settimeout(self, _timeout):
+            pass
+
+        def connect(self, _addr):
+            raise OSError("connection refused")
+
+        def close(self):
+            closed.append(True)
+
+    monkeypatch.setattr(ingest.socket, "socket", lambda *_args, **_kwargs: FailingSocket())
+    assert ingest.measure_tcp_rtt("192.0.2.10", 9100) is None
+    assert closed == [True]

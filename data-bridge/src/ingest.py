@@ -160,16 +160,21 @@ def measure_tcp_rtt(host: str, port: int = 9100, timeout: float = 2.0) -> int | 
     Measure TCP connection RTT (round-trip time) to a host:port.
     Returns RTT in milliseconds, or None if connection fails.
     """
+    sock = None
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
         start = time.time()
         sock.connect((host, port))
-        rtt_ms = int((time.time() - start) * 1000)
-        sock.close()
-        return rtt_ms
+        return int((time.time() - start) * 1000)
     except (socket.timeout, socket.error, OSError):
         return None
+    finally:
+        if sock is not None:
+            try:
+                sock.close()
+            except OSError:
+                pass
 
 
 def scrape_single_node(node: dict) -> dict:
