@@ -2,3 +2,5 @@ allowBuilds:
   '@parcel/watcher': false
   esbuild: true
   workerd: true
+minimumReleaseAgeExclude:
+  - hono@4.13.20

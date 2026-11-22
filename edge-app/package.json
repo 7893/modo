@@ -11,14 +11,14 @@
     "test": "node --test tests/*.test.js"
   },
   "dependencies": {
-    "hono": "^4.13.7"
+    "hono": "^4.13.20"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.1.13",
-    "@types/node": "^26.6.2",
-    "tailwindcss": "^4.1.13",
+    "@tailwindcss/cli": "^4.3.5",
+    "@types/node": "^26.6.6",
+    "tailwindcss": "^4.3.5",
     "typescript": "^7.0.2",
-    "wrangler": "^4.136.1"
+    "wrangler": "^4.166.0"
   },
   "engines": {
     "node": ">=26.13.0 <27",
